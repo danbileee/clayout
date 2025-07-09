@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvKeys } from 'src/shared/constants/env.const';
+import { CountersModule } from './counters/counters.module';
 
 @Module({
   imports: [
@@ -18,9 +19,11 @@ import { EnvKeys } from 'src/shared/constants/env.const';
         ssl: { rejectUnauthorized: false },
         autoLoadEntities: true,
         synchronize: false,
+        entities: [__dirname + '/**/*.entity.{js,ts}'],
       }),
       inject: [ConfigService],
     }),
+    CountersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

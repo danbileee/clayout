@@ -4,19 +4,17 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
-export abstract class BaseModel {
+export abstract class BaseEntity {
   @PrimaryGeneratedColumn()
   id: number;
 
   @CreateDateColumn({
-    name: 'created_at',
     type: 'timestamptz',
   })
-  createdAt: Date;
+  created_at: Date;
 
   @UpdateDateColumn({
-    name: 'updated_at',
     type: 'timestamptz',
   })
-  updatedAt: Date;
+  updated_at: Date;
 }
