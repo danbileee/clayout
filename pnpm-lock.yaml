@@ -13,6 +13,9 @@ importers:
       '@clayout/interface':
         specifier: workspace:*
         version: link:../../packages/interface
+      '@nestjs/cli':
+        specifier: ^10.0.0
+        version: 10.4.9
       '@nestjs/common':
         specifier: ^10.0.0
         version: 10.4.19(class-validator@0.14.2)(reflect-metadata@0.2.2)(rxjs@7.8.2)
@@ -53,9 +56,6 @@ importers:
         specifier: ^3.25.76
         version: 3.25.76
     devDependencies:
-      '@nestjs/cli':
-        specifier: ^10.0.0
-        version: 10.4.9
       '@nestjs/schematics':
         specifier: ^10.0.0
         version: 10.2.3(chokidar@3.6.0)(typescript@5.8.3)
