@@ -1,0 +1,29 @@
+{
+  "name": "clayout-web",
+  "compatibility_date": "2025-04-01",
+  // "main": "workers-site/index.js",
+  // "compatibility_flags": ["nodejs_compat"],
+
+  /*
+  This section is used for Cloudflare Pages + Functions
+  */
+  "site": {
+    "bucket": "./dist" // where your Vite static assets go
+  },
+
+  /*
+  Environment variables for Worker code runtime (not for Vite build time)
+  */
+  // "vars": {
+  //   "VITE_API_HOST": "https://api.clayout.app/v1"
+  // },
+
+  /*
+  Dev server configuration
+  */
+  "dev": {
+    "ip": "127.0.0.1",
+    "port": 5173,
+    "local_protocol": "http"
+  }
+}
