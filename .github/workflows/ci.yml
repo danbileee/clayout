@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: [api, web]
+    defaults:
+      run:
+        working-directory: apps/${{ matrix.app }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps at workspace root
+        run: pnpm install --frozen-lockfile
+        working-directory: ${{ github.workspace }}
+
+      - run: pnpm lint
+        if: matrix.app == 'web'
+
+      - run: pnpm test
+        if: matrix.app == 'api'
+
+      - name: Build (check if builds)
+        run: pnpm build
