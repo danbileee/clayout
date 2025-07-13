@@ -15,7 +15,7 @@ export class CountersService {
     console.log({ param });
     const counters = await this.countersRepository.find();
 
-    return `Hello World~~~~~~~!!!!! ${param}\n${counters.map((counter) => JSON.stringify(counter))}`;
+    return `Hello World~~~~~~~!!!!! ${param}\n${counters.length ? counters.map((counter) => JSON.stringify(counter)).join(', ') : '[]'}`;
   }
 
   async createCounters(dto: SupabaseDB<'counters'>) {
