@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CounterEntity } from './entities/counter.entity';
 import { Repository } from 'typeorm';
-import type { SupabaseDB } from '@clayout/interface';
+import type { SupabaseTable } from '@clayout/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -18,11 +18,11 @@ export class CountersService {
     return `Hello World~~~~~~~!!!!! ${param}\n${counters.length ? counters.map((counter) => JSON.stringify(counter)).join(', ') : '[]'}`;
   }
 
-  async createCounters(dto: SupabaseDB<'counters'>) {
+  async createCounters(dto: SupabaseTable<'counters'>) {
     return this.countersRepository.save(dto);
   }
 
-  async updateCounters(dto: SupabaseDB<'counters'>) {
+  async updateCounters(dto: SupabaseTable<'counters'>) {
     const counter = await this.countersRepository.findOne({
       where: { id: dto.id },
     });
