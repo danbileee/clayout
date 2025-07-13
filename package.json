@@ -1,13 +1,14 @@
 {
   "name": "clayout",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.0.1",
+  "description": "🛠️ Create layouts that connect.",
+  "repository": "https://github.com/danbileee/clayout",
+  "author": "Danbi Lee <hello@danbileee.com>",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.4.1"
 }
