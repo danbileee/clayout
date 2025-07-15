@@ -20,7 +20,9 @@ export default defineConfig({
     cloudflare(),
   ],
   build: {
-    outDir: "dist",
+    outDir: "build/client",
+    manifest: true,
+    ssrManifest: true,
   },
   resolve: {
     alias: {
