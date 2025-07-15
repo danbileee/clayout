@@ -22,7 +22,6 @@ export default defineConfig({
   build: {
     outDir: "build/client",
     manifest: true,
-    ssrManifest: true,
   },
   resolve: {
     alias: {
