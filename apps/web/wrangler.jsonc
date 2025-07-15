@@ -8,7 +8,7 @@
   This section is used for Cloudflare Pages + Functions
   */
   "site": {
-    "bucket": "./dist" // where your Vite static assets go
+    "bucket": "./build/client" // where your Vite static assets go
   },
 
   /*
