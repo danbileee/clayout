@@ -13,7 +13,22 @@ type Pages = {
   "/": {
     params: {};
   };
+  "/auth/error": {
+    params: {};
+  };
+  "/auth/oauth": {
+    params: {};
+  };
+  "/protected": {
+    params: {};
+  };
   "/counter": {
+    params: {};
+  };
+  "/logout": {
+    params: {};
+  };
+  "/login": {
     params: {};
   };
 };
@@ -21,14 +36,34 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/counter";
+    page: "/" | "/auth/error" | "/auth/oauth" | "/protected" | "/counter" | "/logout" | "/login";
   };
-  "./routes/index.tsx": {
-    id: "routes/index";
-    page: "/";
+  "routes/auth.error.tsx": {
+    id: "routes/auth.error";
+    page: "/auth/error";
   };
-  "./routes/counter.tsx": {
+  "routes/auth.oauth.tsx": {
+    id: "routes/auth.oauth";
+    page: "/auth/oauth";
+  };
+  "routes/protected.tsx": {
+    id: "routes/protected";
+    page: "/protected";
+  };
+  "routes/counter.tsx": {
     id: "routes/counter";
     page: "/counter";
+  };
+  "routes/_index.tsx": {
+    id: "routes/_index";
+    page: "/";
+  };
+  "routes/logout.tsx": {
+    id: "routes/logout";
+    page: "/logout";
+  };
+  "routes/login.tsx": {
+    id: "routes/login";
+    page: "/login";
   };
 };

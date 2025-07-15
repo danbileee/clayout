@@ -26,8 +26,7 @@
     /* Path */
     "baseUrl": ".",
     "paths": {
-      "~modules/*": ["app/modules/*"],
-      "~routes/*": ["app/pages/*"]
+      "@/*": ["./app/*"]
     }
   },
   "include": ["app", "vite-env.d.ts"]
