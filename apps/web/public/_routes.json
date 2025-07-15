@@ -7,5 +7,6 @@
     "/robots.txt",
     "/manifest.webmanifest",
     "/service-worker.js"
-  ]
+  ],
+  "fallback": { "type": "rewrite", "destination": "/" }
 }
