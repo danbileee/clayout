@@ -38,6 +38,7 @@ export default tseslint.config([
       "react/jsx-uses-react": "off",
       "react/react-in-jsx-scope": "off",
       "react/require-default-props": "off",
+      "react-refresh/only-export-components": "off",
       "@typescript-eslint/explicit-function-return-type": "off",
       "@typescript-eslint/explicit-module-boundary-types": "off",
       "@typescript-eslint/no-var-requires": "warn",
