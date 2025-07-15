@@ -13,14 +13,18 @@ import { CountersModule } from './counters/counters.module';
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: (config: ConfigService) => ({
-        type: 'postgres',
-        url: config.get<string>(EnvKeys.DATABASE_URL),
-        ssl: { rejectUnauthorized: false },
-        autoLoadEntities: true,
-        synchronize: false,
-        entities: [__dirname + '/**/*.entity.{js,ts}'],
-      }),
+      useFactory: (config: ConfigService) => {
+        const isProduction = process.env.NODE_ENV === 'production';
+
+        return {
+          type: 'postgres',
+          url: config.get<string>(EnvKeys.DATABASE_URL),
+          ...(isProduction ? { ssl: { rejectUnauthorized: false } } : {}),
+          autoLoadEntities: true,
+          synchronize: false,
+          entities: [__dirname + '/**/*.entity.{js,ts}'],
+        };
+      },
       inject: [ConfigService],
     }),
     CountersModule,
