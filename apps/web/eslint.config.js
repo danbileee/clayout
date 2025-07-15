@@ -46,6 +46,7 @@ export default tseslint.config([
       "@typescript-eslint/no-floating-promises": "off",
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-empty-object-type": "off",
+      "@typescript-eslint/no-namespace": "warn",
       "import/no-unresolved": "off",
       "import/extensions": "off",
       "import/no-anonymous-default-export": "off",
