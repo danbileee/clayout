@@ -1,7 +1,7 @@
 import type { SupabaseTable } from "@clayout/interface";
 import { useEffect, useRef, useState } from "react";
 
-function App() {
+export default function Counter() {
   const idRef = useRef<HTMLInputElement>(null);
   const createValueRef = useRef<HTMLInputElement>(null);
   const updateValueRef = useRef<HTMLInputElement>(null);
@@ -62,5 +62,3 @@ function App() {
     </div>
   );
 }
-
-export default App;

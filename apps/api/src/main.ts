@@ -2,15 +2,19 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { VersioningType } from '@nestjs/common';
+import { EnvKeys } from './shared/constants/env.const';
 
-const allowedOrigins = ['https://clayout.app', 'https://app.clayout.app'];
+const allowedOrigins = [
+  process.env[EnvKeys.CORS_ENABLE_ORIGIN_LOCAL],
+  process.env[EnvKeys.CORS_ENABLE_ORIGIN_ROOT],
+  process.env[EnvKeys.CORS_ENABLE_ORIGIN_APP],
+];
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
     origin: (origin, callback) => {
-      console.log('[CORS Origin]', origin);
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
