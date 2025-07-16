@@ -9,7 +9,10 @@ export async function loader({ request }: LoaderFunctionArgs) {
   if (code) {
     const { supabase, headers } = createClient(request);
 
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+
+    console.log({ code, data });
+
     if (!error) {
       return redirect(next, { headers });
     } else {
