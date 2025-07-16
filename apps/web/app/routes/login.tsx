@@ -20,8 +20,6 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     },
   });
 
-  console.log({ data, error });
-
   if (data.url) {
     return redirect(data.url);
   }

@@ -2,8 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { type LoaderFunctionArgs, redirect, useLoaderData } from "react-router";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { supabase } = createClient(request);
+export const loader = async ({ context }: LoaderFunctionArgs) => {
+  const { supabase } = createClient(context);
 
   const { data, error } = await supabase.auth.getUser();
   if (error || !data?.user) {
