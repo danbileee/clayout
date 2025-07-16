@@ -1,6 +1,5 @@
 import path from "path";
 import { defineConfig } from "vite";
-import { cloudflare } from "@cloudflare/vite-plugin";
 import { reactRouter } from "@react-router/dev/vite";
 import tsconfigPaths from "vite-tsconfig-paths";
 import svgr from "vite-plugin-svgr";
@@ -13,16 +12,9 @@ export default defineConfig(({ isSsrBuild }) => {
      * @property plugins
      * the order matters. cloudflare plugin should come at last.
      */
-    plugins: [
-      tailwindcss(),
-      reactRouter(),
-      tsconfigPaths(),
-      svgr(),
-      cloudflare(),
-    ],
+    plugins: [tailwindcss(), reactRouter(), tsconfigPaths(), svgr()],
     build: {
       outDir: "build",
-      ssr: false,
     },
     resolve: {
       alias: {
