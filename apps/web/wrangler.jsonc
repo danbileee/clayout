@@ -11,13 +11,6 @@
   },
 
   /*
-  Edge functions configuration
-  */
-  "functions": {
-    "directory": "./functions"
-  },
-
-  /*
   Environment variables for Worker code runtime (not for Vite build time)
   */
   // "vars": {
