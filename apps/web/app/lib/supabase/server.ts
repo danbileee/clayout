@@ -3,9 +3,8 @@ import {
   parseCookieHeader,
   serializeCookieHeader,
 } from "@supabase/ssr";
-import type { LoaderFunctionArgs } from "react-router";
 
-export function createClient(context: LoaderFunctionArgs["context"]) {
+export function createClient(request: Request) {
   const headers = new Headers();
 
   const supabase = createServerClient(
@@ -14,14 +13,14 @@ export function createClient(context: LoaderFunctionArgs["context"]) {
     {
       cookies: {
         getAll() {
-          return parseCookieHeader(context.req.headers.cookie ?? "") as {
+          return parseCookieHeader(request.headers.get("cookie") ?? "") as {
             name: string;
             value: string;
           }[];
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value, options }) =>
-            context.res.appendHeader(
+            headers.append(
               "Set-Cookie",
               serializeCookieHeader(name, value, options)
             )
