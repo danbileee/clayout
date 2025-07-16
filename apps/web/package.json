@@ -3,10 +3,13 @@
   "private": true,
   "version": "0.0.1",
   "type": "module",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "vite",
     "build:client": "vite build",
-    "build:server": "vite build --ssr",
+    "build:server": "vite build --ssr app/entry.server.tsx --outDir build/server",
     "build": "pnpm build:client && pnpm build:server",
     "lint": "eslint .",
     "preview": "vite preview",
@@ -16,8 +19,8 @@
     "@clayout/interface": "workspace:*",
     "@radix-ui/react-slot": "^1.2.3",
     "@react-router/dev": "^7.6.3",
-    "@react-router/fs-routes": "^7.6.3",
     "@react-router/node": "^7.6.3",
+    "@remix-run/node": "^2.16.8",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.51.0",
     "@tailwindcss/vite": "^4.1.11",
