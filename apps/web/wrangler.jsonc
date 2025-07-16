@@ -1,14 +1,7 @@
 {
   "name": "clayout-web",
-  "pages_build_output_dir": "./build/client",
+  "pages_build_output_dir": "./build",
   "compatibility_date": "2025-04-01",
-
-  /*
-  This section is used for Cloudflare Pages + Functions
-  */
-  "site": {
-    "bucket": "./build/client" // where your Vite static assets go
-  },
 
   /*
   Environment variables for Worker code runtime (not for Vite build time)

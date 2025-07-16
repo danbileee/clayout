@@ -8,10 +8,6 @@ import tailwindcss from "@tailwindcss/vite";
 
 // https://vite.dev/config/
 export default defineConfig(({ isSsrBuild }) => {
-  const entryPath = "app/entries/";
-  const serverEntryPath = path.join(entryPath, "entry.server.tsx");
-  const clientEntryPath = path.join(entryPath, "entry.client.tsx");
-
   return {
     /**
      * @property plugins
@@ -25,13 +21,8 @@ export default defineConfig(({ isSsrBuild }) => {
       cloudflare(),
     ],
     build: {
-      target: "esnext",
-      outDir: isSsrBuild ? "build/server" : "build/client",
-      ssr: isSsrBuild ? serverEntryPath : false,
-      rollupOptions: {
-        input: isSsrBuild ? serverEntryPath : clientEntryPath,
-      },
-      emptyOutDir: false, // Prevent wiping build/client or build/server between builds
+      outDir: "build",
+      ssr: false,
     },
     resolve: {
       alias: {

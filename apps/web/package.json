@@ -6,11 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build:client": "vite build",
-    "build:server": "vite build --ssr",
+    "build:server": "vite build --ssr app/entries/entry.server.tsx --outDir functions/[...catchall]",
     "build": "pnpm build:client && pnpm build:server",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy": "npx wrangler deploy"
+    "deploy": "npx wrangler pages deploy ./build --project-name=clayout-web"
   },
   "dependencies": {
     "@clayout/interface": "workspace:*",
