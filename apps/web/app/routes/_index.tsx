@@ -8,6 +8,8 @@ export const loader = async ({
 }: LoaderFunctionArgs): Promise<{ user: User | null }> => {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
+  const cookies = request.headers.get("cookie");
+  console.log("Cookies in request:", cookies);
 
   if (!code) {
     return { user: null };
