@@ -4,13 +4,13 @@ import { BaseEntity } from '../../shared/entities/base.entity';
 
 @Entity('counters')
 export class CounterEntity extends BaseEntity {
-  @Column()
+  @Column({ nullable: true })
   @IsString({
     message: 'value must be a string.',
   })
   value: string;
 
-  @Column()
+  @Column({ default: 0 })
   @IsInt({
     message: 'count must be an integer.',
   })

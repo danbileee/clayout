@@ -30,7 +30,7 @@ describe('CountersService', () => {
   });
 
   describe('getCounters', () => {
-    it('should return all counters for valid param', async () => {
+    it('should return all counters and ts for valid param', async () => {
       // Arrange
       const mockCounters = createMockCounters(3);
       mockRepository.find.mockResolvedValue(mockCounters);
@@ -38,20 +38,22 @@ describe('CountersService', () => {
       // Act
       const result = await service.getCounters(param);
       // Assert
-      expect(result).toContain(param);
-      expect(result).toContain(JSON.stringify(mockCounters[0]));
+      expect(result).toEqual({ counters: mockCounters, ts: param });
+      expect(result.counters).toEqual(mockCounters);
+      expect(result.ts).toBe(param);
       expect(mockRepository.find).toHaveBeenCalled();
     });
 
-    it('should return string with empty array if no counters exist', async () => {
+    it('should return empty counters array and ts if no counters exist', async () => {
       // Arrange
       mockRepository.find.mockResolvedValue([]);
       const param = faker.word.words(1);
       // Act
       const result = await service.getCounters(param);
       // Assert
-      expect(result).toContain(param);
-      expect(result).toContain('[]');
+      expect(result).toEqual({ counters: [], ts: param });
+      expect(result.counters).toEqual([]);
+      expect(result.ts).toBe(param);
     });
   });
 

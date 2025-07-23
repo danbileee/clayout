@@ -12,6 +12,11 @@ export const EnvKeys = {
   CORS_ENABLE_ORIGIN_LOCAL: 'CORS_ENABLE_ORIGIN_LOCAL',
   CORS_ENABLE_ORIGIN_ROOT: 'CORS_ENABLE_ORIGIN_ROOT',
   CORS_ENABLE_ORIGIN_APP: 'CORS_ENABLE_ORIGIN_APP',
+  /**
+   * Auth
+   */
+  JWT_SECRET: 'JWT_SECRET',
+  HASH_ROUND: 'HASH_ROUND',
 } as const;
 
 export type EnvKey = keyof typeof EnvKeys;

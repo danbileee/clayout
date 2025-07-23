@@ -32,16 +32,22 @@ describe('CountersController', () => {
   });
 
   describe('getCounters', () => {
-    it('should call service.getCounters with param', async () => {
+    it('should call service.getCounters with param and return counters and ts', async () => {
       const param = 'test-param';
-      const expectedResult = 'Hello World~~~~~~~!!!!! test-param';
+      const mockCounters = [
+        { id: 1, value: 'counter-1', count: 0 },
+        { id: 2, value: 'counter-2', count: 1 },
+      ];
+      const expectedResult = { counters: mockCounters, ts: param };
       (mockCountersService.getCounters as jest.Mock).mockResolvedValue(
         expectedResult,
       );
 
       const result = await controller.getCounters(param);
 
-      expect(result).toBe(expectedResult);
+      expect(result).toEqual(expectedResult);
+      expect(result.counters).toEqual(mockCounters);
+      expect(result.ts).toBe(param);
       expect(mockCountersService.getCounters).toHaveBeenCalledWith(param);
     });
   });
