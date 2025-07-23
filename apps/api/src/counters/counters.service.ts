@@ -11,11 +11,12 @@ export class CountersService {
     private readonly countersRepository: Repository<CounterEntity>,
   ) {}
 
-  async getCounters(param: string): Promise<string> {
-    console.log({ param });
+  async getCounters(
+    ts: string,
+  ): Promise<{ counters: CounterEntity[]; ts: string }> {
     const counters = await this.countersRepository.find();
 
-    return `Hello World~~~~~~~!!!!! ${param}\n${counters.length ? counters.map((counter) => JSON.stringify(counter)).join(', ') : '[]'}`;
+    return { counters, ts };
   }
 
   async createCounters(dto: SupabaseTable<'counters'>) {

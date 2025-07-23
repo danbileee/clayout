@@ -16,7 +16,9 @@ export class CountersController {
   constructor(private readonly countersService: CountersService) {}
 
   @Get(':param')
-  getCounters(@Param('param') param: string): Promise<string> {
+  getCounters(
+    @Param('param') param: string,
+  ): Promise<{ counters: CounterEntity[]; ts: string }> {
     return this.countersService.getCounters(param);
   }
 

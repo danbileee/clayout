@@ -1,10 +1,14 @@
-import { Module } from '@nestjs/common';
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EnvKeys } from 'src/shared/constants/env.const';
 import { CountersModule } from './counters/counters.module';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { RoleGuard } from './users/guards/role.guard';
 
 @Module({
   imports: [
@@ -21,15 +25,31 @@ import { CountersModule } from './counters/counters.module';
           url: config.get<string>(EnvKeys.DATABASE_URL),
           ...(isProduction ? { ssl: { rejectUnauthorized: false } } : {}),
           autoLoadEntities: true,
-          synchronize: false,
+          synchronize: !isProduction,
           entities: [__dirname + '/**/*.entity.{js,ts}'],
         };
       },
       inject: [ConfigService],
     }),
     CountersModule,
+    AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: AccessTokenGuard,
+    // },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+  ],
 })
 export class AppModule {}
