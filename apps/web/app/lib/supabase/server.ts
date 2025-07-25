@@ -13,7 +13,7 @@ export function createClient(request: Request) {
     {
       cookies: {
         getAll() {
-          return parseCookieHeader(request.headers.get("cookie") ?? "") as {
+          return parseCookieHeader(request.headers.get("Cookie") ?? "") as {
             name: string;
             value: string;
           }[];

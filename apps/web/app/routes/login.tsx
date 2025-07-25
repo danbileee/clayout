@@ -7,23 +7,36 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { type ActionFunctionArgs, redirect, useFetcher } from "react-router";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  type ActionFunctionArgs,
+  Link,
+  redirect,
+  useFetcher,
+} from "react-router";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabase } = createClient(request);
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "github",
-  });
+  const { supabase, headers } = createClient(request);
 
-  if (data.url) {
-    return redirect(data.url);
-  }
+  const formData = await request.formData();
+
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
 
   if (error) {
     return {
       error: error instanceof Error ? error.message : "An error occurred",
     };
   }
+
+  // Update this route to redirect to an authenticated route. The user already has an active session.
+  return redirect("/protected", { headers });
 };
 
 export default function Login() {
@@ -38,20 +51,51 @@ export default function Login() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Welcome!</CardTitle>
+              <CardTitle className="text-2xl">Login</CardTitle>
               <CardDescription>
-                Sign in to your account to continue
+                Enter your email below to login to your account
               </CardDescription>
             </CardHeader>
             <CardContent>
               <fetcher.Form method="post">
                 <div className="flex flex-col gap-6">
-                  {error && (
-                    <p className="text-sm text-destructive-500">{error}</p>
-                  )}
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="m@example.com"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <div className="flex items-center">
+                      <Label htmlFor="password">Password</Label>
+                      <Link
+                        to="/forgot-password"
+                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                      >
+                        Forgot your password?
+                      </Link>
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      name="password"
+                      required
+                    />
+                  </div>
+                  {error && <p className="text-sm text-red-500">{error}</p>}
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Continue with Github"}
+                    {loading ? "Logging in..." : "Login"}
                   </Button>
+                </div>
+                <div className="mt-4 text-center text-sm">
+                  Don&apos;t have an account?{" "}
+                  <Link to="/sign-up" className="underline underline-offset-4">
+                    Sign up
+                  </Link>
                 </div>
               </fetcher.Form>
             </CardContent>

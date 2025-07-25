@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import * as csurf from 'csurf';
+import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { VersioningType } from '@nestjs/common';
+import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { EnvKeys } from './shared/constants/env.const';
 
 const allowedOrigins = [
@@ -13,6 +15,9 @@ const allowedOrigins = [
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  /**
+   * CORS
+   */
   app.enableCors({
     origin: (origin, callback) => {
       if (!origin || allowedOrigins.includes(origin)) {
@@ -26,10 +31,43 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
+
+  /**
+   * API Versioning
+   */
   app.enableVersioning({
     type: VersioningType.URI,
     defaultVersion: '1',
   });
+
+  /**
+   * Pipes
+   */
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+      whitelist: true,
+      forbidNonWhitelisted: true,
+    }),
+  );
+
+  /**
+   * Cookies
+   */
+
+  app.use(cookieParser());
+  app.use(
+    csurf({
+      cookie: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production',
+      },
+    }),
+  );
 
   await app.listen(process.env.PORT ?? 3000);
 }

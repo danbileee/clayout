@@ -1,11 +1,11 @@
-import type { SupabaseTable } from "@clayout/interface";
+import type { DB } from "@clayout/interface";
 import { useEffect, useRef, useState } from "react";
 
 export default function Counter() {
   const idRef = useRef<HTMLInputElement>(null);
   const createValueRef = useRef<HTMLInputElement>(null);
   const updateValueRef = useRef<HTMLInputElement>(null);
-  const [counters, setCounters] = useState<SupabaseTable<"counters">[]>([]);
+  const [counters, setCounters] = useState<DB<"counters">[]>([]);
 
   async function createCounter() {
     await fetch(`${import.meta.env.VITE_API_HOST}/counters`, {

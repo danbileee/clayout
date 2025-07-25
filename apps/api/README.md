@@ -18,6 +18,11 @@ When developing locally with Supabase, the workflow is:
 
 2. Test your changes locally to make sure everything works as expected.
 
+```sh
+# Generate type definitions according to the table schema
+supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts
+```
+
 3. Create migration files to track your schema changes. This is the recommended approach for production:
 
 ```sh
