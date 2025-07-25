@@ -13,6 +13,18 @@ type Pages = {
   "/": {
     params: {};
   };
+  "/forgot-password": {
+    params: {};
+  };
+  "/update-password": {
+    params: {};
+  };
+  "/auth/confirm": {
+    params: {};
+  };
+  "/auth/verify": {
+    params: {};
+  };
   "/auth/error": {
     params: {};
   };
@@ -23,6 +35,9 @@ type Pages = {
     params: {};
   };
   "/counter": {
+    params: {};
+  };
+  "/sign-up": {
     params: {};
   };
   "/logout": {
@@ -36,7 +51,23 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/auth/error" | "/auth/oauth" | "/protected" | "/counter" | "/logout" | "/login";
+    page: "/" | "/forgot-password" | "/update-password" | "/auth/confirm" | "/auth/verify" | "/auth/error" | "/auth/oauth" | "/protected" | "/counter" | "/sign-up" | "/logout" | "/login";
+  };
+  "routes/forgot-password.tsx": {
+    id: "routes/forgot-password";
+    page: "/forgot-password";
+  };
+  "routes/update-password.tsx": {
+    id: "routes/update-password";
+    page: "/update-password";
+  };
+  "routes/auth.confirm.tsx": {
+    id: "routes/auth.confirm";
+    page: "/auth/confirm";
+  };
+  "routes/auth.verify.tsx": {
+    id: "routes/auth.verify";
+    page: "/auth/verify";
   };
   "routes/auth.error.tsx": {
     id: "routes/auth.error";
@@ -53,6 +84,10 @@ type RouteFiles = {
   "routes/counter.tsx": {
     id: "routes/counter";
     page: "/counter";
+  };
+  "routes/sign-up.tsx": {
+    id: "routes/sign-up";
+    page: "/sign-up";
   };
   "routes/_index.tsx": {
     id: "routes/_index";
