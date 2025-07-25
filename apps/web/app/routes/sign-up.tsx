@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -17,29 +16,36 @@ import {
 } from "react-router";
 
 export const action = async ({ request }: ActionFunctionArgs) => {
-  const { supabase, headers } = createClient(request);
-
   const formData = await request.formData();
-
+  const username = formData.get("username") as string;
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
+  const repeatPassword = formData.get("repeat-password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
+  if (!password) {
     return {
-      error: error instanceof Error ? error.message : "An error occurred",
+      error: "Password is required",
     };
   }
 
-  // Update this route to redirect to an authenticated route. The user already has an active session.
-  return redirect("/protected", { headers });
+  if (password !== repeatPassword) {
+    return { error: "Passwords do not match" };
+  }
+
+  await fetch(`${import.meta.env.VITE_API_HOST}/auth/register/email`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username,
+      email,
+      password,
+    }),
+  });
+
+  return redirect("/auth/verify");
 };
 
-export default function Login() {
+export default function SignUp() {
   const fetcher = useFetcher<typeof action>();
 
   const error = fetcher.data?.error;
@@ -51,14 +57,22 @@ export default function Login() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Login</CardTitle>
-              <CardDescription>
-                Enter your email below to login to your account
-              </CardDescription>
+              <CardTitle className="text-2xl">Sign up</CardTitle>
+              <CardDescription>Create a new account</CardDescription>
             </CardHeader>
             <CardContent>
               <fetcher.Form method="post">
                 <div className="flex flex-col gap-6">
+                  <div className="grid gap-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      type="text"
+                      placeholder="m@example.com"
+                      required
+                    />
+                  </div>
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -72,29 +86,34 @@ export default function Login() {
                   <div className="grid gap-2">
                     <div className="flex items-center">
                       <Label htmlFor="password">Password</Label>
-                      <Link
-                        to="/forgot-password"
-                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                      >
-                        Forgot your password?
-                      </Link>
                     </div>
                     <Input
                       id="password"
-                      type="password"
                       name="password"
+                      type="password"
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <div className="flex items-center">
+                      <Label htmlFor="repeat-password">Repeat Password</Label>
+                    </div>
+                    <Input
+                      id="repeat-password"
+                      name="repeat-password"
+                      type="password"
                       required
                     />
                   </div>
                   {error && <p className="text-sm text-red-500">{error}</p>}
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
+                    {loading ? "Creating an account..." : "Sign up"}
                   </Button>
                 </div>
                 <div className="mt-4 text-center text-sm">
-                  Don&apos;t have an account?{" "}
-                  <Link to="/sign-up" className="underline underline-offset-4">
-                    Sign up
+                  Already have an account?{" "}
+                  <Link to="/login" className="underline underline-offset-4">
+                    Login
                   </Link>
                 </div>
               </fetcher.Form>

@@ -16,7 +16,7 @@ export class UserEntity extends BaseEntity {
   @Length(1, 20, {
     message: lengthMessage,
   })
-  nickname: string;
+  username: string;
 
   @Column({
     unique: true,
@@ -29,7 +29,7 @@ export class UserEntity extends BaseEntity {
 
   @Column()
   @IsString()
-  @Length(3, 8, {
+  @Length(3, 20, {
     message: lengthMessage,
   })
   @Exclude({
@@ -41,7 +41,7 @@ export class UserEntity extends BaseEntity {
   @Column({
     type: 'enum',
     enum: Object.values(UserRoles),
-    default: UserRoles.User,
+    default: UserRoles.None,
   })
   role: UserRole;
 }

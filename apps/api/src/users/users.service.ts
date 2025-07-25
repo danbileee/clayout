@@ -10,15 +10,17 @@ export class UsersService {
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  async createUser(user: Pick<UserEntity, 'nickname' | 'email' | 'password'>) {
-    const matchedNickname = await this.usersRepository.exists({
+  async createUser(
+    user: Pick<UserEntity, 'username' | 'email' | 'password' | 'role'>,
+  ) {
+    const matchedUsername = await this.usersRepository.exists({
       where: {
-        nickname: user.nickname,
+        username: user.username,
       },
     });
 
-    if (matchedNickname) {
-      throw new BadRequestException('This nickname already exists.');
+    if (matchedUsername) {
+      throw new BadRequestException('This username already exists.');
     }
 
     const matchedEmail = await this.usersRepository.exists({

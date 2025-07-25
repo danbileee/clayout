@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { RoleGuard } from './users/guards/role.guard';
+import { AccessTokenGuard } from './auth/guards/token.guard';
 
 @Module({
   imports: [
@@ -42,10 +43,10 @@ import { RoleGuard } from './users/guards/role.guard';
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
     },
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: AccessTokenGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: AccessTokenGuard,
+    },
     {
       provide: APP_GUARD,
       useClass: RoleGuard,

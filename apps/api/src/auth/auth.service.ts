@@ -6,6 +6,7 @@ import { EnvKeys } from 'src/shared/constants/env.const';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { Tokens } from './interfaces/auth.interface';
+import { UserRoles } from 'src/users/constants/role.const';
 
 @Injectable()
 export class AuthService {
@@ -33,6 +34,46 @@ export class AuthService {
       accessToken: this.generateToken(user, false),
       refreshToken: this.generateToken(user, true),
     };
+  }
+
+  decodeBasicToken(token: string): { email: string; password: string } {
+    const decodedToken = Buffer.from(token, 'base64').toString('utf-8');
+    const splitToken = decodedToken.split(':');
+
+    if (splitToken.length !== 2) {
+      throw new UnauthorizedException(`Invalid token`);
+    }
+
+    const [email, password] = splitToken;
+
+    return {
+      email,
+      password,
+    };
+  }
+
+  verifyToken(token: string) {
+    try {
+      return this.jwtService.verify(token, {
+        secret: this.configService.get(EnvKeys.JWT_SECRET),
+      });
+    } catch (e) {
+      throw new UnauthorizedException(`Token is invalid or expired`, {
+        cause: e,
+      });
+    }
+  }
+
+  reissueToken(token: string, isRefreshing: boolean) {
+    const decodedToken = this.verifyToken(token);
+
+    if (decodedToken.type !== 'refresh') {
+      throw new UnauthorizedException(
+        `Only refresh token is accepted to reissue the token.`,
+      );
+    }
+
+    return this.generateToken(decodedToken, isRefreshing);
   }
 
   async authenticate(
@@ -66,7 +107,7 @@ export class AuthService {
   }
 
   async register(
-    user: Pick<UserEntity, 'nickname' | 'email' | 'password'>,
+    user: Pick<UserEntity, 'username' | 'email' | 'password'>,
   ): Promise<Tokens> {
     const hash = await bcrypt.hash(
       user.password,
@@ -76,6 +117,7 @@ export class AuthService {
     const createdUser = await this.usersService.createUser({
       ...user,
       password: hash,
+      role: UserRoles.Registrant,
     });
 
     return this.generateTokens(createdUser);

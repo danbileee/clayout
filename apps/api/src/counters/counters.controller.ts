@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CountersService } from './counters.service';
 import { CounterEntity } from 'src/counters/entities/counter.entity';
-import type { SupabaseTable } from '@clayout/interface';
+import type { DB } from '@clayout/interface';
 
 @Controller('counters')
 export class CountersController {
@@ -25,7 +25,7 @@ export class CountersController {
   @Post()
   postCounters(
     @Body()
-    dto: SupabaseTable<'counters'>,
+    dto: DB<'counters'>,
   ): Promise<CounterEntity> {
     return this.countersService.createCounters(dto);
   }
@@ -34,7 +34,7 @@ export class CountersController {
   patchCounters(
     @Param('id', ParseIntPipe) id: number,
     @Body()
-    dto: SupabaseTable<'counters'>,
+    dto: DB<'counters'>,
   ): Promise<CounterEntity> {
     return this.countersService.updateCounters({ id, ...dto });
   }
