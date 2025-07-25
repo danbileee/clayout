@@ -1,10 +1,20 @@
-import { Body, Controller, Post, UseGuards, Res, Req } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  UseGuards,
+  Res,
+  Req,
+  Get,
+  Query,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dtos/user.dto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
 import { BasicTokenGuard, RefreshTokenGuard } from './guards/token.guard';
 import { Request, Response } from 'express';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { EnvKeys } from 'src/shared/constants/env.const';
 
 @Controller('auth')
 export class AuthController {
@@ -33,10 +43,10 @@ export class AuthController {
     return { message: 'Tokens refreshed' };
   }
 
-  @Post('login/email')
+  @Post('login')
   @PublicRoute()
   @UseGuards(BasicTokenGuard)
-  async postLoginWithEmail(@Res({ passthrough: true }) res: Response) {
+  async postLogin(@Res({ passthrough: true }) res: Response) {
     const { user } = res.req as Request & { user: UserEntity };
     const { accessToken, refreshToken } = await this.authService.login(user);
 
@@ -54,9 +64,36 @@ export class AuthController {
     return { message: 'Login successful' };
   }
 
-  @Post('register/email')
+  @Post('register')
   @PublicRoute()
-  postRegiterWithEmail(@Body() createUserDto: CreateUserDto) {
+  postRegiter(@Body() createUserDto: CreateUserDto) {
     return this.authService.register(createUserDto);
+  }
+
+  @Get('register/confirm')
+  @PublicRoute()
+  async getRegisterConfirm(
+    @Query('token') token: string,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const { accessToken, refreshToken } = await this.authService.confirm(token);
+
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'none',
+    });
+
+    const redirectUrl =
+      process.env.NODE_ENV === 'production'
+        ? process.env[EnvKeys.CORS_ENABLE_ORIGIN_ROOT]
+        : process.env[EnvKeys.CORS_ENABLE_ORIGIN_LOCAL];
+
+    res.redirect(redirectUrl);
   }
 }
