@@ -1,12 +1,15 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { EnvKeys } from 'src/shared/constants/env.const';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { Tokens } from './interfaces/auth.interface';
 import { UserRoles } from 'src/users/constants/role.const';
+import { TokenType, TokenTypes } from './constants/token.const';
+
+type TokenOptions = { tokenType: TokenType } & JwtSignOptions;
 
 @Injectable()
 export class AuthService {
@@ -16,23 +19,33 @@ export class AuthService {
     private readonly usersService: UsersService,
   ) {}
 
-  generateToken(user: Pick<UserEntity, 'email' | 'id'>, isRefreshing: boolean) {
+  generateToken(
+    user: Pick<UserEntity, 'email' | 'id'>,
+    options?: TokenOptions,
+  ) {
+    const { tokenType, ...restOptions } = options ?? {};
     const payload = {
       email: user.email,
       sub: user.id,
-      type: isRefreshing ? 'refresh' : 'access',
+      type: tokenType,
     };
 
     return this.jwtService.sign(payload, {
       secret: this.configService.get(EnvKeys.JWT_SECRET),
-      expiresIn: isRefreshing ? 3600 : 300,
+      ...restOptions,
     });
   }
 
   generateTokens(user: Pick<UserEntity, 'email' | 'id'>): Tokens {
     return {
-      accessToken: this.generateToken(user, false),
-      refreshToken: this.generateToken(user, true),
+      accessToken: this.generateToken(user, {
+        tokenType: TokenTypes.access,
+        expiresIn: 300,
+      }),
+      refreshToken: this.generateToken(user, {
+        tokenType: TokenTypes.refresh,
+        expiresIn: 3600,
+      }),
     };
   }
 
@@ -64,7 +77,7 @@ export class AuthService {
     }
   }
 
-  reissueToken(token: string, isRefreshing: boolean) {
+  reissueToken(token: string, options?: TokenOptions) {
     const decodedToken = this.verifyToken(token);
 
     if (decodedToken.type !== 'refresh') {
@@ -73,7 +86,10 @@ export class AuthService {
       );
     }
 
-    return this.generateToken(decodedToken, isRefreshing);
+    return this.generateToken(
+      { email: decodedToken.email, id: decodedToken.sub },
+      options,
+    );
   }
 
   async authenticate(
@@ -108,7 +124,7 @@ export class AuthService {
 
   async register(
     user: Pick<UserEntity, 'username' | 'email' | 'password'>,
-  ): Promise<Tokens> {
+  ): Promise<boolean> {
     const hash = await bcrypt.hash(
       user.password,
       parseInt(this.configService.get(EnvKeys.HASH_ROUND)),
@@ -120,6 +136,28 @@ export class AuthService {
       role: UserRoles.Registrant,
     });
 
-    return this.generateTokens(createdUser);
+    // TODO: createdUser로 컨펌 이메일 발송 트리거
+
+    return true;
+  }
+
+  async confirm(token: string): Promise<Tokens> {
+    const decodedToken = this.verifyToken(token);
+
+    if (decodedToken.type !== 'confirm') {
+      throw new UnauthorizedException(
+        `Invalid token. Please check if this page is open from the email confirmation link.`,
+      );
+    }
+
+    const matchedUser = await this.usersService.getUser({
+      email: decodedToken.email,
+    });
+
+    if (!matchedUser) {
+      throw new UnauthorizedException(`The user doesn't exist.`);
+    }
+
+    return this.generateTokens(matchedUser);
   }
 }
