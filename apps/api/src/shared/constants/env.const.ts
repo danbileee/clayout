@@ -7,6 +7,10 @@ export const EnvKeys = {
   SUPABASE_ANON_KEY: 'SUPABASE_ANON_KEY',
   SUPABASE_SERVICE_ROLE_KEY: 'SUPABASE_SERVICE_ROLE_KEY',
   /**
+   * API Host
+   */
+  API_HOST: 'API_HOST',
+  /**
    * CORS
    */
   CORS_ENABLE_ORIGIN_LOCAL: 'CORS_ENABLE_ORIGIN_LOCAL',
@@ -17,6 +21,15 @@ export const EnvKeys = {
    */
   JWT_SECRET: 'JWT_SECRET',
   HASH_ROUND: 'HASH_ROUND',
+  /**
+   * Email
+   */
+  SMTP_HOST: 'SMTP_HOST',
+  SMTP_PORT: 'SMTP_PORT',
+  SMTP_USER: 'SMTP_USER',
+  SMTP_PASS: 'SMTP_PASS',
+  SMTP_FROM_NAME: 'SMTP_FROM_NAME',
+  SMTP_FROM_EMAIL: 'SMTP_FROM_EMAIL',
 } as const;
 
 export type EnvKey = keyof typeof EnvKeys;
