@@ -74,12 +74,12 @@ export class EmailsService {
     });
   }
 
-  async recordClick({
-    email,
-    ...recordEmailClickDto
-  }: RecordEmailClickDto): Promise<EmailClickEventEntity> {
+  async recordClick(
+    recordEmailClickDto: RecordEmailClickDto,
+    emailId: number,
+  ): Promise<EmailClickEventEntity> {
     const matchedEmail = await this.emailsRepository.findOne({
-      where: { id: email.id },
+      where: { id: emailId },
     });
 
     if (!matchedEmail) {

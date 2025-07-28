@@ -1,15 +1,16 @@
 import {
+  Body,
   Controller,
   Get,
   Param,
   ParseIntPipe,
-  Query,
+  Post,
   Res,
 } from '@nestjs/common';
 import { EmailsService } from './emails.service';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { EnvKeys } from 'src/shared/constants/env.const';
+import { RecordEmailClickDto } from './dtos/email.dto';
 
 @Controller('emails')
 export class EmailsController {
@@ -32,24 +33,13 @@ export class EmailsController {
     res.send(buffer);
   }
 
-  @Get(':id/track-click')
+  @Post(':id/track-click')
   async trackClick(
     @Param('id', ParseIntPipe) id: number,
-    @Query('link') link: string,
-    @Query('button_text') button_text: string,
-    @Res() res: Response,
+    @Body() recordEmailClickDto: RecordEmailClickDto,
   ) {
-    await this.emailsService.recordClick({
-      email: { id },
-      link,
-      button_text,
-    });
+    await this.emailsService.recordClick(recordEmailClickDto, id);
 
-    const defaultLink =
-      process.env.NODE_ENV === 'production'
-        ? process.env[EnvKeys.CORS_ENABLE_ORIGIN_ROOT]
-        : process.env[EnvKeys.CORS_ENABLE_ORIGIN_LOCAL];
-
-    res.redirect(link || defaultLink);
+    return true;
   }
 }

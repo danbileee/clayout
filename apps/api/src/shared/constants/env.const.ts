@@ -7,9 +7,10 @@ export const EnvKeys = {
   SUPABASE_ANON_KEY: 'SUPABASE_ANON_KEY',
   SUPABASE_SERVICE_ROLE_KEY: 'SUPABASE_SERVICE_ROLE_KEY',
   /**
-   * API Host
+   * Host
    */
   API_HOST: 'API_HOST',
+  WEB_HOST: 'WEB_HOST',
   /**
    * CORS
    */
