@@ -14,6 +14,4 @@ export class RecordEmailOpenDto extends PickType(EmailEntity, ['id']) {}
 export class RecordEmailClickDto extends PickType(EmailClickEventEntity, [
   'link',
   'button_text',
-]) {
-  email: Pick<EmailEntity, 'id'>;
-}
+]) {}

@@ -58,6 +58,124 @@ export type Database = {
         }
         Relationships: []
       }
+      email_click_events: {
+        Row: {
+          button_text: string
+          clicked_at: string
+          created_at: string
+          emailId: number | null
+          id: number
+          link: string
+          updated_at: string
+        }
+        Insert: {
+          button_text: string
+          clicked_at: string
+          created_at?: string
+          emailId?: number | null
+          id?: number
+          link: string
+          updated_at?: string
+        }
+        Update: {
+          button_text?: string
+          clicked_at?: string
+          created_at?: string
+          emailId?: number | null
+          id?: number
+          link?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_0481f77b1f72ae9917dc4032169"
+            columns: ["emailId"]
+            isOneToOne: false
+            referencedRelation: "emails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_clicks: {
+        Row: {
+          buttonText: string
+          clickedAt: string
+          created_at: string
+          id: number
+          link: string
+          updated_at: string
+        }
+        Insert: {
+          buttonText: string
+          clickedAt: string
+          created_at?: string
+          id?: number
+          link: string
+          updated_at?: string
+        }
+        Update: {
+          buttonText?: string
+          clickedAt?: string
+          created_at?: string
+          id?: number
+          link?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      emails: {
+        Row: {
+          context: Json | null
+          created_at: string
+          error_log: string | null
+          failed_at: string | null
+          id: number
+          opened_at: string | null
+          sent_at: string | null
+          subject: string
+          template: string
+          to: string
+          updated_at: string
+          userId: number | null
+        }
+        Insert: {
+          context?: Json | null
+          created_at?: string
+          error_log?: string | null
+          failed_at?: string | null
+          id?: number
+          opened_at?: string | null
+          sent_at?: string | null
+          subject: string
+          template: string
+          to: string
+          updated_at?: string
+          userId?: number | null
+        }
+        Update: {
+          context?: Json | null
+          created_at?: string
+          error_log?: string | null
+          failed_at?: string | null
+          id?: number
+          opened_at?: string | null
+          sent_at?: string | null
+          subject?: string
+          template?: string
+          to?: string
+          updated_at?: string
+          userId?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_1c41bc3d329b0edc905b6409dba"
+            columns: ["userId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string

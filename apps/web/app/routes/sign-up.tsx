@@ -1,3 +1,4 @@
+import { postAuthRegister } from "@/apis/auth/register";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -32,15 +33,7 @@ export const action = async ({ request }: ActionFunctionArgs) => {
     return { error: "Passwords do not match" };
   }
 
-  await fetch(`${import.meta.env.VITE_API_HOST}/auth/register/email`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      username,
-      email,
-      password,
-    }),
-  });
+  await postAuthRegister({ username, email, password });
 
   return redirect("/auth/verify");
 };

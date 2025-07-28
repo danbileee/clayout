@@ -2,6 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import qs from 'qs';
 import { EnvKeys } from 'src/shared/constants/env.const';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -9,7 +10,6 @@ import { Tokens } from './interfaces/auth.interface';
 import { UserRoles } from 'src/users/constants/role.const';
 import { TokenType, TokenTypes } from './constants/token.const';
 import { EmailsService } from 'src/emails/emails.service';
-import { RecordEmailClickDto } from 'src/emails/dtos/email.dto';
 
 type TokenOptions = { tokenType: TokenType } & JwtSignOptions;
 
@@ -150,7 +150,15 @@ export class AuthService {
       tokenType: TokenTypes.email_confirm,
       expiresIn: 3600,
     });
-    const verifyLink = `${this.configService.get(EnvKeys.API_HOST)}/auth/register/confirm?token=${token}`;
+    const queryString = qs.stringify(
+      {
+        token,
+        email_id: createdEmail.id,
+        button_text: `Verify email`,
+      },
+      { addQueryPrefix: true },
+    );
+    const verifyLink = `${this.configService.get(EnvKeys.WEB_HOST)}/auth/confirm${queryString}`;
 
     await this.emailsService.sendEmail({
       ...createdEmail,
@@ -164,10 +172,7 @@ export class AuthService {
     return true;
   }
 
-  async confirm(
-    token: string,
-    recordEmailClickDto: RecordEmailClickDto,
-  ): Promise<Tokens> {
+  async confirm(token: string): Promise<Tokens> {
     const decodedToken = this.verifyToken(token);
 
     if (decodedToken.type !== 'email_confirm') {
@@ -190,7 +195,6 @@ export class AuthService {
     };
 
     await this.usersService.updateUser(updatedUser);
-    await this.emailsService.recordClick(recordEmailClickDto);
 
     return this.generateTokens(matchedUser);
   }

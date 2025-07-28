@@ -1,27 +1,86 @@
-import { createClient } from "@/lib/supabase/server";
-import { type EmailOtpType } from "@supabase/supabase-js";
-import { type LoaderFunctionArgs, redirect } from "react-router";
+import {
+  useLoaderData,
+  useNavigation,
+  type LoaderFunctionArgs,
+  redirect,
+} from "react-router";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { patchAuthRegister } from "@/apis/auth/register";
+import { postEmailsTrackClick } from "@/apis/emails/track-click";
+import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
-  const token_hash = requestUrl.searchParams.get("token_hash");
-  const type = requestUrl.searchParams.get("type") as EmailOtpType | null;
-  const _next = requestUrl.searchParams.get("next");
-  const next = _next?.startsWith("/") ? _next : "/";
+  const token = requestUrl.searchParams.get("token") ?? "";
+  const email_id = requestUrl.searchParams.get("email_id") ?? "";
+  const button_text = requestUrl.searchParams.get("button_text") ?? "";
 
-  if (token_hash && type) {
-    const { supabase, headers } = createClient(request);
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
+  try {
+    await patchAuthRegister({ token });
+    await postEmailsTrackClick({
+      id: email_id,
+      link: request.url,
+      button_text,
     });
-    if (!error) {
-      return redirect(next, { headers });
-    } else {
-      return redirect(`/auth/error?error=${error?.message}`);
-    }
+
+    return redirect(process.env.VITE_WEB_HOST || "/");
+  } catch (error: unknown) {
+    const errorMessage = getErrorMessage(error);
+
+    return {
+      status: "error" as const,
+      message: errorMessage,
+    };
+  }
+}
+
+export default function AuthConfirm() {
+  const { message } = useLoaderData<typeof loader>();
+  const navigation = useNavigation();
+  const isLoading = navigation.state === "loading";
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">
+              Confirming Registration...
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <div className="space-y-4">
+              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
+              <p className="text-gray-600">
+                Please wait while we verify your email address...
+              </p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
-  // redirect the user to an error page with some instructions
-  return redirect(`/auth/error?error=No token hash or type`);
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+      <Card className="w-full max-w-md">
+        <CardHeader className="text-center">
+          <CardTitle className="text-xl">Confirmation Failed</CardTitle>
+        </CardHeader>
+        <CardContent className="text-center">
+          <div className="space-y-4">
+            <div className="text-red-500 text-4xl">✗</div>
+            <p className="text-red-700">{message}</p>
+            <Button
+              onClick={() => (window.location.href = "/")}
+              className="w-full"
+            >
+              Go to Home
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
