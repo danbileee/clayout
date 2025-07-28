@@ -40,4 +40,8 @@ export class UsersService {
   async getUser(user: Partial<UserEntity>): Promise<UserEntity> {
     return this.usersRepository.findOne({ where: user });
   }
+
+  async updateUser(updatedUser: UserEntity): Promise<UserEntity> {
+    return this.usersRepository.save(updatedUser);
+  }
 }

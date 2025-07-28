@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { RoleGuard } from './users/guards/role.guard';
 import { AccessTokenGuard } from './auth/guards/token.guard';
+import { EmailsModule } from './emails/emails.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { AccessTokenGuard } from './auth/guards/token.guard';
     CountersModule,
     AuthModule,
     UsersModule,
+    EmailsModule,
   ],
   controllers: [AppController],
   providers: [

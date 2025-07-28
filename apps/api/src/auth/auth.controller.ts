@@ -7,6 +7,7 @@ import {
   Req,
   Get,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dtos/user.dto';
@@ -74,9 +75,19 @@ export class AuthController {
   @PublicRoute()
   async getRegisterConfirm(
     @Query('token') token: string,
+    @Query('emailId', ParseIntPipe) emailId: number,
+    @Query('link') link: string,
+    @Query('button_text') button_text: string,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken, refreshToken } = await this.authService.confirm(token);
+    const { accessToken, refreshToken } = await this.authService.confirm(
+      token,
+      {
+        email: { id: emailId },
+        link,
+        button_text,
+      },
+    );
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
@@ -89,11 +100,11 @@ export class AuthController {
       sameSite: 'none',
     });
 
-    const redirectUrl =
+    const defaultLink =
       process.env.NODE_ENV === 'production'
         ? process.env[EnvKeys.CORS_ENABLE_ORIGIN_ROOT]
         : process.env[EnvKeys.CORS_ENABLE_ORIGIN_LOCAL];
 
-    res.redirect(redirectUrl);
+    res.redirect(link || defaultLink);
   }
 }

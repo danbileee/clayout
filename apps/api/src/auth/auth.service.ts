@@ -8,6 +8,8 @@ import { UsersService } from 'src/users/users.service';
 import { Tokens } from './interfaces/auth.interface';
 import { UserRoles } from 'src/users/constants/role.const';
 import { TokenType, TokenTypes } from './constants/token.const';
+import { EmailsService } from 'src/emails/emails.service';
+import { RecordEmailClickDto } from 'src/emails/dtos/email.dto';
 
 type TokenOptions = { tokenType: TokenType } & JwtSignOptions;
 
@@ -17,6 +19,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly usersService: UsersService,
+    private readonly emailsService: EmailsService,
   ) {}
 
   generateToken(
@@ -127,7 +130,7 @@ export class AuthService {
   ): Promise<boolean> {
     const hash = await bcrypt.hash(
       user.password,
-      parseInt(this.configService.get(EnvKeys.HASH_ROUND)),
+      parseInt(this.configService.get(EnvKeys.HASH_ROUND), 10),
     );
 
     const createdUser = await this.usersService.createUser({
@@ -135,16 +138,39 @@ export class AuthService {
       password: hash,
       role: UserRoles.Registrant,
     });
+    const createdEmail = this.emailsService.createEmail({
+      user: createdUser,
+      to: createdUser.email,
+      subject: `Verify your account`,
+      template: 'verify-email',
+    });
 
-    // TODO: createdUser로 컨펌 이메일 발송 트리거
+    const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
+    const token = this.generateToken(createdUser, {
+      tokenType: TokenTypes.email_confirm,
+      expiresIn: 3600,
+    });
+    const verifyLink = `${this.configService.get(EnvKeys.API_HOST)}/auth/register/confirm?token=${token}`;
+
+    await this.emailsService.sendEmail({
+      ...createdEmail,
+      context: {
+        name: createdUser.username,
+        openLink,
+        verifyLink,
+      },
+    });
 
     return true;
   }
 
-  async confirm(token: string): Promise<Tokens> {
+  async confirm(
+    token: string,
+    recordEmailClickDto: RecordEmailClickDto,
+  ): Promise<Tokens> {
     const decodedToken = this.verifyToken(token);
 
-    if (decodedToken.type !== 'confirm') {
+    if (decodedToken.type !== 'email_confirm') {
       throw new UnauthorizedException(
         `Invalid token. Please check if this page is open from the email confirmation link.`,
       );
@@ -157,6 +183,14 @@ export class AuthService {
     if (!matchedUser) {
       throw new UnauthorizedException(`The user doesn't exist.`);
     }
+
+    const updatedUser: UserEntity = {
+      ...matchedUser,
+      role: UserRoles.User,
+    };
+
+    await this.usersService.updateUser(updatedUser);
+    await this.emailsService.recordClick(recordEmailClickDto);
 
     return this.generateTokens(matchedUser);
   }
