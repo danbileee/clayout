@@ -16,16 +16,6 @@ export class BasicTokenGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
 
-    // CSRF check for non-GET requests
-    if (req.method !== 'GET') {
-      const csrfCookie = req.cookies['csrfToken'];
-      const csrfHeader = req.headers['x-csrf-token'];
-
-      if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
-        throw new UnauthorizedException('Invalid CSRF token');
-      }
-    }
-
     const basicToken = req.cookies['basicToken'];
 
     if (!basicToken) {
@@ -60,16 +50,6 @@ export class BearerTokenGuard implements CanActivate {
       req.isPublicRoute = true;
 
       return true;
-    }
-
-    // CSRF check for non-GET requests
-    if (req.method !== 'GET') {
-      const csrfCookie = req.cookies['csrfToken'];
-      const csrfHeader = req.headers['x-csrf-token'];
-
-      if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
-        throw new UnauthorizedException('Invalid CSRF token');
-      }
     }
 
     const accessToken = req.cookies['accessToken'];

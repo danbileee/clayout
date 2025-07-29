@@ -10,13 +10,18 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  getActionFormError,
+  getActionResults,
+  type ActionResult,
+} from "@/lib/react-router/action";
+import {
   type ActionFunctionArgs,
   Link,
   redirect,
   useFetcher,
 } from "react-router";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
   const formData = await request.formData();
   const username = formData.get("username") as string;
   const email = formData.get("email") as string;
@@ -24,25 +29,22 @@ export const action = async ({ request }: ActionFunctionArgs) => {
   const repeatPassword = formData.get("repeat-password") as string;
 
   if (!password) {
-    return {
-      error: "Password is required",
-    };
+    return getActionFormError("password", "Password is required");
   }
 
   if (password !== repeatPassword) {
-    return { error: "Passwords do not match" };
+    return getActionFormError("repeat-password", "Passwords do not match");
   }
 
-  await postAuthRegister({ username, email, password });
+  await postAuthRegister({ username, email, password }, request);
 
   return redirect("/auth/verify");
 };
 
 export default function SignUp() {
   const fetcher = useFetcher<typeof action>();
-
-  const error = fetcher.data?.error;
-  const loading = fetcher.state === "submitting";
+  const { error, state } = getActionResults(fetcher);
+  const loading = state === "submitting";
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -62,7 +64,7 @@ export default function SignUp() {
                       id="username"
                       name="username"
                       type="text"
-                      placeholder="m@example.com"
+                      placeholder="Your Name"
                       required
                     />
                   </div>

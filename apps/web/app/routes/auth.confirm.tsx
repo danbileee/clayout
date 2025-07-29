@@ -9,27 +9,37 @@ import { Button } from "@/components/ui/button";
 import { patchAuthRegister } from "@/apis/auth/register";
 import { postEmailsTrackClick } from "@/apis/emails/track-click";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
+import * as qs from "qs";
+import type { LoaderResult } from "@/lib/react-router/loader";
 
-export async function loader({ request }: LoaderFunctionArgs) {
+export async function loader({ request }: LoaderFunctionArgs): LoaderResult {
   const requestUrl = new URL(request.url);
   const token = requestUrl.searchParams.get("token") ?? "";
   const email_id = requestUrl.searchParams.get("email_id") ?? "";
   const button_text = requestUrl.searchParams.get("button_text") ?? "";
 
   try {
-    await patchAuthRegister({ token });
-    await postEmailsTrackClick({
-      id: email_id,
-      link: request.url,
-      button_text,
-    });
+    await patchAuthRegister({ token }, request);
+    await postEmailsTrackClick(
+      {
+        id: email_id,
+        link: request.url,
+        button_text,
+      },
+      request
+    );
 
-    return redirect(process.env.VITE_WEB_HOST || "/");
+    const queryString = qs.stringify(
+      { auth_confirm: true },
+      { addQueryPrefix: true }
+    );
+
+    return redirect(`/${queryString}`);
   } catch (error: unknown) {
     const errorMessage = getErrorMessage(error);
 
     return {
-      status: "error" as const,
+      error,
       message: errorMessage,
     };
   }

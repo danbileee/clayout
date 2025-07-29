@@ -1,3 +1,5 @@
+import { postAuthResetPassword } from "@/apis/auth/reset-password";
+import { postEmailsTrackClick } from "@/apis/emails/track-click";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -8,40 +10,82 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import {
   type ActionFunctionArgs,
-  Link,
+  type LoaderFunctionArgs,
   useFetcher,
+  useLoaderData,
   useNavigate,
 } from "react-router";
-import { postAuthLogin } from "@/apis/auth/login";
-import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
+import type { LoaderResult } from "@/lib/react-router/loader";
 import { getActionResults, type ActionResult } from "@/lib/react-router/action";
 
-export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
-  const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
+export async function loader({
+  request,
+}: LoaderFunctionArgs): LoaderResult<undefined, { token: string }> {
+  const requestUrl = new URL(request.url);
+  const token = requestUrl.searchParams.get("token") ?? "";
+  const email_id = requestUrl.searchParams.get("email_id") ?? "";
+  const button_text = requestUrl.searchParams.get("button_text") ?? "";
 
   try {
-    const response = await postAuthLogin({ email, password }, request);
+    await postEmailsTrackClick(
+      {
+        id: email_id,
+        link: request.url,
+        button_text,
+      },
+      request
+    );
 
     return {
-      message: response?.data?.message ?? "Login successful",
+      query: { token },
     };
-  } catch (error) {
+  } catch (error: unknown) {
     const errorMessage = getErrorMessage(error);
 
     return {
+      query: { token },
       error,
       message: errorMessage,
     };
   }
+}
+
+export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
+  const formData = await request.formData();
+  const password = formData.get("password") as string;
+  const token = formData.get("token") as string;
+
+  if (!password) {
+    return { error: "Password is required." };
+  }
+
+  if (!token) {
+    return { error: "Token not found." };
+  }
+
+  try {
+    const response = await postAuthResetPassword({ password, token });
+
+    return {
+      message: response.data.message,
+    };
+  } catch (error) {
+    const message = getErrorMessage(error);
+
+    return {
+      error,
+      message,
+    };
+  }
 };
 
-export default function Login() {
+export default function Page() {
+  const { query } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof action>();
   const navigate = useNavigate();
   const { refetchCsrfToken } = useAuth();
@@ -50,7 +94,7 @@ export default function Login() {
 
   /**
    * @useEffect
-   * Refresh CSRF token after successful login
+   * Refresh CSRF token after reseting password
    *  */
   useEffect(() => {
     if (success) {
@@ -66,51 +110,29 @@ export default function Login() {
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Login</CardTitle>
+              <CardTitle className="text-2xl">Reset Your Password</CardTitle>
               <CardDescription>
-                Enter your email below to login to your account
+                Please enter your new password below.
               </CardDescription>
             </CardHeader>
             <CardContent>
               <fetcher.Form method="post">
                 <div className="flex flex-col gap-6">
+                  <input type="hidden" name="token" value={query?.token} />
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      placeholder="m@example.com"
-                      required
-                    />
-                  </div>
-                  <div className="grid gap-2">
-                    <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
-                      <Link
-                        to="/forgot-password"
-                        className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                      >
-                        Forgot your password?
-                      </Link>
-                    </div>
+                    <Label htmlFor="password">New password</Label>
                     <Input
                       id="password"
-                      type="password"
                       name="password"
+                      type="password"
+                      placeholder="New password"
                       required
                     />
                   </div>
                   {error && <p className="text-sm text-red-500">{error}</p>}
                   <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
+                    {loading ? "Saving..." : "Save new password"}
                   </Button>
-                </div>
-                <div className="mt-4 text-center text-sm">
-                  Don&apos;t have an account?{" "}
-                  <Link to="/sign-up" className="underline underline-offset-4">
-                    Sign up
-                  </Link>
                 </div>
               </fetcher.Form>
             </CardContent>

@@ -10,7 +10,10 @@ import {
 import { CountersService } from './counters.service';
 import { CounterEntity } from 'src/counters/entities/counter.entity';
 import type { DB } from '@clayout/interface';
+import { Roles } from 'src/users/decorators/role.decorator';
+import { UserRoleWeights } from 'src/users/constants/role.const';
 
+@Roles({ minWeight: UserRoleWeights.None })
 @Controller('counters')
 export class CountersController {
   constructor(private readonly countersService: CountersService) {}

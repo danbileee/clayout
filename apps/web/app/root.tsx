@@ -1,5 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import "./style.css";
+import { QueryClientProvider } from "./lib/react-query/QuernClientProvider";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -10,7 +11,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Meta />
         <Links />
       </head>
-      <body>
+      <body suppressHydrationWarning={true}>
         {children}
         <ScrollRestoration />
         <Scripts />
@@ -20,5 +21,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <QueryClientProvider>
+      <Outlet />
+    </QueryClientProvider>
+  );
 }
