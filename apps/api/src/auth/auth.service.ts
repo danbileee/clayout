@@ -2,7 +2,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import qs from 'qs';
+import * as qs from 'qs';
 import { EnvKeys } from 'src/shared/constants/env.const';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
@@ -10,6 +10,7 @@ import { Tokens } from './interfaces/auth.interface';
 import { UserRoles } from 'src/users/constants/role.const';
 import { TokenType, TokenTypes } from './constants/token.const';
 import { EmailsService } from 'src/emails/emails.service';
+import { Request } from 'express';
 
 type TokenOptions = { tokenType: TokenType } & JwtSignOptions;
 
@@ -80,19 +81,47 @@ export class AuthService {
     }
   }
 
-  reissueToken(token: string, options?: TokenOptions) {
-    const decodedToken = this.verifyToken(token);
+  async getUser(req: Request): Promise<UserEntity> {
+    const accessToken = req.cookies['accessToken'];
+    const basicToken = req.cookies['basicToken'];
 
-    if (decodedToken.type !== 'refresh') {
-      throw new UnauthorizedException(
-        `Only refresh token is accepted to reissue the token.`,
-      );
+    if (!accessToken || !basicToken) {
+      throw new UnauthorizedException(`Token not found.`);
     }
 
-    return this.generateToken(
-      { email: decodedToken.email, id: decodedToken.sub },
-      options,
-    );
+    if (accessToken) {
+      const decodedToken = this.verifyToken(accessToken);
+
+      if (decodedToken.type !== TokenTypes.access) {
+        throw new UnauthorizedException(`Invalid token type.`);
+      }
+
+      const matchedUser = await this.usersService.getUser({
+        email: decodedToken.email,
+      });
+
+      if (!matchedUser) {
+        throw new UnauthorizedException(`The user doesn't exist.`);
+      }
+
+      return matchedUser;
+    }
+
+    const decodedToken = this.verifyToken(basicToken);
+
+    if (decodedToken.type !== TokenTypes.basic) {
+      throw new UnauthorizedException(`Invalid token type.`);
+    }
+
+    const matchedUser = await this.usersService.getUser({
+      email: decodedToken.email,
+    });
+
+    if (!matchedUser) {
+      throw new UnauthorizedException(`The user doesn't exist.`);
+    }
+
+    return matchedUser;
   }
 
   async authenticate(
@@ -127,7 +156,7 @@ export class AuthService {
 
   async register(
     user: Pick<UserEntity, 'username' | 'email' | 'password'>,
-  ): Promise<boolean> {
+  ): Promise<{ basicToken: string }> {
     const hash = await bcrypt.hash(
       user.password,
       parseInt(this.configService.get(EnvKeys.HASH_ROUND), 10),
@@ -146,36 +175,36 @@ export class AuthService {
     });
 
     const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
-    const token = this.generateToken(createdUser, {
-      tokenType: TokenTypes.email_confirm,
+    const basicToken = this.generateToken(createdUser, {
+      tokenType: TokenTypes.basic,
       expiresIn: 3600,
     });
     const queryString = qs.stringify(
       {
-        token,
+        token: basicToken,
         email_id: createdEmail.id,
         button_text: `Verify email`,
       },
       { addQueryPrefix: true },
     );
-    const verifyLink = `${this.configService.get(EnvKeys.WEB_HOST)}/auth/confirm${queryString}`;
+    const ctaLink = `${this.configService.get(EnvKeys.WEB_HOST)}/auth/confirm${queryString}`;
 
     await this.emailsService.sendEmail({
       ...createdEmail,
       context: {
         name: createdUser.username,
         openLink,
-        verifyLink,
+        ctaLink,
       },
     });
 
-    return true;
+    return { basicToken };
   }
 
   async confirm(token: string): Promise<Tokens> {
     const decodedToken = this.verifyToken(token);
 
-    if (decodedToken.type !== 'email_confirm') {
+    if (decodedToken.type !== TokenTypes.basic) {
       throw new UnauthorizedException(
         `Invalid token. Please check if this page is open from the email confirmation link.`,
       );
@@ -197,5 +226,76 @@ export class AuthService {
     await this.usersService.updateUser(updatedUser);
 
     return this.generateTokens(matchedUser);
+  }
+
+  async forgotPassword({ email }: Pick<UserEntity, 'email'>) {
+    const matchedUser = await this.usersService.getUser({ email });
+
+    if (!matchedUser) {
+      throw new UnauthorizedException(`The user doesn't exist.`);
+    }
+
+    const createdEmail = this.emailsService.createEmail({
+      user: matchedUser,
+      to: matchedUser.email,
+      subject: `Reset your password`,
+      template: 'reset-password',
+    });
+
+    const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
+    const basicToken = this.generateToken(matchedUser, {
+      tokenType: TokenTypes.basic,
+      expiresIn: 900,
+    });
+    const queryString = qs.stringify(
+      {
+        token: basicToken,
+        email_id: createdEmail.id,
+        button_text: `Reset password`,
+      },
+      { addQueryPrefix: true },
+    );
+    const ctaLink = `${this.configService.get(EnvKeys.WEB_HOST)}/reset-password${queryString}`;
+
+    await this.emailsService.sendEmail({
+      ...createdEmail,
+      context: {
+        name: matchedUser.username,
+        openLink,
+        ctaLink,
+      },
+    });
+
+    return { basicToken };
+  }
+
+  async resetPassword(token: string, user: UserEntity, newPassword: string) {
+    const decodedToken = this.verifyToken(token);
+
+    if (decodedToken.type !== TokenTypes.basic) {
+      throw new UnauthorizedException(
+        `Invalid token. Please check if this page is open from the email confirmation link.`,
+      );
+    }
+
+    const matchedUser = await this.usersService.getUser({
+      email: decodedToken.email,
+    });
+
+    if (!matchedUser) {
+      throw new UnauthorizedException(`The user doesn't exist.`);
+    }
+
+    const hash = await bcrypt.hash(
+      newPassword,
+      parseInt(this.configService.get(EnvKeys.HASH_ROUND), 10),
+    );
+
+    const updatedUser = await this.usersService.updateUser({
+      ...user,
+      password: hash,
+    });
+
+    return this.generateTokens(updatedUser);
   }
 }

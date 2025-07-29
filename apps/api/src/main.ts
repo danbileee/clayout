@@ -1,5 +1,4 @@
 import 'dotenv/config';
-import * as csurf from 'csurf';
 import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
@@ -57,17 +56,7 @@ async function bootstrap() {
   /**
    * Cookies
    */
-
   app.use(cookieParser());
-  app.use(
-    csurf({
-      cookie: {
-        httpOnly: true,
-        sameSite: 'lax',
-        secure: process.env.NODE_ENV === 'production',
-      },
-    }),
-  );
 
   await app.listen(process.env.PORT ?? 3000);
 }

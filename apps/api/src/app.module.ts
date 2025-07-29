@@ -10,6 +10,7 @@ import { UsersModule } from './users/users.module';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { RoleGuard } from './users/guards/role.guard';
 import { AccessTokenGuard } from './auth/guards/token.guard';
+import { CsrfGuard } from './shared/guards/csrf.guard';
 import { EmailsModule } from './emails/emails.module';
 
 @Module({
@@ -47,11 +48,15 @@ import { EmailsModule } from './emails/emails.module';
     },
     {
       provide: APP_GUARD,
+      useClass: RoleGuard,
+    },
+    {
+      provide: APP_GUARD,
       useClass: AccessTokenGuard,
     },
     {
       provide: APP_GUARD,
-      useClass: RoleGuard,
+      useClass: CsrfGuard,
     },
   ],
 })

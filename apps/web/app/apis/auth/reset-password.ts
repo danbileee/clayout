@@ -6,21 +6,22 @@ import { type AxiosResponse } from "axios";
  * POST
  */
 
-interface PostEndpointParams {
-  id: string;
-}
+interface PostEndpointParams {}
 
 interface PostQueryParams {}
 
-interface PostBody
-  extends Pick<DB<"email_click_events">, "link" | "button_text"> {}
+interface PostBody extends Pick<DB<"users">, "password"> {
+  token: string;
+}
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
-interface PostResponse {}
+interface PostResponse {
+  message: string;
+}
 
-export async function postEmailsTrackClick(
-  { id, link, button_text }: PostParams,
+export async function postAuthResetPassword(
+  { token, password }: PostParams,
   request?: Request
 ) {
   const axios = createAxiosInstance(request);
@@ -28,5 +29,5 @@ export async function postEmailsTrackClick(
     PostResponse,
     AxiosResponse<PostResponse, PostParams>,
     PostParams
-  >(`/emails/${id}/track-click`, { id, link, button_text });
+  >(`/auth/reset-password`, { token, password });
 }

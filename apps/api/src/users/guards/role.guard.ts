@@ -29,10 +29,15 @@ export class RoleGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest();
     const { requiredRole, minWeight } = roleOptions as RolesDecoratorOptions;
+    const userRole = user?.role ?? UserRoles.None;
 
-    if (requiredRole && user?.role !== requiredRole) {
+    if (requiredRole === UserRoles.None || minWeight === UserRoleWeights.None) {
+      return true;
+    }
+
+    if (requiredRole && userRole !== requiredRole) {
       throw new ForbiddenException(
-        `NO PERMISSION: You don't have access to this feature. Ask an admin to grant you the required role: ${requiredRole}`,
+        `NO PERMISSION: You don't have access to this feature. Ask an admin to grant you the required role: ${requiredRole}. Your current role is ${userRole}`,
       );
     }
 
@@ -46,7 +51,7 @@ export class RoleGuard implements CanActivate {
         .reduce((acc, [key]) => key as UserRole, UserRoles.Admin);
 
       throw new ForbiddenException(
-        `NO PERMISSION: You don't have access to this feature. Ask an admin to grant you the minimum required role: ${minRequiredRole}`,
+        `NO PERMISSION: You don't have access to this feature. Ask an admin to grant you the minimum required role: ${minRequiredRole}. Your current role is ${userRole}`,
       );
     }
 

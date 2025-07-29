@@ -1,4 +1,3 @@
-import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,47 +8,36 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  type ActionFunctionArgs,
-  Link,
-  data,
-  redirect,
-  useFetcher,
-  useSearchParams,
-} from "react-router";
+import { type ActionFunctionArgs, Link, useFetcher } from "react-router";
+import { postAuthForgotPassword } from "@/apis/auth/forgot-password";
+import { getErrorMessage } from "@/lib/axios/getErrorMessage";
+import { getActionResults, type ActionResult } from "@/lib/react-router/action";
 
-export const action = async ({ request }: ActionFunctionArgs) => {
+export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
   const formData = await request.formData();
   const email = formData.get("email") as string;
 
-  const { supabase, headers } = createClient(request);
-  const origin = new URL(request.url).origin;
+  try {
+    const response = await postAuthForgotPassword({ email }, request);
 
-  // Send the actual reset password email
-  const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/confirm?next=/update-password`,
-  });
+    return {
+      message: response.data.message,
+    };
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
 
-  if (error) {
-    return data(
-      {
-        error: error instanceof Error ? error.message : "An error occurred",
-        data: { email },
-      },
-      { headers }
-    );
+    return {
+      error,
+      message: errorMessage,
+    };
   }
-
-  return redirect("/forgot-password?success");
 };
 
 export default function ForgotPassword() {
   const fetcher = useFetcher<typeof action>();
-  const [searchParams] = useSearchParams();
 
-  const success = !!searchParams.has("success");
-  const error = fetcher.data?.error;
-  const loading = fetcher.state === "submitting";
+  const { success, error, state } = getActionResults(fetcher);
+  const loading = state === "submitting";
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">

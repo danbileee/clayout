@@ -15,14 +15,15 @@ interface PostBody
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
-interface PostResponse {}
+interface PostResponse {
+  message: string;
+}
 
-export async function postAuthRegister({
-  username,
-  email,
-  password,
-}: PostParams) {
-  const axios = createAxiosInstance();
+export async function postAuthRegister(
+  { username, email, password }: PostParams,
+  request?: Request
+) {
+  const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,
     AxiosResponse<PostResponse, PostParams>,
@@ -47,10 +48,15 @@ interface PatchParams
     PatchQueryParams,
     PatchBody {}
 
-interface PatchResponse {}
+interface PatchResponse {
+  message: string;
+}
 
-export async function patchAuthRegister({ token }: PatchParams) {
-  const axios = createAxiosInstance();
+export async function patchAuthRegister(
+  { token }: PatchParams,
+  request: Request
+) {
+  const axios = createAxiosInstance(request);
   return await axios.patch<
     PatchResponse,
     AxiosResponse<PatchResponse, PatchParams>,
