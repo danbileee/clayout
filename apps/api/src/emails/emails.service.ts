@@ -23,8 +23,9 @@ export class EmailsService {
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  createEmail(email: Partial<EmailEntity>): EmailEntity {
-    return this.emailsRepository.create(email);
+  async createEmail(email: Partial<EmailEntity>): Promise<EmailEntity> {
+    const createdEmail = this.emailsRepository.create(email);
+    return await this.emailsRepository.save(createdEmail);
   }
 
   async sendEmail(email: EmailEntity): Promise<EmailEntity> {
@@ -36,7 +37,28 @@ export class EmailsService {
     };
 
     try {
-      await this.mailerService.sendMail(sendEmailDto);
+      // Use raw nodemailer options to bypass SendGrid tracking
+      await this.mailerService.sendMail({
+        ...sendEmailDto,
+        headers: {
+          'X-SMTPAPI': JSON.stringify({
+            filters: {
+              clicktrack: {
+                settings: {
+                  enable: 0,
+                },
+              },
+              opentrack: {
+                settings: {
+                  enable: 0,
+                },
+              },
+            },
+          }),
+          // Bypass link management
+          'X-SendGrid-Bypass-Link-Management': 'true',
+        },
+      });
 
       const updatedEmail: EmailEntity = {
         ...email,
@@ -47,10 +69,25 @@ export class EmailsService {
 
       return updatedEmail;
     } catch (err) {
+      // If the first attempt fails, try without headers
+      try {
+        await this.mailerService.sendMail(sendEmailDto);
+      } catch (retryErr) {
+        const updatedEmail: EmailEntity = {
+          ...email,
+          failed_at: new Date(),
+          error_log: String(err) + ' | Retry: ' + String(retryErr),
+        };
+
+        await this.emailsRepository.save(updatedEmail);
+
+        return updatedEmail;
+      }
+
+      // If retry succeeds, continue with success flow
       const updatedEmail: EmailEntity = {
         ...email,
-        failed_at: new Date(),
-        error_log: String(err),
+        sent_at: new Date(),
       };
 
       await this.emailsRepository.save(updatedEmail);

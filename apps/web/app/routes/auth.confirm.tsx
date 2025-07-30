@@ -1,70 +1,111 @@
-import {
-  useLoaderData,
-  useNavigation,
-  type LoaderFunctionArgs,
-  redirect,
-} from "react-router";
+import { useLoaderData, type LoaderFunctionArgs } from "react-router";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { patchAuthRegister } from "@/apis/auth/register";
 import { postEmailsTrackClick } from "@/apis/emails/track-click";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import * as qs from "qs";
-import type { LoaderResult } from "@/lib/react-router/loader";
+import { type LoaderResult } from "@/lib/react-router/loader";
+import { useCallback, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
 
-export async function loader({ request }: LoaderFunctionArgs): LoaderResult {
+export async function loader({ request }: LoaderFunctionArgs): LoaderResult<{
+  token: string;
+  email_id: string;
+  button_text: string;
+}> {
   const requestUrl = new URL(request.url);
   const token = requestUrl.searchParams.get("token") ?? "";
   const email_id = requestUrl.searchParams.get("email_id") ?? "";
   const button_text = requestUrl.searchParams.get("button_text") ?? "";
 
-  try {
-    await patchAuthRegister({ token }, request);
-    await postEmailsTrackClick(
-      {
-        id: email_id,
-        link: request.url,
-        button_text,
-      },
-      request
-    );
-
-    const queryString = qs.stringify(
-      { auth_confirm: true },
-      { addQueryPrefix: true }
-    );
-
-    return redirect(`/${queryString}`);
-  } catch (error: unknown) {
-    const errorMessage = getErrorMessage(error);
-
-    return {
-      error,
-      message: errorMessage,
-    };
-  }
+  return {
+    data: {
+      token,
+      email_id,
+      button_text,
+    },
+  };
 }
 
 export default function AuthConfirm() {
-  const { message } = useLoaderData<typeof loader>();
-  const navigation = useNavigation();
-  const isLoading = navigation.state === "loading";
+  const { data } = useLoaderData<typeof loader>();
+  const {
+    mutateAsync: confirmRegister,
+    error,
+    isSuccess,
+    isError,
+  } = useMutation({
+    mutationFn: patchAuthRegister,
+  });
+  const { mutateAsync: trackClickEmail } = useMutation({
+    mutationFn: postEmailsTrackClick,
+  });
 
-  if (isLoading) {
+  const confirmRegistration = useCallback(async () => {
+    if (!data) return;
+
+    await confirmRegister({ token: data.token });
+    await trackClickEmail({
+      id: data.email_id,
+      link: window.location.href,
+      button_text: data.button_text,
+    });
+
+    // Add a little delay for smooth UX
+    setTimeout(() => {
+      window.location.href = `/`;
+    }, 1000);
+  }, [confirmRegister, data, trackClickEmail]);
+
+  /**
+   * @useEffect
+   * Auth confirmation
+   * - make the API call client-side to ensure cookies are set in the browser
+   */
+  useEffect(() => {
+    confirmRegistration();
+  }, [confirmRegistration]);
+
+  if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">
-              Confirming Registration...
-            </CardTitle>
+            <CardTitle className="text-xl">Registration Confirmed!</CardTitle>
           </CardHeader>
           <CardContent className="text-center">
             <div className="space-y-4">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
-              <p className="text-gray-600">
-                Please wait while we verify your email address...
+              <div className="text-green-500 text-4xl">✓</div>
+              <p className="text-green-700">
+                Your email has been verified successfully. Redirecting...
               </p>
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Confirmation Failed</CardTitle>
+          </CardHeader>
+          <CardContent className="text-center">
+            <div className="space-y-4">
+              <div className="text-red-500 text-4xl">✗</div>
+              <p className="text-red-700">
+                {error ? getErrorMessage(error) : "Unknown error"}
+              </p>
+              <Button
+                onClick={() => (window.location.href = "/")}
+                className="w-full"
+              >
+                Go to Home
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -76,18 +117,14 @@ export default function AuthConfirm() {
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl">Confirmation Failed</CardTitle>
+          <CardTitle className="text-xl">Confirming Registration...</CardTitle>
         </CardHeader>
         <CardContent className="text-center">
           <div className="space-y-4">
-            <div className="text-red-500 text-4xl">✗</div>
-            <p className="text-red-700">{message}</p>
-            <Button
-              onClick={() => (window.location.href = "/")}
-              className="w-full"
-            >
-              Go to Home
-            </Button>
+            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="text-gray-600">
+              Please wait while we verify your email address...
+            </p>
           </div>
         </CardContent>
       </Card>

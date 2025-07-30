@@ -8,57 +8,36 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  type ActionFunctionArgs,
-  Link,
-  useFetcher,
-  useNavigate,
-} from "react-router";
+import { Link } from "react-router";
 import { postAuthLogin } from "@/apis/auth/login";
+import { type FormEvent } from "react";
+import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import { useAuth } from "@/hooks/useAuth";
-import { useEffect } from "react";
-import { getActionResults, type ActionResult } from "@/lib/react-router/action";
-
-export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
-  const formData = await request.formData();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  try {
-    const response = await postAuthLogin({ email, password }, request);
-
-    return {
-      message: response?.data?.message ?? "Login successful",
-    };
-  } catch (error) {
-    const errorMessage = getErrorMessage(error);
-
-    return {
-      error,
-      message: errorMessage,
-    };
-  }
-};
 
 export default function Login() {
-  const fetcher = useFetcher<typeof action>();
-  const navigate = useNavigate();
-  const { refetchCsrfToken } = useAuth();
-  const { success, error, state } = getActionResults(fetcher);
-  const loading = state === "submitting";
+  const {
+    mutateAsync: login,
+    isError,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: postAuthLogin,
+  });
 
-  /**
-   * @useEffect
-   * Refresh CSRF token after successful login
-   *  */
-  useEffect(() => {
-    if (success) {
-      refetchCsrfToken().then(() => {
-        navigate("/");
-      });
-    }
-  }, [navigate, success, refetchCsrfToken]);
+  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email")?.toString() ?? "";
+    const password = formData.get("password")?.toString() ?? "";
+
+    await login({ email, password });
+
+    // Redirect after a short delay to ensure cookies are set
+    setTimeout(() => {
+      window.location.href = `/`;
+    }, 1000);
+  };
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -72,7 +51,7 @@ export default function Login() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <fetcher.Form method="post">
+              <form onSubmit={handleLogin}>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor="email">Email</Label>
@@ -101,9 +80,13 @@ export default function Login() {
                       required
                     />
                   </div>
-                  {error && <p className="text-sm text-red-500">{error}</p>}
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
+                  {isError && (
+                    <p className="text-sm text-red-500">
+                      {getErrorMessage(error)}
+                    </p>
+                  )}
+                  <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? "Logging in..." : "Login"}
                   </Button>
                 </div>
                 <div className="mt-4 text-center text-sm">
@@ -112,7 +95,7 @@ export default function Login() {
                     Sign up
                   </Link>
                 </div>
-              </fetcher.Form>
+              </form>
             </CardContent>
           </Card>
         </div>

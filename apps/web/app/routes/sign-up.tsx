@@ -9,11 +9,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  getActionFormError,
-  getActionResults,
-  type ActionResult,
-} from "@/lib/react-router/action";
+import { getErrorMessage } from "@/lib/axios/getErrorMessage";
+import { getActionResults, type ActionResult } from "@/lib/react-router/action";
 import {
   type ActionFunctionArgs,
   Link,
@@ -29,22 +26,37 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
   const repeatPassword = formData.get("repeat-password") as string;
 
   if (!password) {
-    return getActionFormError("password", "Password is required");
+    return {
+      error: new Error(`FORM ERROR: password`),
+      message: "Password is required.",
+    };
   }
 
   if (password !== repeatPassword) {
-    return getActionFormError("repeat-password", "Passwords do not match");
+    return {
+      error: new Error(`FORM ERROR: repeat-password`),
+      message: "Passwords do not match",
+    };
   }
 
-  await postAuthRegister({ username, email, password }, request);
+  try {
+    await postAuthRegister({ username, email, password }, request);
 
-  return redirect("/auth/verify");
+    return redirect("/auth/verify");
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
+
+    return {
+      error: new Error(errorMessage),
+      message: errorMessage,
+    };
+  }
 };
 
 export default function SignUp() {
   const fetcher = useFetcher<typeof action>();
-  const { error, state } = getActionResults(fetcher);
-  const loading = state === "submitting";
+  const { error } = getActionResults(fetcher);
+  const loading = fetcher.state === "submitting";
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">

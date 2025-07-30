@@ -36,17 +36,11 @@ function parseCookies(cookieString: string): Record<string, string> {
 
 export function extractClientSideTokens(): {
   csrfToken?: string;
-  accessToken?: string;
-  refreshToken?: string;
-  basicToken?: string;
 } {
   // Check if we're in a browser environment
   if (typeof document === "undefined") {
     return {
       csrfToken: undefined,
-      accessToken: undefined,
-      refreshToken: undefined,
-      basicToken: undefined,
     };
   }
 
@@ -55,8 +49,5 @@ export function extractClientSideTokens(): {
 
   return {
     csrfToken: parsedCookies.csrfToken,
-    accessToken: parsedCookies.accessToken,
-    refreshToken: parsedCookies.refreshToken,
-    basicToken: parsedCookies.basicToken,
   };
 }

@@ -15,18 +15,16 @@ interface PostQueryParams {}
 interface PostBody
   extends Pick<DB<"email_click_events">, "link" | "button_text"> {}
 
-interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
-
 interface PostResponse {}
 
 export async function postEmailsTrackClick(
-  { id, link, button_text }: PostParams,
+  { id, link, button_text }: PostEndpointParams & PostQueryParams & PostBody,
   request?: Request
 ) {
   const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,
-    AxiosResponse<PostResponse, PostParams>,
-    PostParams
-  >(`/emails/${id}/track-click`, { id, link, button_text });
+    AxiosResponse<PostResponse, PostBody>,
+    PostBody
+  >(`/emails/${id}/track-click`, { link, button_text });
 }

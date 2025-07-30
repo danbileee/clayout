@@ -27,7 +27,7 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
     const errorMessage = getErrorMessage(error);
 
     return {
-      error,
+      error: new Error(errorMessage),
       message: errorMessage,
     };
   }
@@ -36,8 +36,8 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
 export default function ForgotPassword() {
   const fetcher = useFetcher<typeof action>();
 
-  const { success, error, state } = getActionResults(fetcher);
-  const loading = state === "submitting";
+  const { success, error } = getActionResults(fetcher);
+  const loading = fetcher.state === "submitting";
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
