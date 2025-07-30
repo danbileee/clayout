@@ -85,10 +85,7 @@ export class AuthService {
     const accessToken = req.cookies['accessToken'];
     const basicToken = req.cookies['basicToken'];
 
-    if (!accessToken || !basicToken) {
-      throw new UnauthorizedException(`Token not found.`);
-    }
-
+    // If accessToken exists, use it (for confirmed users)
     if (accessToken) {
       const decodedToken = this.verifyToken(accessToken);
 
@@ -107,21 +104,26 @@ export class AuthService {
       return matchedUser;
     }
 
-    const decodedToken = this.verifyToken(basicToken);
+    // If no accessToken but basicToken exists, use it (for unconfirmed users)
+    if (basicToken) {
+      const decodedToken = this.verifyToken(basicToken);
 
-    if (decodedToken.type !== TokenTypes.basic) {
-      throw new UnauthorizedException(`Invalid token type.`);
+      if (decodedToken.type !== TokenTypes.basic) {
+        throw new UnauthorizedException(`Invalid token type.`);
+      }
+
+      const matchedUser = await this.usersService.getUser({
+        email: decodedToken.email,
+      });
+
+      if (!matchedUser) {
+        throw new UnauthorizedException(`The user doesn't exist.`);
+      }
+
+      return matchedUser;
     }
 
-    const matchedUser = await this.usersService.getUser({
-      email: decodedToken.email,
-    });
-
-    if (!matchedUser) {
-      throw new UnauthorizedException(`The user doesn't exist.`);
-    }
-
-    return matchedUser;
+    throw new UnauthorizedException(`Token not found.`);
   }
 
   async authenticate(
@@ -167,7 +169,7 @@ export class AuthService {
       password: hash,
       role: UserRoles.Registrant,
     });
-    const createdEmail = this.emailsService.createEmail({
+    const createdEmail = await this.emailsService.createEmail({
       user: createdUser,
       to: createdUser.email,
       subject: `Verify your account`,
@@ -225,7 +227,7 @@ export class AuthService {
 
     await this.usersService.updateUser(updatedUser);
 
-    return this.generateTokens(matchedUser);
+    return this.generateTokens(updatedUser);
   }
 
   async forgotPassword({ email }: Pick<UserEntity, 'email'>) {
@@ -235,7 +237,7 @@ export class AuthService {
       throw new UnauthorizedException(`The user doesn't exist.`);
     }
 
-    const createdEmail = this.emailsService.createEmail({
+    const createdEmail = await this.emailsService.createEmail({
       user: matchedUser,
       to: matchedUser.email,
       subject: `Reset your password`,

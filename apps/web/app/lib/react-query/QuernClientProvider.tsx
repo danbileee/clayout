@@ -14,6 +14,7 @@ const getQueryClient = (queryClientConfig?: QueryClientConfig): QueryClient =>
         staleTime: 15000,
         refetchOnWindowFocus: false,
         retry: false,
+        throwOnError: false,
       },
       mutations: {
         retry: false,

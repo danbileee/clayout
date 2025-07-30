@@ -75,11 +75,11 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
       message: response.data.message,
     };
   } catch (error) {
-    const message = getErrorMessage(error);
+    const errorMessage = getErrorMessage(error);
 
     return {
-      error,
-      message,
+      error: new Error(errorMessage),
+      message: errorMessage,
     };
   }
 };
@@ -89,8 +89,8 @@ export default function Page() {
   const fetcher = useFetcher<typeof action>();
   const navigate = useNavigate();
   const { refetchCsrfToken } = useAuth();
-  const { success, error, state } = getActionResults(fetcher);
-  const loading = state === "submitting";
+  const { success, error } = getActionResults(fetcher);
+  const loading = fetcher.state === "submitting";
 
   /**
    * @useEffect

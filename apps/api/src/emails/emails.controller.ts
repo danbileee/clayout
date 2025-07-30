@@ -11,6 +11,7 @@ import { EmailsService } from './emails.service';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { RecordEmailClickDto } from './dtos/email.dto';
+import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
 
 @Controller('emails')
 export class EmailsController {
@@ -20,6 +21,7 @@ export class EmailsController {
   ) {}
 
   @Get(':id/track-open')
+  @PublicRoute()
   async trackOpen(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
     await this.emailsService.recordOpen({ id });
 
@@ -34,6 +36,7 @@ export class EmailsController {
   }
 
   @Post(':id/track-click')
+  @PublicRoute()
   async trackClick(
     @Param('id', ParseIntPipe) id: number,
     @Body() recordEmailClickDto: RecordEmailClickDto,

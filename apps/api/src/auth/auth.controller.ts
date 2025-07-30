@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from 'src/users/dtos/user.dto';
+import { LoginDto } from './dtos/auth.dto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
 import { BasicTokenGuard, RefreshTokenGuard } from './guards/token.guard';
 import { Request, Response } from 'express';
@@ -37,15 +38,14 @@ export class AuthController {
 
     res.cookie('csrfToken', csrfToken, {
       httpOnly: false,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { csrfToken };
   }
 
   @Post('token/refresh')
-  @PublicRoute()
   @UseGuards(RefreshTokenGuard)
   postTokenRefresh(
     @Res({ passthrough: true }) res: Response,
@@ -58,13 +58,13 @@ export class AuthController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { message: 'Tokens refreshed' };
@@ -73,21 +73,21 @@ export class AuthController {
   @Post('login')
   @PublicRoute()
   async postLogin(
-    @Body() loginUserDto: Pick<CreateUserDto, 'email' | 'password'>,
+    @Body() loginUserDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const user = await this.authService.authenticate(loginUserDto);
-    const { accessToken, refreshToken } = await this.authService.login(user);
+    const { accessToken, refreshToken } =
+      await this.authService.login(loginUserDto);
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { message: 'Login successful' };
@@ -113,8 +113,8 @@ export class AuthController {
 
     res.cookie('basicToken', basicToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { message: 'Waiting for email confirmation' };
@@ -130,13 +130,13 @@ export class AuthController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { message: 'Register confirmed' };
@@ -152,8 +152,8 @@ export class AuthController {
 
     res.cookie('basicToken', basicToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { message: 'Waiting for resetting password' };
@@ -178,13 +178,13 @@ export class AuthController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: true,
-      sameSite: 'none',
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
     return { message: 'Password reset successful' };

@@ -54,7 +54,7 @@ interface PatchResponse {
 
 export async function patchAuthRegister(
   { token }: PatchParams,
-  request: Request
+  request?: Request
 ) {
   const axios = createAxiosInstance(request);
   return await axios.patch<
