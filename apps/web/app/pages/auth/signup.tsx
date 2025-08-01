@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { getActionResults } from "@/lib/react-router/action";
+import { joinPath, Paths } from "@/routes";
 import {
   type ActionFunctionArgs,
   Link,
@@ -42,7 +43,7 @@ export const clientAction = async ({ request }: ActionFunctionArgs) => {
   try {
     await postAuthRegister({ username, email, password }, request);
 
-    return redirect("/auth/verify");
+    return redirect(joinPath([Paths.auth, Paths.verify]));
   } catch (error) {
     const errorMessage = getErrorMessage(error);
 
@@ -119,7 +120,10 @@ export default function SignUp() {
                 </div>
                 <div className="mt-4 text-center text-sm">
                   Already have an account?{" "}
-                  <Link to="/login" className="underline underline-offset-4">
+                  <Link
+                    to={joinPath([Paths.login])}
+                    className="underline underline-offset-4"
+                  >
                     Login
                   </Link>
                 </div>

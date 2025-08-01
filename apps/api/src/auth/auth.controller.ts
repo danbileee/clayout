@@ -25,8 +25,15 @@ export class AuthController {
   @PublicRoute()
   async getUser(
     @Req() req: Request & { user: UserEntity },
+    @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: UserEntity | null }> {
     const user = await this.authService.getUser(req);
+
+    if (!user) {
+      res.clearCookie('accessToken');
+      res.clearCookie('refreshToken');
+      res.clearCookie('basicToken');
+    }
 
     return { user };
   }
@@ -55,6 +62,7 @@ export class AuthController {
     const { accessToken, refreshToken } = this.authService.generateTokens(
       req.user,
     );
+    const csrfToken = randomBytes(32).toString('hex');
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
@@ -66,8 +74,13 @@ export class AuthController {
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
+    res.cookie('csrfToken', csrfToken, {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    });
 
-    return { message: 'Tokens refreshed' };
+    return { message: 'Tokens refreshed', csrfToken };
   }
 
   @Post('login')
@@ -94,6 +107,7 @@ export class AuthController {
   }
 
   @Post('logout')
+  @PublicRoute()
   async postLogout(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('accessToken');
     res.clearCookie('refreshToken');

@@ -1,12 +1,65 @@
-import { useAuth } from "@/hooks/useAuth";
-import type { ReactNode } from "react";
+import { getAuthTokenCsrf, getAuthTokenCsrfKey } from "@/apis/auth/token/csrf";
+import { getAuthUser, getAuthUserKey } from "@/apis/auth/user";
+import { extractClientSideTokens } from "@/lib/cookie/extractTokens";
+import { useClientQuery } from "@/lib/react-query/useClientQuery";
+import type { DB } from "@clayout/interface";
+import { createContext, useContext, useMemo, type ReactNode } from "react";
+
+interface AuthContextValue {
+  tokens: ReturnType<typeof extractClientSideTokens>;
+  user: DB<"users"> | null;
+  refetchCsrfToken: () => Promise<{ csrfToken: string } | undefined>;
+  refetchUser: () => Promise<{ user: DB<"users"> | null } | undefined>;
+}
+
+const AuthContext = createContext<AuthContextValue | null>(null);
 
 interface Props {
   children: ReactNode;
 }
 
 export function AuthProvider({ children }: Props) {
-  useAuth();
+  const { csrfToken } = extractClientSideTokens();
+  const { data: tokenData, refetch: refetchCsrfToken } = useClientQuery({
+    queryKey: getAuthTokenCsrfKey({ csrfToken }),
+    queryFn: () => getAuthTokenCsrf(),
+    enabled: !csrfToken,
+  });
+  const { data: userData, refetch: refetchUser } = useClientQuery({
+    queryKey: getAuthUserKey(),
+    queryFn: () => getAuthUser(),
+    staleTime: 1000 * 60 * 15, // 15 minutes
+  });
 
-  return <>{children}</>;
+  const contextValue = useMemo<AuthContextValue>(
+    () => ({
+      tokens: tokenData?.data ?? {},
+      user: userData?.data?.user ?? null,
+      refetchCsrfToken: async () => {
+        const response = await refetchCsrfToken();
+        return response?.data?.data;
+      },
+      refetchUser: async () => {
+        const response = await refetchUser();
+        return response?.data?.data;
+      },
+    }),
+    [refetchCsrfToken, refetchUser, tokenData?.data, userData?.data?.user]
+  );
+
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
+}
+
+export function useAuthContext(): AuthContextValue {
+  const context = useContext(AuthContext);
+
+  if (!context) {
+    throw new Error(
+      `useAuthContext should be called within AuthContext.Provider`
+    );
+  }
+
+  return context;
 }

@@ -44,12 +44,20 @@ export class AuthService {
     return {
       accessToken: this.generateToken(user, {
         tokenType: TokenTypes.access,
-        expiresIn: 60 * 15,
+        expiresIn: 60,
       }),
       refreshToken: this.generateToken(user, {
         tokenType: TokenTypes.refresh,
-        expiresIn: 60 * 60 * 24,
+        expiresIn: 60 * 5,
       }),
+      // accessToken: this.generateToken(user, {
+      //   tokenType: TokenTypes.access,
+      //   expiresIn: 60 * 15,
+      // }),
+      // refreshToken: this.generateToken(user, {
+      //   tokenType: TokenTypes.refresh,
+      //   expiresIn: 60 * 60 * 24,
+      // }),
     };
   }
 
@@ -99,42 +107,47 @@ export class AuthService {
     const accessToken = req.cookies['accessToken'];
     const basicToken = req.cookies['basicToken'];
 
-    // If accessToken exists, use it (for confirmed users)
-    if (accessToken) {
-      const decodedToken = this.verifyToken(accessToken);
+    try {
+      // If accessToken exists, use it (for confirmed users)
+      if (accessToken) {
+        const decodedToken = this.verifyToken(accessToken);
 
-      if (decodedToken.type !== TokenTypes.access) {
-        throw new UnauthorizedException(`Invalid token type.`);
+        if (decodedToken.type !== TokenTypes.access) {
+          throw new UnauthorizedException(`Invalid token type.`);
+        }
+
+        const matchedUser = await this.usersService.getUser({
+          email: decodedToken.email,
+        });
+
+        if (!matchedUser) {
+          throw new UnauthorizedException(`The user doesn't exist.`);
+        }
+
+        return matchedUser;
       }
 
-      const matchedUser = await this.usersService.getUser({
-        email: decodedToken.email,
-      });
+      // If no accessToken but basicToken exists, use it (for unconfirmed users)
+      if (basicToken) {
+        const decodedToken = this.verifyToken(basicToken);
 
-      if (!matchedUser) {
-        throw new UnauthorizedException(`The user doesn't exist.`);
+        if (decodedToken.type !== TokenTypes.basic) {
+          throw new UnauthorizedException(`Invalid token type.`);
+        }
+
+        const matchedUser = await this.usersService.getUser({
+          email: decodedToken.email,
+        });
+
+        if (!matchedUser) {
+          throw new UnauthorizedException(`The user doesn't exist.`);
+        }
+
+        return matchedUser;
       }
-
-      return matchedUser;
-    }
-
-    // If no accessToken but basicToken exists, use it (for unconfirmed users)
-    if (basicToken) {
-      const decodedToken = this.verifyToken(basicToken);
-
-      if (decodedToken.type !== TokenTypes.basic) {
-        throw new UnauthorizedException(`Invalid token type.`);
-      }
-
-      const matchedUser = await this.usersService.getUser({
-        email: decodedToken.email,
-      });
-
-      if (!matchedUser) {
-        throw new UnauthorizedException(`The user doesn't exist.`);
-      }
-
-      return matchedUser;
+    } catch (e) {
+      console.error(e);
+      return null;
     }
 
     return null;

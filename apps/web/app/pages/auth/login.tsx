@@ -13,8 +13,11 @@ import { postAuthLogin } from "@/apis/auth/login";
 import { type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
+import { useAuthContext } from "@/providers/AuthProvider";
+import { joinPath, Paths } from "@/routes";
 
 export default function Login() {
+  const { refetchUser, refetchCsrfToken } = useAuthContext();
   const {
     mutateAsync: login,
     isError,
@@ -31,14 +34,26 @@ export default function Login() {
     const email = formData.get("email")?.toString() ?? "";
     const password = formData.get("password")?.toString() ?? "";
 
-    await login({
-      params: { email, password },
-    });
+    try {
+      await login({
+        params: { email, password },
+      });
+      await refetchUser();
+      await refetchCsrfToken();
 
-    // Redirect after a short delay to ensure cookies are set
-    setTimeout(() => {
-      window.location.href = `/`;
-    }, 1000);
+      // Redirect after a short delay to ensure cookies are set
+      setTimeout(() => {
+        if (window.history.length === 1) {
+          window.location.href = `/`;
+        } else {
+          window.history.back();
+        }
+      }, 1000);
+    } catch (error) {
+      const message = getErrorMessage(error);
+
+      throw new Error(message);
+    }
   };
 
   return (
@@ -69,7 +84,7 @@ export default function Login() {
                     <div className="flex items-center">
                       <Label htmlFor="password">Password</Label>
                       <Link
-                        to="/forgot-password"
+                        to={joinPath([Paths["forgot-password"]])}
                         className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                       >
                         Forgot your password?
@@ -93,7 +108,10 @@ export default function Login() {
                 </div>
                 <div className="mt-4 text-center text-sm">
                   Don&apos;t have an account?{" "}
-                  <Link to="/sign-up" className="underline underline-offset-4">
+                  <Link
+                    to={joinPath([Paths.signup])}
+                    className="underline underline-offset-4"
+                  >
                     Sign up
                   </Link>
                 </div>

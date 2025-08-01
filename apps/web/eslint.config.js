@@ -55,6 +55,7 @@ export default tseslint.config([
       "sonarjs/fixme-tag": "warn",
       "sonarjs/no-unused-vars": "off",
       "sonarjs/no-dead-store": "off",
+      "sonarjs/todo-tag": "warn",
     },
   },
 ]);

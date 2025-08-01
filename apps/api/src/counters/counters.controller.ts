@@ -13,7 +13,7 @@ import type { DB } from '@clayout/interface';
 import { Roles } from 'src/users/decorators/role.decorator';
 import { UserRoleWeights } from 'src/users/constants/role.const';
 
-@Roles({ minWeight: UserRoleWeights.None })
+@Roles({ minWeight: UserRoleWeights.User })
 @Controller('counters')
 export class CountersController {
   constructor(private readonly countersService: CountersService) {}
@@ -26,19 +26,23 @@ export class CountersController {
   }
 
   @Post()
-  postCounters(
+  async postCounters(
     @Body()
-    dto: DB<'counters'>,
-  ): Promise<CounterEntity> {
-    return this.countersService.createCounters(dto);
+    dto: Pick<DB<'counters'>, 'value'>,
+  ): Promise<{ counter: CounterEntity }> {
+    const counter = await this.countersService.createCounters(dto);
+
+    return { counter };
   }
 
   @Patch(':id')
-  patchCounters(
+  async patchCounters(
     @Param('id', ParseIntPipe) id: number,
     @Body()
-    dto: DB<'counters'>,
-  ): Promise<CounterEntity> {
-    return this.countersService.updateCounters({ id, ...dto });
+    dto: Pick<DB<'counters'>, 'id' | 'value'>,
+  ): Promise<{ counter: CounterEntity }> {
+    const counter = await this.countersService.updateCounters({ id, ...dto });
+
+    return { counter };
   }
 }
