@@ -11,10 +11,12 @@ const getQueryClient = (queryClientConfig?: QueryClientConfig): QueryClient =>
   new QueryClient({
     defaultOptions: {
       queries: {
-        staleTime: 15000,
+        staleTime: 1000 * 15,
         refetchOnWindowFocus: false,
         retry: false,
         throwOnError: false,
+        refetchOnMount: false,
+        refetchOnReconnect: false,
       },
       mutations: {
         retry: false,
@@ -23,21 +25,18 @@ const getQueryClient = (queryClientConfig?: QueryClientConfig): QueryClient =>
     ...queryClientConfig,
   });
 
+export const defaultQueryClient = getQueryClient();
+
 type Props = Omit<QueryClientProviderProps, "client"> & {
-  queryClientConfig?: QueryClientConfig;
   children: ReactNode;
 };
 
 export function QueryClientProvider({
-  queryClientConfig,
   children,
   ...props
 }: Props): ReactElement {
   return (
-    <ReactQueryClientProvider
-      {...props}
-      client={getQueryClient(queryClientConfig)}
-    >
+    <ReactQueryClientProvider {...props} client={defaultQueryClient}>
       {children}
       {import.meta.env.MODE === "development" && (
         <ReactQueryDevtools

@@ -12,6 +12,7 @@ import { type ActionFunctionArgs, Link, useFetcher } from "react-router";
 import { postAuthForgotPassword } from "@/apis/auth/forgot-password";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { getActionResults } from "@/lib/react-router/action";
+import { joinPath, Paths } from "@/routes";
 
 export const clientAction = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
@@ -90,7 +91,10 @@ export default function ForgotPassword() {
                   </div>
                   <div className="mt-4 text-center text-sm">
                     Already have an account?{" "}
-                    <Link to="/login" className="underline underline-offset-4">
+                    <Link
+                      to={joinPath([Paths.login])}
+                      className="underline underline-offset-4"
+                    >
                       Login
                     </Link>
                   </div>

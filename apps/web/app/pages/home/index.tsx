@@ -2,9 +2,10 @@ import { useFetcher, type ActionFunctionArgs } from "react-router";
 import { Button } from "@/components/ui/button";
 import { postAuthLogout } from "@/apis/auth/logout";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { getActionResults } from "@/lib/react-router/action";
+import { useAuthContext } from "@/providers/AuthProvider";
+import { joinPath, Paths } from "@/routes";
 
 export const clientAction = async ({ request }: ActionFunctionArgs) => {
   try {
@@ -24,7 +25,7 @@ export const clientAction = async ({ request }: ActionFunctionArgs) => {
 };
 
 export default function Home() {
-  const { user, refetchCsrfToken, refetchUser } = useAuth();
+  const { user, refetchCsrfToken, refetchUser } = useAuthContext();
   const fetcher = useFetcher<typeof clientAction>();
 
   const { error, success } = getActionResults(fetcher);
@@ -32,12 +33,14 @@ export default function Home() {
 
   /**
    * @useEffect
-   * Refresh CSRF token
+   * Refresh CSRF token and remove user after logging out
    *  */
   useEffect(() => {
     (async () => {
-      await refetchCsrfToken();
-      await refetchUser();
+      if (success) {
+        await refetchCsrfToken();
+        await refetchUser();
+      }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [success]);
@@ -55,7 +58,7 @@ export default function Home() {
           {error && <p className="text-sm text-red-500">{error}</p>}
         </fetcher.Form>
       ) : (
-        <a href="/login">
+        <a href={joinPath([Paths.login])}>
           <Button>Login</Button>
         </a>
       )}

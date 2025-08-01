@@ -19,11 +19,14 @@ export class CountersService {
     return { counters, ts };
   }
 
-  async createCounters(dto: DB<'counters'>) {
-    return this.countersRepository.save(dto);
+  async createCounters(dto: Pick<DB<'counters'>, 'value'>) {
+    const createdCounter = this.countersRepository.create(dto);
+    await this.countersRepository.save(createdCounter);
+
+    return createdCounter;
   }
 
-  async updateCounters(dto: DB<'counters'>) {
+  async updateCounters(dto: Pick<DB<'counters'>, 'id' | 'value'>) {
     const counter = await this.countersRepository.findOne({
       where: { id: dto.id },
     });
@@ -37,7 +40,8 @@ export class CountersService {
     }
 
     await this.countersRepository.increment({ id: dto.id }, 'count', 1);
+    await this.countersRepository.save(dto);
 
-    return this.countersRepository.save(dto);
+    return counter;
   }
 }

@@ -18,9 +18,9 @@ import {
   useLoaderData,
   useNavigate,
 } from "react-router";
-import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
 import { getActionResults } from "@/lib/react-router/action";
+import { joinPath, Paths } from "@/routes";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
@@ -90,21 +90,22 @@ export default function Page() {
   const { query } = useLoaderData<typeof loader>();
   const fetcher = useFetcher<typeof clientAction>();
   const navigate = useNavigate();
-  const { refetchCsrfToken } = useAuth();
   const { success, error } = getActionResults(fetcher);
   const loading = fetcher.state === "submitting";
 
   /**
    * @useEffect
-   * Refresh CSRF token after reseting password
+   * Navigate to the login page after reseting password
    *  */
   useEffect(() => {
     if (success) {
-      refetchCsrfToken().then(() => {
-        navigate("/");
-      });
+      // TODO: Toast로 상황 설명
+
+      setTimeout(() => {
+        navigate(joinPath([Paths.login]));
+      }, 5000);
     }
-  }, [navigate, success, refetchCsrfToken]);
+  }, [navigate, success]);
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">

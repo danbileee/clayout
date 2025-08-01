@@ -48,15 +48,15 @@ import { EmailsModule } from './emails/emails.module';
     },
     {
       provide: APP_GUARD,
-      useClass: RoleGuard,
-    },
-    {
-      provide: APP_GUARD,
       useClass: AccessTokenGuard,
     },
     {
       provide: APP_GUARD,
       useClass: CsrfGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RoleGuard,
     },
   ],
 })

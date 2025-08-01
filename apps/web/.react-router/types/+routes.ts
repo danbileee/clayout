@@ -13,16 +13,7 @@ type Pages = {
   "/": {
     params: {};
   };
-  "/forgot-password": {
-    params: {};
-  };
-  "/reset-password": {
-    params: {};
-  };
   "/auth/confirm": {
-    params: {};
-  };
-  "/auth/verify": {
     params: {};
   };
   "/auth/error": {
@@ -31,13 +22,22 @@ type Pages = {
   "/auth/oauth": {
     params: {};
   };
-  "/counter": {
-    params: {};
-  };
-  "/sign-up": {
+  "/auth/verify": {
     params: {};
   };
   "/login": {
+    params: {};
+  };
+  "/signup": {
+    params: {};
+  };
+  "/forgot-password": {
+    params: {};
+  };
+  "/reset-password": {
+    params: {};
+  };
+  "/counter": {
     params: {};
   };
 };
@@ -45,46 +45,50 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/forgot-password" | "/reset-password" | "/auth/confirm" | "/auth/verify" | "/auth/error" | "/auth/oauth" | "/counter" | "/sign-up" | "/login";
+    page: "/" | "/auth/confirm" | "/auth/error" | "/auth/oauth" | "/auth/verify" | "/login" | "/signup" | "/forgot-password" | "/reset-password" | "/counter";
   };
-  "routes/forgot-password.tsx": {
-    id: "routes/forgot-password";
-    page: "/forgot-password";
-  };
-  "routes/reset-password.tsx": {
-    id: "routes/reset-password";
-    page: "/reset-password";
-  };
-  "routes/auth.confirm.tsx": {
-    id: "routes/auth.confirm";
-    page: "/auth/confirm";
-  };
-  "routes/auth.verify.tsx": {
-    id: "routes/auth.verify";
-    page: "/auth/verify";
-  };
-  "routes/auth.error.tsx": {
-    id: "routes/auth.error";
-    page: "/auth/error";
-  };
-  "routes/auth.oauth.tsx": {
-    id: "routes/auth.oauth";
-    page: "/auth/oauth";
-  };
-  "routes/counter.tsx": {
-    id: "routes/counter";
-    page: "/counter";
-  };
-  "routes/sign-up.tsx": {
-    id: "routes/sign-up";
-    page: "/sign-up";
-  };
-  "routes/_index.tsx": {
-    id: "routes/_index";
+  "./pages/home/index.tsx": {
+    id: "pages/home/index";
     page: "/";
   };
-  "routes/login.tsx": {
-    id: "routes/login";
+  "./pages/auth/layout.tsx": {
+    id: "pages/auth/layout";
+    page: "/auth/confirm" | "/auth/error" | "/auth/oauth" | "/auth/verify" | "/login" | "/signup" | "/forgot-password" | "/reset-password";
+  };
+  "./pages/auth/confirm.tsx": {
+    id: "pages/auth/confirm";
+    page: "/auth/confirm";
+  };
+  "./pages/auth/error.tsx": {
+    id: "pages/auth/error";
+    page: "/auth/error";
+  };
+  "./pages/auth/oauth.tsx": {
+    id: "pages/auth/oauth";
+    page: "/auth/oauth";
+  };
+  "./pages/auth/verify.tsx": {
+    id: "pages/auth/verify";
+    page: "/auth/verify";
+  };
+  "./pages/auth/login.tsx": {
+    id: "pages/auth/login";
     page: "/login";
+  };
+  "./pages/auth/signup.tsx": {
+    id: "pages/auth/signup";
+    page: "/signup";
+  };
+  "./pages/auth/forgot-password.tsx": {
+    id: "pages/auth/forgot-password";
+    page: "/forgot-password";
+  };
+  "./pages/auth/reset-password.tsx": {
+    id: "pages/auth/reset-password";
+    page: "/reset-password";
+  };
+  "./pages/counter/index.tsx": {
+    id: "pages/counter/index";
+    page: "/counter";
   };
 };
