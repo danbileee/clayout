@@ -44,11 +44,11 @@ export class AuthService {
     return {
       accessToken: this.generateToken(user, {
         tokenType: TokenTypes.access,
-        expiresIn: 300,
+        expiresIn: 60 * 15,
       }),
       refreshToken: this.generateToken(user, {
         tokenType: TokenTypes.refresh,
-        expiresIn: 3600,
+        expiresIn: 60 * 60 * 24,
       }),
     };
   }
@@ -81,7 +81,21 @@ export class AuthService {
     }
   }
 
-  async getUser(req: Request): Promise<UserEntity> {
+  isTokenExpired(token: string): boolean {
+    try {
+      const decoded = this.jwtService.decode(token) as any;
+      if (!decoded || !decoded.exp) {
+        return true;
+      }
+
+      const currentTime = Math.floor(Date.now() / 1000);
+      return decoded.exp < currentTime;
+    } catch {
+      return true;
+    }
+  }
+
+  async getUser(req: Request): Promise<UserEntity | null> {
     const accessToken = req.cookies['accessToken'];
     const basicToken = req.cookies['basicToken'];
 
@@ -123,7 +137,7 @@ export class AuthService {
       return matchedUser;
     }
 
-    throw new UnauthorizedException(`Token not found.`);
+    return null;
   }
 
   async authenticate(

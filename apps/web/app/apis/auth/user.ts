@@ -21,7 +21,11 @@ export function getAuthUserKey(params?: Partial<GetParams>) {
   return getQueryKey("/auth/user");
 }
 
-export async function getAuthUser(params?: GetParams, request?: Request) {
+export async function getAuthUser(args?: {
+  params?: GetParams;
+  request?: Request;
+}) {
+  const { request } = args ?? {};
   const axios = createAxiosInstance(request);
   try {
     return await axios.get<

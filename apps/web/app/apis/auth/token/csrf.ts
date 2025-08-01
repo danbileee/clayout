@@ -22,7 +22,11 @@ export function getAuthTokenCsrfKey(params?: Partial<GetParams>) {
   return getQueryKey("/auth/token/csrf", params);
 }
 
-export async function getAuthTokenCsrf(params?: GetParams, request?: Request) {
+export async function getAuthTokenCsrf(args?: {
+  params?: GetParams;
+  request?: Request;
+}) {
+  const { request } = args ?? {};
   const axios = createAxiosInstance(request);
   return await axios.get<
     GetResponse,

@@ -17,7 +17,11 @@ interface PostResponse {
   message: string;
 }
 
-export async function postAuthLogout(params?: PostParams, request?: Request) {
+export async function postAuthLogout(args?: {
+  params?: PostParams;
+  request?: Request;
+}) {
+  const { request } = args ?? {};
   const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,

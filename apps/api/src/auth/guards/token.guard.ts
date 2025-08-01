@@ -54,14 +54,15 @@ export class BearerTokenGuard implements CanActivate {
 
     const accessToken = req.cookies['accessToken'];
     const refreshToken = req.cookies['refreshToken'];
+
     let token: string | undefined;
     let expectedType: 'access' | 'refresh';
 
     // Determine which token to use based on the guard type
-    if (this instanceof AccessTokenGuard) {
+    if (this.constructor.name === 'AccessTokenGuard') {
       token = accessToken;
       expectedType = 'access';
-    } else if (this instanceof RefreshTokenGuard) {
+    } else if (this.constructor.name === 'RefreshTokenGuard') {
       token = refreshToken;
       expectedType = 'refresh';
     } else {

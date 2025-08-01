@@ -21,6 +21,7 @@ export function useAuth(): Returns {
   const { data: userData, refetch: refetchUser } = useClientQuery({
     queryKey: getAuthUserKey(),
     queryFn: (ctx) => getAuthUser(),
+    staleTime: 1000 * 60 * 15,
   });
 
   return {

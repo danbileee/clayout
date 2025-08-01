@@ -20,42 +20,41 @@ import {
 } from "react-router";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
-import type { LoaderResult } from "@/lib/react-router/loader";
-import { getActionResults, type ActionResult } from "@/lib/react-router/action";
+import { getActionResults } from "@/lib/react-router/action";
 
-export async function loader({
-  request,
-}: LoaderFunctionArgs): LoaderResult<undefined, { token: string }> {
+export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
   const token = requestUrl.searchParams.get("token") ?? "";
   const email_id = requestUrl.searchParams.get("email_id") ?? "";
   const button_text = requestUrl.searchParams.get("button_text") ?? "";
 
   try {
-    await postEmailsTrackClick(
-      {
+    await postEmailsTrackClick({
+      params: {
         id: email_id,
+        button_text: button_text,
         link: request.url,
+      },
+    });
+
+    return {
+      query: {
+        token,
+        email_id,
         button_text,
       },
-      request
-    );
-
-    return {
-      query: { token },
     };
-  } catch (error: unknown) {
-    const errorMessage = getErrorMessage(error);
+  } catch (error) {
+    const message = getErrorMessage(error);
 
     return {
-      query: { token },
-      error,
-      message: errorMessage,
+      error: new Error(message),
+      message,
     };
   }
 }
 
-export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
+export const clientAction = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const password = formData.get("password") as string;
   const token = formData.get("token") as string;
@@ -69,7 +68,10 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
   }
 
   try {
-    const response = await postAuthResetPassword({ password, token });
+    const response = await postAuthResetPassword({
+      params: { password, token },
+      request,
+    });
 
     return {
       message: response.data.message,
@@ -86,7 +88,7 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
 
 export default function Page() {
   const { query } = useLoaderData<typeof loader>();
-  const fetcher = useFetcher<typeof action>();
+  const fetcher = useFetcher<typeof clientAction>();
   const navigate = useNavigate();
   const { refetchCsrfToken } = useAuth();
   const { success, error } = getActionResults(fetcher);

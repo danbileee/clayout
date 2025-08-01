@@ -52,10 +52,14 @@ interface PatchResponse {
   message: string;
 }
 
-export async function patchAuthRegister(
-  { token }: PatchParams,
-  request?: Request
-) {
+export async function patchAuthRegister(args: {
+  params: PatchParams;
+  request?: Request;
+}) {
+  const {
+    params: { token },
+    request,
+  } = args;
   const axios = createAxiosInstance(request);
   return await axios.patch<
     PatchResponse,

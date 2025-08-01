@@ -31,7 +31,9 @@ export default function Login() {
     const email = formData.get("email")?.toString() ?? "";
     const password = formData.get("password")?.toString() ?? "";
 
-    await login({ email, password });
+    await login({
+      params: { email, password },
+    });
 
     // Redirect after a short delay to ensure cookies are set
     setTimeout(() => {

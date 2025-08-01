@@ -18,14 +18,15 @@ interface PostResponse {
   message: string;
 }
 
-export async function postAuthLogin(
-  { email, password }: PostParams,
-  request?: Request
-) {
+export async function postAuthLogin(args: {
+  params: PostParams;
+  request?: Request;
+}) {
+  const { params, request } = args;
   const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,
     AxiosResponse<PostResponse, PostParams>,
     PostParams
-  >(`/auth/login`, { email, password });
+  >(`/auth/login`, params);
 }

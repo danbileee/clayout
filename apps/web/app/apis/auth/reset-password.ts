@@ -20,10 +20,14 @@ interface PostResponse {
   message: string;
 }
 
-export async function postAuthResetPassword(
-  { token, password }: PostParams,
-  request?: Request
-) {
+export async function postAuthResetPassword(args: {
+  params: PostParams;
+  request?: Request;
+}) {
+  const {
+    params: { token, password },
+    request,
+  } = args;
   const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,
