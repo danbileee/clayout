@@ -25,7 +25,7 @@ export class AuthController {
   @PublicRoute()
   async getUser(
     @Req() req: Request & { user: UserEntity },
-  ): Promise<{ user: UserEntity }> {
+  ): Promise<{ user: UserEntity | null }> {
     const user = await this.authService.getUser(req);
 
     return { user };

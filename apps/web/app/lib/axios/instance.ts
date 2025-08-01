@@ -58,7 +58,9 @@ function createServerAxiosInstance(request: Request) {
     (config) => {
       const { csrfToken } = extractServerSideTokens(request);
 
-      return addCsrfTokenToHeader(config, csrfToken);
+      const newConfig = addCsrfTokenToHeader(config, csrfToken);
+      console.log({ newConfig: newConfig.headers });
+      return newConfig;
     },
     (error) => {
       return Promise.reject(error);

@@ -4,15 +4,10 @@ import { Button } from "@/components/ui/button";
 import { patchAuthRegister } from "@/apis/auth/register";
 import { postEmailsTrackClick } from "@/apis/emails/track-click";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import { type LoaderResult } from "@/lib/react-router/loader";
 import { useCallback, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 
-export async function loader({ request }: LoaderFunctionArgs): LoaderResult<{
-  token: string;
-  email_id: string;
-  button_text: string;
-}> {
+export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
   const token = requestUrl.searchParams.get("token") ?? "";
   const email_id = requestUrl.searchParams.get("email_id") ?? "";
@@ -44,11 +39,15 @@ export default function AuthConfirm() {
   const confirmRegistration = useCallback(async () => {
     if (!data) return;
 
-    await confirmRegister({ token: data.token });
+    await confirmRegister({
+      params: { token: data.token },
+    });
     await trackClickEmail({
-      id: data.email_id,
-      link: window.location.href,
-      button_text: data.button_text,
+      params: {
+        id: data.email_id,
+        link: window.location.href,
+        button_text: data.button_text,
+      },
     });
 
     // Add a little delay for smooth UX

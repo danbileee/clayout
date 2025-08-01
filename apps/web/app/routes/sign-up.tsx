@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import { getActionResults, type ActionResult } from "@/lib/react-router/action";
+import { getActionResults } from "@/lib/react-router/action";
 import {
   type ActionFunctionArgs,
   Link,
@@ -18,7 +18,7 @@ import {
   useFetcher,
 } from "react-router";
 
-export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
+export const clientAction = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const username = formData.get("username") as string;
   const email = formData.get("email") as string;
@@ -54,7 +54,7 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
 };
 
 export default function SignUp() {
-  const fetcher = useFetcher<typeof action>();
+  const fetcher = useFetcher<typeof clientAction>();
   const { error } = getActionResults(fetcher);
   const loading = fetcher.state === "submitting";
 

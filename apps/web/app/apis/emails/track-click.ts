@@ -17,10 +17,14 @@ interface PostBody
 
 interface PostResponse {}
 
-export async function postEmailsTrackClick(
-  { id, link, button_text }: PostEndpointParams & PostQueryParams & PostBody,
-  request?: Request
-) {
+export async function postEmailsTrackClick(args: {
+  params: PostEndpointParams & PostQueryParams & PostBody;
+  request?: Request;
+}) {
+  const {
+    params: { id, link, button_text },
+    request,
+  } = args;
   const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,

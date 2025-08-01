@@ -4,11 +4,11 @@ import { postAuthLogout } from "@/apis/auth/logout";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect } from "react";
-import { getActionResults, type ActionResult } from "@/lib/react-router/action";
+import { getActionResults } from "@/lib/react-router/action";
 
-export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
+export const clientAction = async ({ request }: ActionFunctionArgs) => {
   try {
-    const response = await postAuthLogout(request);
+    const response = await postAuthLogout({ request });
 
     return {
       message: response.data.message,
@@ -25,9 +25,9 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
 
 export default function Home() {
   const { user, refetchCsrfToken, refetchUser } = useAuth();
-  const fetcher = useFetcher<typeof action>();
+  const fetcher = useFetcher<typeof clientAction>();
 
-  const { error } = getActionResults(fetcher);
+  const { error, success } = getActionResults(fetcher);
   const loading = fetcher.state === "submitting";
 
   /**
@@ -40,7 +40,7 @@ export default function Home() {
       await refetchUser();
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [success]);
 
   return (
     <div className="flex items-center justify-center h-screen gap-2">

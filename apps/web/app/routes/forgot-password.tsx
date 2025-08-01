@@ -11,14 +11,17 @@ import { Label } from "@/components/ui/label";
 import { type ActionFunctionArgs, Link, useFetcher } from "react-router";
 import { postAuthForgotPassword } from "@/apis/auth/forgot-password";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import { getActionResults, type ActionResult } from "@/lib/react-router/action";
+import { getActionResults } from "@/lib/react-router/action";
 
-export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
+export const clientAction = async ({ request }: ActionFunctionArgs) => {
   const formData = await request.formData();
   const email = formData.get("email") as string;
 
   try {
-    const response = await postAuthForgotPassword({ email }, request);
+    const response = await postAuthForgotPassword({
+      params: { email },
+      request,
+    });
 
     return {
       message: response.data.message,
@@ -34,7 +37,7 @@ export const action = async ({ request }: ActionFunctionArgs): ActionResult => {
 };
 
 export default function ForgotPassword() {
-  const fetcher = useFetcher<typeof action>();
+  const fetcher = useFetcher<typeof clientAction>();
 
   const { success, error } = getActionResults(fetcher);
   const loading = fetcher.state === "submitting";
