@@ -2,13 +2,10 @@ import axios, {
   type CreateAxiosDefaults,
   type InternalAxiosRequestConfig,
 } from "axios";
-import axiosRetry from "axios-retry";
 import {
   extractClientSideTokens,
   extractServerSideTokens,
 } from "../cookie/extractTokens";
-import { postAuthTokenRefresh } from "@/apis/auth/token/refresh";
-import { joinPath, Paths } from "@/routes";
 
 const baseConfig: CreateAxiosDefaults = {
   withCredentials: true,
@@ -48,18 +45,6 @@ function createClientAxiosInstance() {
     }
   );
 
-  axiosRetry(instance, {
-    retries: 3,
-    onRetry: async (retryCount, error, requestConfig) => {
-      if (error.response?.status === 401) {
-        await postAuthTokenRefresh();
-      }
-    },
-    onMaxRetryTimesExceeded: () => {
-      window.location.href = joinPath([Paths.login]);
-    },
-  });
-
   return instance;
 }
 
@@ -80,18 +65,6 @@ function createServerAxiosInstance(request: Request) {
       return Promise.reject(error);
     }
   );
-
-  axiosRetry(instance, {
-    retries: 3,
-    onRetry: async (retryCount, error, requestConfig) => {
-      if (error.response?.status === 401) {
-        await postAuthTokenRefresh();
-      }
-    },
-    onMaxRetryTimesExceeded: () => {
-      window.location.href = joinPath([Paths.login]);
-    },
-  });
 
   return instance;
 }

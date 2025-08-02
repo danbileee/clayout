@@ -25,15 +25,8 @@ export class AuthController {
   @PublicRoute()
   async getUser(
     @Req() req: Request & { user: UserEntity },
-    @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: UserEntity | null }> {
     const user = await this.authService.getUser(req);
-
-    if (!user) {
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
-      res.clearCookie('basicToken');
-    }
 
     return { user };
   }
@@ -53,34 +46,22 @@ export class AuthController {
   }
 
   @Post('token/refresh')
+  @PublicRoute()
   @UseGuards(RefreshTokenGuard)
   postTokenRefresh(
     @Res({ passthrough: true }) res: Response,
     @Req() req: Request & { user: UserEntity },
   ) {
     // The RefreshTokenGuard has already validated the refresh token and set req.user
-    const { accessToken, refreshToken } = this.authService.generateTokens(
-      req.user,
-    );
-    const csrfToken = randomBytes(32).toString('hex');
+    const accessToken = this.authService.generateAccessToken(req.user);
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    });
-    res.cookie('csrfToken', csrfToken, {
-      httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-    });
 
-    return { message: 'Tokens refreshed', csrfToken };
+    return { message: 'Access token refreshed' };
   }
 
   @Post('login')
