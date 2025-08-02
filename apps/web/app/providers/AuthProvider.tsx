@@ -5,6 +5,14 @@ import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import type { DB } from "@clayout/interface";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
+export const AuthMetas = {
+  AccessTokenRefreshed: "AccessTokenRefreshed",
+  RefreshTokenExpired: "RefreshTokenExpired",
+  UserExists: "UserExists",
+} as const;
+
+export type AuthMeta = keyof typeof AuthMetas;
+
 interface AuthContextValue {
   tokens: ReturnType<typeof extractClientSideTokens>;
   user: DB<"users"> | null;
@@ -28,7 +36,7 @@ export function AuthProvider({ children }: Props) {
   const { data: userData, refetch: refetchUser } = useClientQuery({
     queryKey: getAuthUserKey(),
     queryFn: () => getAuthUser(),
-    staleTime: 1000 * 60 * 15, // 15 minutes
+    staleTime: Infinity,
   });
 
   const contextValue = useMemo<AuthContextValue>(

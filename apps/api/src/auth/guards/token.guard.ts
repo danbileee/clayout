@@ -8,6 +8,7 @@ import { AuthService } from '../auth.service';
 import { UsersService } from 'src/users/users.service';
 import { Reflector } from '@nestjs/core';
 import { PUBLIC_ROUTE_KEY } from 'src/shared/decorators/public-route.decorator';
+import { TokenTypes } from '../constants/token.const';
 
 @Injectable()
 export class BasicTokenGuard implements CanActivate {
@@ -32,7 +33,7 @@ export class BasicTokenGuard implements CanActivate {
 }
 
 @Injectable()
-export class BearerTokenGuard implements CanActivate {
+export class AccessTokenGuard implements CanActivate {
   constructor(
     private readonly authService: AuthService,
     private readonly usersService: UsersService,
@@ -53,35 +54,20 @@ export class BearerTokenGuard implements CanActivate {
     }
 
     const accessToken = req.cookies['accessToken'];
-    const refreshToken = req.cookies['refreshToken'];
 
-    let token: string | undefined;
-    let expectedType: 'access' | 'refresh';
-
-    // Determine which token to use based on the guard type
-    if (this.constructor.name === 'AccessTokenGuard') {
-      token = accessToken;
-      expectedType = 'access';
-    } else if (this.constructor.name === 'RefreshTokenGuard') {
-      token = refreshToken;
-      expectedType = 'refresh';
-    } else {
-      throw new UnauthorizedException('Unknown token type.');
+    if (!accessToken) {
+      throw new UnauthorizedException('Access token not found in cookies.');
     }
 
-    if (!token) {
-      throw new UnauthorizedException('Token not found in cookies.');
-    }
+    const result = await this.authService.verifyToken(accessToken);
 
-    const result = await this.authService.verifyToken(token);
-
-    if (result.type !== expectedType) {
-      throw new UnauthorizedException(`Expected ${expectedType} token.`);
+    if (result.type !== TokenTypes.access) {
+      throw new UnauthorizedException('Expected access token.');
     }
 
     const user = await this.usersService.getUser({ email: result.email });
 
-    req.token = token;
+    req.token = accessToken;
     req.tokenType = result.type;
     req.user = user;
 
@@ -90,38 +76,31 @@ export class BearerTokenGuard implements CanActivate {
 }
 
 @Injectable()
-export class AccessTokenGuard extends BearerTokenGuard {
+export class RefreshTokenGuard implements CanActivate {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
+
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    await super.canActivate(context);
-
     const req = context.switchToHttp().getRequest();
+    const refreshToken = req.cookies['refreshToken'];
 
-    if (req.isPublicRoute) {
-      return true;
+    if (!refreshToken) {
+      throw new UnauthorizedException('Refresh token not found in cookies.');
     }
 
-    if (req.tokenType !== 'access') {
-      throw new UnauthorizedException('Access token not found.');
+    const result = await this.authService.verifyToken(refreshToken);
+
+    if (result.type !== TokenTypes.refresh) {
+      throw new UnauthorizedException('Expected refresh token.');
     }
 
-    return true;
-  }
-}
+    const user = await this.usersService.getUser({ email: result.email });
 
-@Injectable()
-export class RefreshTokenGuard extends BearerTokenGuard {
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    await super.canActivate(context);
-
-    const req = context.switchToHttp().getRequest();
-
-    if (req.isPublicRoute) {
-      return true;
-    }
-
-    if (req.tokenType !== 'refresh') {
-      throw new UnauthorizedException('Refresh token not found.');
-    }
+    req.token = refreshToken;
+    req.tokenType = result.type;
+    req.user = user;
 
     return true;
   }

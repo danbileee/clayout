@@ -4,6 +4,7 @@ import {
   Injectable,
   ForbiddenException,
   Type,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { Reflector, ModuleRef } from '@nestjs/core';
 import {
@@ -39,7 +40,9 @@ export class AuthorGuard implements CanActivate {
     );
 
     if (!serviceToken) {
-      throw new Error('Missing author service token metadata');
+      throw new InternalServerErrorException(
+        `Missing author service token metadata`,
+      );
     }
 
     const service = this.moduleRef.get<AuthorService>(serviceToken, {
@@ -47,7 +50,7 @@ export class AuthorGuard implements CanActivate {
     });
 
     if (!service) {
-      throw new Error(`${serviceToken} not found`);
+      throw new InternalServerErrorException(`${serviceToken} not found`);
     }
 
     const resourceId = request.params.id;

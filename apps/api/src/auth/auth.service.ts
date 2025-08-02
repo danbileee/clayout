@@ -40,24 +40,26 @@ export class AuthService {
     });
   }
 
+  generateAccessToken(user: Pick<UserEntity, 'email' | 'id'>) {
+    return this.generateToken(user, {
+      tokenType: TokenTypes.access,
+      // expiresIn: 30, // for test
+      expiresIn: '10m',
+    });
+  }
+
+  generateRefreshToken(user: Pick<UserEntity, 'email' | 'id'>) {
+    return this.generateToken(user, {
+      tokenType: TokenTypes.refresh,
+      // expiresIn: 30 * 3, // for test
+      expiresIn: '14d',
+    });
+  }
+
   generateTokens(user: Pick<UserEntity, 'email' | 'id'>): Tokens {
     return {
-      accessToken: this.generateToken(user, {
-        tokenType: TokenTypes.access,
-        expiresIn: 60,
-      }),
-      refreshToken: this.generateToken(user, {
-        tokenType: TokenTypes.refresh,
-        expiresIn: 60 * 5,
-      }),
-      // accessToken: this.generateToken(user, {
-      //   tokenType: TokenTypes.access,
-      //   expiresIn: 60 * 15,
-      // }),
-      // refreshToken: this.generateToken(user, {
-      //   tokenType: TokenTypes.refresh,
-      //   expiresIn: 60 * 60 * 24,
-      // }),
+      accessToken: this.generateAccessToken(user),
+      refreshToken: this.generateRefreshToken(user),
     };
   }
 
@@ -274,7 +276,7 @@ export class AuthService {
     const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
     const basicToken = this.generateToken(matchedUser, {
       tokenType: TokenTypes.basic,
-      expiresIn: 900,
+      expiresIn: 60 * 15,
     });
     const queryString = qs.stringify(
       {

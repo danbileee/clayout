@@ -27,19 +27,9 @@ export async function getAuthUser(args?: {
 }) {
   const { request } = args ?? {};
   const axios = createAxiosInstance(request);
-  try {
-    return await axios.get<
-      GetResponse,
-      AxiosResponse<GetResponse, GetParams>,
-      GetParams
-    >("/auth/user");
-  } catch {
-    // Return a default response structure when auth fails
-    // This prevents React Query from receiving undefined
-    return {
-      data: {
-        user: null,
-      },
-    } as AxiosResponse<GetResponse, GetParams>;
-  }
+  return await axios.get<
+    GetResponse,
+    AxiosResponse<GetResponse, GetParams>,
+    GetParams
+  >("/auth/user");
 }

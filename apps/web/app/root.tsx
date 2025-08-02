@@ -1,6 +1,6 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 import "./style.css";
-import { QueryClientProvider } from "./lib/react-query/QuernClientProvider";
+import { QueryClientProvider } from "./providers/QuernClientProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 
 export function Layout({ children }: { children: React.ReactNode }) {
