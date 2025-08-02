@@ -61,17 +61,21 @@ describe('CountersService', () => {
     it('should create a counter with valid input', async () => {
       // Arrange
       const dto = createMockCounter();
+      const createdCounter = { ...dto };
       const expectedResult = { ...dto };
+      mockRepository.create.mockReturnValue(createdCounter);
       mockRepository.save.mockResolvedValue(expectedResult);
       // Act
       const result = await service.createCounters(dto as any);
       // Assert
       expect(result).toEqual(expectedResult);
-      expect(mockRepository.save).toHaveBeenCalledWith(dto);
+      expect(mockRepository.create).toHaveBeenCalledWith(dto);
+      expect(mockRepository.save).toHaveBeenCalledWith(createdCounter);
     });
 
     it('should handle invalid input (null/undefined)', async () => {
       // Arrange
+      mockRepository.create.mockReturnValue(undefined);
       mockRepository.save.mockResolvedValue(undefined);
       // Act/Assert
       await expect(
@@ -88,7 +92,8 @@ describe('CountersService', () => {
       // Arrange
       const dto = createMockCounter({ value: 'updated', count: 1 });
       const existingCounter = createMockCounter({ id: dto.id, value: 'old' });
-      const expectedResult = { ...dto };
+      const updatedCounter = { ...existingCounter, value: dto.value };
+      const expectedResult = updatedCounter;
       mockRepository.findOne.mockResolvedValue(existingCounter);
       mockRepository.save.mockResolvedValue(expectedResult);
       mockRepository.increment.mockResolvedValue({ affected: 1 } as any);
@@ -104,7 +109,7 @@ describe('CountersService', () => {
         'count',
         1,
       );
-      expect(mockRepository.save).toHaveBeenCalledWith(dto);
+      expect(mockRepository.save).toHaveBeenCalledWith(updatedCounter);
     });
 
     it('should throw if counter not found', async () => {
@@ -130,7 +135,8 @@ describe('CountersService', () => {
       // Arrange
       const dto = createMockCounter({ count: 1_000_000 });
       const existingCounter = createMockCounter({ id: dto.id, count: 999_999 });
-      const expectedResult = { ...dto };
+      const updatedCounter = { ...existingCounter, value: dto.value };
+      const expectedResult = updatedCounter;
       mockRepository.findOne.mockResolvedValue(existingCounter);
       mockRepository.save.mockResolvedValue(expectedResult);
       mockRepository.increment.mockResolvedValue({ affected: 1 } as any);
@@ -143,6 +149,7 @@ describe('CountersService', () => {
         'count',
         1,
       );
+      expect(mockRepository.save).toHaveBeenCalledWith(updatedCounter);
     });
   });
 });

@@ -9,6 +9,7 @@ import { isAxiosError } from "axios";
 export async function isAuthenticated(): Promise<{
   meta?: {
     auth: AuthMeta;
+    user?: DB<"users"> | null;
   };
   error?: Error;
 }> {
@@ -48,6 +49,7 @@ export async function isAuthenticated(): Promise<{
     meta: hasUser
       ? {
           auth: AuthMetas.UserExists,
+          user: queryData?.data?.user ?? null,
         }
       : undefined,
   };

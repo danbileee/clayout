@@ -55,10 +55,8 @@ describe('CountersController', () => {
   describe('postCounters', () => {
     it('should call service.createCounters with dto', async () => {
       const dto = { id: 1, value: 'test', count: 0 };
-      const expectedResult = { ...dto };
-      (mockCountersService.createCounters as jest.Mock).mockResolvedValue(
-        expectedResult,
-      );
+      const expectedResult = { counter: { ...dto } };
+      (mockCountersService.createCounters as jest.Mock).mockResolvedValue(dto);
 
       const result = await controller.postCounters(dto);
 
@@ -70,11 +68,12 @@ describe('CountersController', () => {
   describe('patchCounters', () => {
     it('should call service.updateCounters with id and dto', async () => {
       const id = 1;
-      const dto = { value: 'updated', count: 1 };
-      const expectedResult = { id, ...dto };
-      (mockCountersService.updateCounters as jest.Mock).mockResolvedValue(
-        expectedResult,
-      );
+      const dto = { id: 1, value: 'updated', count: 1 };
+      const expectedResult = { counter: { id, ...dto } };
+      (mockCountersService.updateCounters as jest.Mock).mockResolvedValue({
+        id,
+        ...dto,
+      });
 
       const result = await controller.patchCounters(id, dto);
 

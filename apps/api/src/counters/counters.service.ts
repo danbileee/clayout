@@ -21,9 +21,9 @@ export class CountersService {
 
   async createCounters(dto: Pick<DB<'counters'>, 'value'>) {
     const createdCounter = this.countersRepository.create(dto);
-    await this.countersRepository.save(createdCounter);
+    const savedCounter = await this.countersRepository.save(createdCounter);
 
-    return createdCounter;
+    return savedCounter;
   }
 
   async updateCounters(dto: Pick<DB<'counters'>, 'id' | 'value'>) {
@@ -40,8 +40,8 @@ export class CountersService {
     }
 
     await this.countersRepository.increment({ id: dto.id }, 'count', 1);
-    await this.countersRepository.save(dto);
+    const updatedCounter = await this.countersRepository.save(counter);
 
-    return counter;
+    return updatedCounter;
   }
 }
