@@ -1,4 +1,8 @@
-import { useFetcher, type ActionFunctionArgs } from "react-router";
+import {
+  useFetcher,
+  useLoaderData,
+  type ActionFunctionArgs,
+} from "react-router";
 import { Button } from "@/components/ui/button";
 import { postAuthLogout } from "@/apis/auth/logout";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
@@ -6,6 +10,15 @@ import { useEffect } from "react";
 import { getActionResults } from "@/lib/react-router/action";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { joinPath, Paths } from "@/routes";
+import { isAuthenticated } from "@/lib/axios/isAuthenticated";
+
+export async function clientLoader() {
+  const { meta } = await isAuthenticated();
+
+  return {
+    meta,
+  };
+}
 
 export const clientAction = async ({ request }: ActionFunctionArgs) => {
   try {
@@ -26,10 +39,11 @@ export const clientAction = async ({ request }: ActionFunctionArgs) => {
 
 export default function Home() {
   const { user, refetchCsrfToken, refetchUser } = useAuthContext();
+  const { meta } = useLoaderData<typeof clientLoader>();
   const fetcher = useFetcher<typeof clientAction>();
-
   const { error, success } = getActionResults(fetcher);
   const loading = fetcher.state === "submitting";
+  const finalUser = meta?.user ?? user;
 
   /**
    * @useEffect
@@ -48,9 +62,9 @@ export default function Home() {
   return (
     <div className="flex items-center justify-center h-screen gap-2">
       <h1 className="text-3xl font-bold underline">
-        Hello {user ? user.email : "World"}!
+        Hello {finalUser ? finalUser.email : "World"}!
       </h1>
-      {user ? (
+      {finalUser ? (
         <fetcher.Form method="post">
           <Button type="submit" disabled={loading}>
             {loading ? "Logging out..." : "Logout"}
