@@ -12,15 +12,17 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import {
-  type ActionFunctionArgs,
   type LoaderFunctionArgs,
-  useFetcher,
   useLoaderData,
   useNavigate,
 } from "react-router";
 import { useEffect } from "react";
-import { getActionResults } from "@/lib/react-router/action";
 import { joinPath, Paths } from "@/routes";
+import { useMutation } from "@tanstack/react-query";
+import { getFormProps, useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
+import { ResetPasswordSchema } from "@clayout/interface";
+import { handleError } from "@/lib/axios/handleError";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
@@ -35,13 +37,12 @@ export async function loader({ request }: LoaderFunctionArgs) {
         button_text: button_text,
         link: request.url,
       },
+      request,
     });
 
     return {
       query: {
         token,
-        email_id,
-        button_text,
       },
     };
   } catch (error) {
@@ -50,62 +51,75 @@ export async function loader({ request }: LoaderFunctionArgs) {
     return {
       error: new Error(message),
       message,
+      query: {
+        token,
+      },
     };
   }
 }
 
-export const clientAction = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  const password = formData.get("password") as string;
-  const token = formData.get("token") as string;
-
-  if (!password) {
-    return { error: "Password is required." };
-  }
-
-  if (!token) {
-    return { error: "Token not found." };
-  }
-
-  try {
-    const response = await postAuthResetPassword({
-      params: { password, token },
-      request,
-    });
-
-    return {
-      message: response.data.message,
-    };
-  } catch (error) {
-    const errorMessage = getErrorMessage(error);
-
-    return {
-      error: new Error(errorMessage),
-      message: errorMessage,
-    };
-  }
-};
-
 export default function Page() {
-  const { query } = useLoaderData<typeof loader>();
-  const fetcher = useFetcher<typeof clientAction>();
   const navigate = useNavigate();
-  const { success, error } = getActionResults(fetcher);
-  const loading = fetcher.state === "submitting";
+  const { query } = useLoaderData<typeof loader>();
+  const {
+    mutateAsync: resetPassword,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: postAuthResetPassword,
+  });
+  const [form, fields] = useForm({
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: ResetPasswordSchema });
+    },
+    async onSubmit(e, { formData }) {
+      e.preventDefault();
+
+      const fn = async () => {
+        const password = formData.get("password")?.toString() ?? "";
+        const token = formData.get("token")?.toString() ?? "";
+
+        if (!token) {
+          throw new Error(`Token not found`);
+        }
+
+        await resetPassword({
+          params: { password, token },
+        });
+
+        // Add a little delay for smooth UX
+        setTimeout(() => {
+          window.location.href = `/`;
+        }, 1000);
+      };
+
+      try {
+        await fn();
+      } catch (e) {
+        const { error } = await handleError(e, { onRetry: fn });
+
+        if (error) {
+          throw error;
+        }
+      }
+    },
+  });
 
   /**
    * @useEffect
    * Navigate to the login page after reseting password
    *  */
   useEffect(() => {
-    if (success) {
+    if (form.status === "success") {
       // TODO: Toast로 상황 설명
 
       setTimeout(() => {
         navigate(joinPath([Paths.login]));
       }, 5000);
     }
-  }, [navigate, success]);
+  }, [navigate, form.status]);
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -119,25 +133,36 @@ export default function Page() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <fetcher.Form method="post">
+              <form {...getFormProps(form)}>
                 <div className="flex flex-col gap-6">
                   <input type="hidden" name="token" value={query?.token} />
                   <div className="grid gap-2">
-                    <Label htmlFor="password">New password</Label>
+                    <Label htmlFor={fields.password.id}>New password</Label>
                     <Input
-                      id="password"
-                      name="password"
+                      id={fields.password.id}
+                      name={fields.password.name}
                       type="password"
                       placeholder="New password"
                       required
                     />
+                    {fields.password.errors?.length
+                      ? fields.password.errors.map((error) => (
+                          <p key={error} className="text-sm text-red-500">
+                            {error}
+                          </p>
+                        ))
+                      : null}
+                    {error ? (
+                      <p className="text-sm text-red-500">
+                        {getErrorMessage(error)}
+                      </p>
+                    ) : null}
                   </div>
-                  {error && <p className="text-sm text-red-500">{error}</p>}
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Saving..." : "Save new password"}
+                  <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? "Saving..." : "Save new password"}
                   </Button>
                 </div>
-              </fetcher.Form>
+              </form>
             </CardContent>
           </Card>
         </div>

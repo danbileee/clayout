@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { CountersService } from './counters.service';
 import { CounterEntity } from 'src/counters/entities/counter.entity';
-import type { DB } from '@clayout/interface';
+import type { Tables } from '@clayout/interface';
 import { Roles } from 'src/users/decorators/role.decorator';
 import { UserRoleWeights } from 'src/users/constants/role.const';
 
@@ -28,7 +28,7 @@ export class CountersController {
   @Post()
   async postCounters(
     @Body()
-    dto: Pick<DB<'counters'>, 'value'>,
+    dto: Pick<Tables<'counters'>, 'value'>,
   ): Promise<{ counter: CounterEntity }> {
     const counter = await this.countersService.createCounters(dto);
 
@@ -39,7 +39,7 @@ export class CountersController {
   async patchCounters(
     @Param('id', ParseIntPipe) id: number,
     @Body()
-    dto: Pick<DB<'counters'>, 'id' | 'value'>,
+    dto: Pick<Tables<'counters'>, 'id' | 'value'>,
   ): Promise<{ counter: CounterEntity }> {
     const counter = await this.countersService.updateCounters({ id, ...dto });
 

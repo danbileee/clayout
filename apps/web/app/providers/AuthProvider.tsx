@@ -2,7 +2,7 @@ import { getAuthTokenCsrf, getAuthTokenCsrfKey } from "@/apis/auth/token/csrf";
 import { getAuthUser, getAuthUserKey } from "@/apis/auth/user";
 import { extractClientSideTokens } from "@/lib/cookie/extractTokens";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
-import type { DB } from "@clayout/interface";
+import type { Tables } from "@clayout/interface";
 import { createContext, useContext, useMemo, type ReactNode } from "react";
 
 export const AuthMetas = {
@@ -15,9 +15,9 @@ export type AuthMeta = keyof typeof AuthMetas;
 
 interface AuthContextValue {
   tokens: ReturnType<typeof extractClientSideTokens>;
-  user: DB<"users"> | null;
+  user: Tables<"users"> | null;
   refetchCsrfToken: () => Promise<{ csrfToken: string } | undefined>;
-  refetchUser: () => Promise<{ user: DB<"users"> | null } | undefined>;
+  refetchUser: () => Promise<{ user: Tables<"users"> | null } | undefined>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);

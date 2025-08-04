@@ -14,7 +14,7 @@ const getQueryClient = (queryClientConfig?: QueryClientConfig): QueryClient =>
         staleTime: 1000 * 15,
         refetchOnWindowFocus: false,
         retry: false,
-        throwOnError: false,
+        throwOnError: true,
         refetchOnMount: false,
         refetchOnReconnect: false,
       },

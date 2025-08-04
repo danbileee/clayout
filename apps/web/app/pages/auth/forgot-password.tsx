@@ -8,46 +8,58 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type ActionFunctionArgs, Link, useFetcher } from "react-router";
+import { Link } from "react-router";
 import { postAuthForgotPassword } from "@/apis/auth/forgot-password";
-import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import { getActionResults } from "@/lib/react-router/action";
 import { joinPath, Paths } from "@/routes";
-
-export const clientAction = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  const email = formData.get("email") as string;
-
-  try {
-    const response = await postAuthForgotPassword({
-      params: { email },
-      request,
-    });
-
-    return {
-      message: response.data.message,
-    };
-  } catch (error) {
-    const errorMessage = getErrorMessage(error);
-
-    return {
-      error: new Error(errorMessage),
-      message: errorMessage,
-    };
-  }
-};
+import { getFormProps, useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
+import { ForgotPasswordSchema } from "@clayout/interface";
+import { handleError } from "@/lib/axios/handleError";
+import { useMutation } from "@tanstack/react-query";
+import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 
 export default function ForgotPassword() {
-  const fetcher = useFetcher<typeof clientAction>();
+  const {
+    mutateAsync: forgotPassword,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: postAuthForgotPassword,
+  });
+  const [form, fields] = useForm({
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: ForgotPasswordSchema });
+    },
+    async onSubmit(e, { formData }) {
+      e.preventDefault();
 
-  const { success, error } = getActionResults(fetcher);
-  const loading = fetcher.state === "submitting";
+      const fn = async () => {
+        const email = formData.get("email")?.toString() ?? "";
+
+        return await forgotPassword({
+          params: { email },
+        });
+      };
+
+      try {
+        await fn();
+      } catch (e) {
+        const { error } = await handleError(e, { onRetry: fn });
+
+        if (error) {
+          throw error;
+        }
+      }
+    },
+  });
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          {success ? (
+          {form.status === "success" ? (
             <Card>
               <CardHeader>
                 <CardTitle className="text-2xl">Check Your Email</CardTitle>
@@ -72,21 +84,36 @@ export default function ForgotPassword() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <fetcher.Form method="post">
+                <form {...getFormProps(form)}>
                   <div className="flex flex-col gap-6">
                     <div className="grid gap-2">
-                      <Label htmlFor="email">Email</Label>
+                      <Label htmlFor={fields.email.id}>Email</Label>
                       <Input
-                        id="email"
-                        name="email"
+                        id={fields.email.id}
+                        name={fields.email.name}
                         type="email"
                         placeholder="m@example.com"
                         required
                       />
+                      {fields.email.errors?.length
+                        ? fields.email.errors.map((error) => (
+                            <p key={error} className="text-sm text-red-500">
+                              {error}
+                            </p>
+                          ))
+                        : null}
                     </div>
-                    {error && <p className="text-sm text-red-500">{error}</p>}
-                    <Button type="submit" className="w-full" disabled={loading}>
-                      {loading ? "Sending..." : "Send reset email"}
+                    {error ? (
+                      <p className="text-sm text-red-500">
+                        {getErrorMessage(error)}
+                      </p>
+                    ) : null}
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isPending}
+                    >
+                      {isPending ? "Sending..." : "Send reset email"}
                     </Button>
                   </div>
                   <div className="mt-4 text-center text-sm">
@@ -98,7 +125,7 @@ export default function ForgotPassword() {
                       Login
                     </Link>
                   </div>
-                </fetcher.Form>
+                </form>
               </CardContent>
             </Card>
           )}

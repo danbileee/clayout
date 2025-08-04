@@ -96,33 +96,6 @@ export type Database = {
           },
         ]
       }
-      email_clicks: {
-        Row: {
-          buttonText: string
-          clickedAt: string
-          created_at: string
-          id: number
-          link: string
-          updated_at: string
-        }
-        Insert: {
-          buttonText: string
-          clickedAt: string
-          created_at?: string
-          id?: number
-          link: string
-          updated_at?: string
-        }
-        Update: {
-          buttonText?: string
-          clickedAt?: string
-          created_at?: string
-          id?: number
-          link?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
       emails: {
         Row: {
           context: Json | null
@@ -214,7 +187,6 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      user_entity_role_enum: "User" | "Admin"
       users_role_enum: "None" | "Guest" | "Registrant" | "User" | "Admin"
     }
     CompositeTypes: {
@@ -334,7 +306,6 @@ export const Constants = {
   },
   public: {
     Enums: {
-      user_entity_role_enum: ["User", "Admin"],
       users_role_enum: ["None", "Guest", "Registrant", "User", "Admin"],
     },
   },

@@ -1,6 +1,6 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
 import { getQueryKey } from "@/lib/react-query/getQueryKey";
-import type { DB } from "@clayout/interface";
+import type { Tables } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
 
 /**
@@ -14,7 +14,7 @@ interface GetQueryParams {}
 interface GetParams extends GetEndpointParams, GetQueryParams {}
 
 interface GetResponse {
-  user: DB<"users"> | null;
+  user: Tables<"users"> | null;
 }
 
 export function getAuthUserKey(params?: Partial<GetParams>) {

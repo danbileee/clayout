@@ -1,20 +1,20 @@
 import { getAuthUserKey } from "@/apis/auth/user";
-import { defaultQueryClient } from "../../providers/QuernClientProvider";
+import { defaultQueryClient } from "../../providers/QueryClientProvider";
 import { postAuthTokenRefresh } from "@/apis/auth/token/refresh";
 import { getErrorMessage } from "./getErrorMessage";
 import { AuthMetas, type AuthMeta } from "@/providers/AuthProvider";
-import type { DB } from "@clayout/interface";
+import type { Tables } from "@clayout/interface";
 import { isAxiosError } from "axios";
 
 export async function isAuthenticated(): Promise<{
   meta?: {
     auth: AuthMeta;
-    user?: DB<"users"> | null;
+    user?: Tables<"users"> | null;
   };
   error?: Error;
 }> {
   const queryData = defaultQueryClient.getQueryData<{
-    data: { user: DB<"users"> | null };
+    data: { user: Tables<"users"> | null };
   }>(getAuthUserKey());
   const hasUser = Boolean(queryData?.data?.user);
 

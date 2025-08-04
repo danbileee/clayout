@@ -12,7 +12,10 @@ import { TokenTypes } from '../constants/token.const';
 
 @Injectable()
 export class BasicTokenGuard implements CanActivate {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly usersService: UsersService,
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
@@ -23,9 +26,16 @@ export class BasicTokenGuard implements CanActivate {
       throw new UnauthorizedException('Basic token not found in cookies.');
     }
 
-    const credentials = this.authService.decodeBasicToken(basicToken);
-    const user = await this.authService.authenticate(credentials);
+    const result = await this.authService.verifyToken(basicToken);
 
+    if (result.type !== TokenTypes.basic) {
+      throw new UnauthorizedException('Expected basic token.');
+    }
+
+    const user = await this.usersService.getUser({ email: result.email });
+
+    req.token = basicToken;
+    req.tokenType = result.type;
     req.user = user;
 
     return true;
@@ -101,6 +111,40 @@ export class RefreshTokenGuard implements CanActivate {
     req.token = refreshToken;
     req.tokenType = result.type;
     req.user = user;
+
+    return true;
+  }
+}
+
+@Injectable()
+export class CsrfTokenGuard implements CanActivate {
+  constructor(private readonly reflector: Reflector) {}
+
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+
+    // Skip CSRF for GET, HEAD, OPTIONS requests
+    if (['GET', 'HEAD', 'OPTIONS'].includes(request.method)) {
+      return true;
+    }
+
+    // Check if route is marked as public
+    const isPublicRoute = this.reflector.getAllAndOverride(PUBLIC_ROUTE_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+
+    if (isPublicRoute) {
+      return true;
+    }
+
+    // Validate CSRF token for protected routes
+    const csrfCookie = request.cookies['csrfToken'];
+    const csrfHeader = request.headers['x-csrf-token'];
+
+    if (!csrfCookie || !csrfHeader || csrfCookie !== csrfHeader) {
+      throw new UnauthorizedException('Invalid CSRF token');
+    }
 
     return true;
   }

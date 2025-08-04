@@ -3,7 +3,7 @@ import { isAxiosError, type AxiosResponse } from "axios";
 import { getErrorMessage } from "./getErrorMessage";
 
 interface Params<Data extends AxiosResponse> {
-  onRetry?: () => Promise<Data>;
+  onRetry?: () => Promise<Data | void>;
   onRedirect?: () => void;
 }
 
@@ -25,7 +25,7 @@ export async function handleError<Data extends AxiosResponse>(
       const data = await onRetry?.();
 
       return {
-        data,
+        data: isAxiosResponse(data) ? data : undefined,
         message: getErrorMessage(error),
       };
     } catch (retryError: unknown) {
@@ -51,4 +51,10 @@ export async function handleError<Data extends AxiosResponse>(
     error: error instanceof Error ? error : new Error(errorMessage),
     message: errorMessage,
   };
+}
+
+function isAxiosResponse(data: unknown): data is AxiosResponse {
+  if (!data) return false;
+
+  return typeof data === "object" && "data" in data && "status" in data;
 }
