@@ -35,6 +35,7 @@ export class EmailEntity extends BaseEntity {
   @Column({
     nullable: true,
     type: 'timestamptz',
+    precision: 6,
   })
   @IsOptional()
   @IsDate()
@@ -43,14 +44,7 @@ export class EmailEntity extends BaseEntity {
   @Column({
     nullable: true,
     type: 'timestamptz',
-  })
-  @IsOptional()
-  @IsDate()
-  opened_at?: Date;
-
-  @Column({
-    nullable: true,
-    type: 'timestamptz',
+    precision: 6,
   })
   @IsOptional()
   @IsDate()

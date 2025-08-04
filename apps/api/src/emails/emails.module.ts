@@ -11,11 +11,17 @@ import { UserEntity } from 'src/users/entities/user.entity';
 import { EmailEntity } from './entities/email.entity';
 import { UsersService } from 'src/users/users.service';
 import { EmailClickEventEntity } from './entities/email-click-event.entity';
+import { EmailOpenEventEntity } from './entities/email-open-event.entity';
 
 @Module({
   imports: [
     ConfigModule.forRoot(),
-    TypeOrmModule.forFeature([UserEntity, EmailEntity, EmailClickEventEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      EmailEntity,
+      EmailClickEventEntity,
+      EmailOpenEventEntity,
+    ]),
     MailerModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({

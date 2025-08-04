@@ -3,13 +3,9 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EmailEntity } from './entities/email.entity';
-import {
-  RecordEmailClickDto,
-  RecordEmailOpenDto,
-  SendEmailDto,
-} from './dtos/email.dto';
-import { UserEntity } from 'src/users/entities/user.entity';
+import { RecordEmailClickDto, SendEmailDto } from './dtos/email.dto';
 import { EmailClickEventEntity } from './entities/email-click-event.entity';
+import { EmailOpenEventEntity } from './entities/email-open-event.entity';
 
 @Injectable()
 export class EmailsService {
@@ -19,8 +15,8 @@ export class EmailsService {
     private readonly emailsRepository: Repository<EmailEntity>,
     @InjectRepository(EmailClickEventEntity)
     private readonly emailClickEventsRepository: Repository<EmailClickEventEntity>,
-    @InjectRepository(UserEntity)
-    private readonly usersRepository: Repository<UserEntity>,
+    @InjectRepository(EmailOpenEventEntity)
+    private readonly emailOpenEventsRepository: Repository<EmailOpenEventEntity>,
   ) {}
 
   async createEmail(email: Partial<EmailEntity>): Promise<EmailEntity> {
@@ -96,7 +92,7 @@ export class EmailsService {
     }
   }
 
-  async recordOpen({ id }: RecordEmailOpenDto): Promise<EmailEntity> {
+  async recordOpen(id: number): Promise<EmailOpenEventEntity> {
     const matchedEmail = await this.emailsRepository.findOne({
       where: { id },
     });
@@ -105,10 +101,15 @@ export class EmailsService {
       throw new InternalServerErrorException(`Email not found.`);
     }
 
-    return await this.emailsRepository.save({
-      ...matchedEmail,
+    const createdEvent = this.emailOpenEventsRepository.create({
+      id,
+      email: matchedEmail,
       opened_at: new Date(),
     });
+
+    await this.emailOpenEventsRepository.save(createdEvent);
+
+    return createdEvent;
   }
 
   async recordClick(
