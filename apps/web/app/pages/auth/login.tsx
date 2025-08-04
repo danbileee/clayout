@@ -10,51 +10,63 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router";
 import { postAuthLogin } from "@/apis/auth/login";
-import { type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { joinPath, Paths } from "@/routes";
+import { getFormProps, useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
+import { LoginSchema } from "@clayout/interface";
+import { handleError } from "@/lib/axios/handleError";
+import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 
 export default function Login() {
   const { refetchUser, refetchCsrfToken } = useAuthContext();
   const {
     mutateAsync: login,
-    isError,
     isPending,
     error,
   } = useMutation({
     mutationFn: postAuthLogin,
   });
+  const [form, fields] = useForm({
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: LoginSchema });
+    },
+    async onSubmit(e, { formData }) {
+      e.preventDefault();
 
-  const handleLogin = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+      const fn = async () => {
+        const email = formData.get("email")?.toString() ?? "";
+        const password = formData.get("password")?.toString() ?? "";
+        await login({
+          params: { email, password },
+        });
+        await refetchUser();
+        await refetchCsrfToken();
 
-    const formData = new FormData(e.currentTarget);
-    const email = formData.get("email")?.toString() ?? "";
-    const password = formData.get("password")?.toString() ?? "";
+        // Redirect after a short delay to ensure cookies are set
+        setTimeout(() => {
+          if (window.history.length === 1) {
+            window.location.href = `/`;
+          } else {
+            window.history.back();
+          }
+        }, 1000);
+      };
 
-    try {
-      await login({
-        params: { email, password },
-      });
-      await refetchUser();
-      await refetchCsrfToken();
+      try {
+        await fn();
+      } catch (e) {
+        const { error } = await handleError(e, { onRetry: fn });
 
-      // Redirect after a short delay to ensure cookies are set
-      setTimeout(() => {
-        if (window.history.length === 1) {
-          window.location.href = `/`;
-        } else {
-          window.history.back();
+        if (error) {
+          throw error;
         }
-      }, 1000);
-    } catch (error) {
-      const message = getErrorMessage(error);
-
-      throw new Error(message);
-    }
-  };
+      }
+    },
+  });
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -68,21 +80,28 @@ export default function Login() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleLogin}>
+              <form {...getFormProps(form)}>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor={fields.email.id}>Email</Label>
                     <Input
-                      id="email"
-                      name="email"
+                      id={fields.email.id}
+                      name={fields.email.name}
                       type="email"
                       placeholder="m@example.com"
                       required
                     />
+                    {fields.email.errors?.length
+                      ? fields.email.errors.map((error) => (
+                          <p key={error} className="text-sm text-red-500">
+                            {error}
+                          </p>
+                        ))
+                      : null}
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor={fields.password.id}>Password</Label>
                       <Link
                         to={joinPath([Paths["forgot-password"]])}
                         className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
@@ -91,17 +110,24 @@ export default function Login() {
                       </Link>
                     </div>
                     <Input
-                      id="password"
-                      type="password"
+                      id={fields.password.id}
+                      type={fields.password.name}
                       name="password"
                       required
                     />
+                    {fields.password.errors?.length
+                      ? fields.password.errors.map((error) => (
+                          <p key={error} className="text-sm text-red-500">
+                            {error}
+                          </p>
+                        ))
+                      : null}
                   </div>
-                  {isError && (
+                  {error ? (
                     <p className="text-sm text-red-500">
                       {getErrorMessage(error)}
                     </p>
-                  )}
+                  ) : null}
                   <Button type="submit" className="w-full" disabled={isPending}>
                     {isPending ? "Logging in..." : "Login"}
                   </Button>

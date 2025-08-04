@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { CounterEntity } from './entities/counter.entity';
 import { Repository } from 'typeorm';
-import type { DB } from '@clayout/interface';
+import type { Tables } from '@clayout/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
@@ -19,14 +19,14 @@ export class CountersService {
     return { counters, ts };
   }
 
-  async createCounters(dto: Pick<DB<'counters'>, 'value'>) {
+  async createCounters(dto: Pick<Tables<'counters'>, 'value'>) {
     const createdCounter = this.countersRepository.create(dto);
     const savedCounter = await this.countersRepository.save(createdCounter);
 
     return savedCounter;
   }
 
-  async updateCounters(dto: Pick<DB<'counters'>, 'id' | 'value'>) {
+  async updateCounters(dto: Pick<Tables<'counters'>, 'id' | 'value'>) {
     const counter = await this.countersRepository.findOne({
       where: { id: dto.id },
     });

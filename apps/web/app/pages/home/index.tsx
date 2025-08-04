@@ -1,16 +1,12 @@
-import {
-  useFetcher,
-  useLoaderData,
-  type ActionFunctionArgs,
-} from "react-router";
+import { useLoaderData } from "react-router";
 import { Button } from "@/components/ui/button";
 import { postAuthLogout } from "@/apis/auth/logout";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { useEffect } from "react";
-import { getActionResults } from "@/lib/react-router/action";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { joinPath, Paths } from "@/routes";
 import { isAuthenticated } from "@/lib/axios/isAuthenticated";
+import { useMutation } from "@tanstack/react-query";
 
 export async function clientLoader() {
   const { meta } = await isAuthenticated();
@@ -20,29 +16,18 @@ export async function clientLoader() {
   };
 }
 
-export const clientAction = async ({ request }: ActionFunctionArgs) => {
-  try {
-    const response = await postAuthLogout({ request });
-
-    return {
-      message: response.data.message,
-    };
-  } catch (error) {
-    const message = getErrorMessage(error);
-
-    return {
-      error,
-      message,
-    };
-  }
-};
-
 export default function Home() {
   const { user, refetchCsrfToken, refetchUser } = useAuthContext();
   const { meta } = useLoaderData<typeof clientLoader>();
-  const fetcher = useFetcher<typeof clientAction>();
-  const { error, success } = getActionResults(fetcher);
-  const loading = fetcher.state === "submitting";
+  const {
+    mutateAsync: logout,
+    error,
+    isSuccess,
+    isError,
+    isPending,
+  } = useMutation({
+    mutationFn: postAuthLogout,
+  });
   const finalUser = meta?.user ?? user;
 
   /**
@@ -51,13 +36,13 @@ export default function Home() {
    *  */
   useEffect(() => {
     (async () => {
-      if (success) {
+      if (isSuccess) {
         await refetchCsrfToken();
         await refetchUser();
       }
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [success]);
+  }, [isSuccess]);
 
   return (
     <div className="flex items-center justify-center h-screen gap-2">
@@ -65,12 +50,14 @@ export default function Home() {
         Hello {finalUser ? finalUser.email : "World"}!
       </h1>
       {finalUser ? (
-        <fetcher.Form method="post">
-          <Button type="submit" disabled={loading}>
-            {loading ? "Logging out..." : "Logout"}
+        <div>
+          <Button onClick={() => logout({})} disabled={isPending}>
+            {isPending ? "Logging out..." : "Logout"}
           </Button>
-          {error && <p className="text-sm text-red-500">{error}</p>}
-        </fetcher.Form>
+          {isError && (
+            <p className="text-sm text-red-500">{getErrorMessage(error)}</p>
+          )}
+        </div>
       ) : (
         <a href={joinPath([Paths.login])}>
           <Button>Login</Button>

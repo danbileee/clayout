@@ -63,22 +63,6 @@ export class AuthService {
     };
   }
 
-  decodeBasicToken(token: string): { email: string; password: string } {
-    const decodedToken = Buffer.from(token, 'base64').toString('utf-8');
-    const splitToken = decodedToken.split(':');
-
-    if (splitToken.length !== 2) {
-      throw new UnauthorizedException(`Invalid token`);
-    }
-
-    const [email, password] = splitToken;
-
-    return {
-      email,
-      password,
-    };
-  }
-
   verifyToken(token: string) {
     try {
       return this.jwtService.verify(token, {

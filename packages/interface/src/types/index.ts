@@ -1,4 +1,9 @@
-import type { Database } from "./supabase";
+import { Constants as SupabseConstants, type Database } from "./supabase";
 
-export type DB<T extends keyof Database["public"]["Tables"]> =
+export type Tables<T extends keyof Database["public"]["Tables"]> =
   Database["public"]["Tables"][T]["Row"];
+
+export type Enums<T extends keyof Database["public"]["Enums"]> =
+  Database["public"]["Enums"][T];
+
+export const Constants = SupabseConstants.public.Enums;

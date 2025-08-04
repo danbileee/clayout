@@ -1,6 +1,6 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
 import { getQueryKey } from "@/lib/react-query/getQueryKey";
-import type { DB } from "@clayout/interface";
+import type { Tables } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
 
 /**
@@ -16,7 +16,7 @@ interface GetQueryParams {}
 interface GetParams extends GetEndpointParams, GetQueryParams {}
 
 interface GetResponse {
-  counters: DB<"counters">[];
+  counters: Tables<"counters">[];
   ts: string;
 }
 
@@ -45,12 +45,12 @@ interface PostEndpointParams {}
 
 interface PostQueryParams {}
 
-interface PostBody extends Pick<DB<"counters">, "value"> {}
+interface PostBody extends Pick<Tables<"counters">, "value"> {}
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
 interface PostResponse {
-  counter: DB<"counters">;
+  counter: Tables<"counters">;
 }
 
 export async function postCounters(args: {
@@ -70,11 +70,11 @@ export async function postCounters(args: {
  * PATCH
  */
 
-interface PatchEndpointParams extends Pick<DB<"counters">, "id"> {}
+interface PatchEndpointParams extends Pick<Tables<"counters">, "id"> {}
 
 interface PatchQueryParams {}
 
-interface PatchBody extends Pick<DB<"counters">, "value"> {}
+interface PatchBody extends Pick<Tables<"counters">, "value"> {}
 
 interface PatchParams
   extends PatchEndpointParams,
@@ -82,7 +82,7 @@ interface PatchParams
     PatchBody {}
 
 interface PatchResponse {
-  counter: DB<"counters">;
+  counter: Tables<"counters">;
 }
 
 export async function patchCounters(args: {

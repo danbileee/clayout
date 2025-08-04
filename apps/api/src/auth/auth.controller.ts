@@ -123,6 +123,8 @@ export class AuthController {
   ) {
     const { accessToken, refreshToken } = await this.authService.confirm(token);
 
+    res.clearCookie('basicToken');
+
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',

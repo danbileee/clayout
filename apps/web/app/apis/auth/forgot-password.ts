@@ -1,5 +1,5 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
-import type { DB } from "@clayout/interface";
+import type { Tables } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
 
 /**
@@ -10,7 +10,7 @@ interface PostEndpointParams {}
 
 interface PostQueryParams {}
 
-interface PostBody extends Pick<DB<"users">, "email"> {}
+interface PostBody extends Pick<Tables<"users">, "email"> {}
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 

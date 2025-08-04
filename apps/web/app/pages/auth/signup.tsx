@@ -1,3 +1,5 @@
+import { getFormProps, useForm } from "@conform-to/react";
+import { parseWithZod } from "@conform-to/zod";
 import { postAuthRegister } from "@/apis/auth/register";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,55 +11,51 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { getErrorMessage } from "@/lib/axios/getErrorMessage";
-import { getActionResults } from "@/lib/react-router/action";
 import { joinPath, Paths } from "@/routes";
-import {
-  type ActionFunctionArgs,
-  Link,
-  redirect,
-  useFetcher,
-} from "react-router";
-
-export const clientAction = async ({ request }: ActionFunctionArgs) => {
-  const formData = await request.formData();
-  const username = formData.get("username") as string;
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const repeatPassword = formData.get("repeat-password") as string;
-
-  if (!password) {
-    return {
-      error: new Error(`FORM ERROR: password`),
-      message: "Password is required.",
-    };
-  }
-
-  if (password !== repeatPassword) {
-    return {
-      error: new Error(`FORM ERROR: repeat-password`),
-      message: "Passwords do not match",
-    };
-  }
-
-  try {
-    await postAuthRegister({ username, email, password }, request);
-
-    return redirect(joinPath([Paths.auth, Paths.verify]));
-  } catch (error) {
-    const errorMessage = getErrorMessage(error);
-
-    return {
-      error: new Error(errorMessage),
-      message: errorMessage,
-    };
-  }
-};
+import { Link, redirect } from "react-router";
+import { SignupSchema } from "@clayout/interface";
+import { handleError } from "@/lib/axios/handleError";
+import { useMutation } from "@tanstack/react-query";
+import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 
 export default function SignUp() {
-  const fetcher = useFetcher<typeof clientAction>();
-  const { error } = getActionResults(fetcher);
-  const loading = fetcher.state === "submitting";
+  const {
+    mutateAsync: register,
+    isPending,
+    error,
+  } = useMutation({
+    mutationFn: postAuthRegister,
+  });
+  const [form, fields] = useForm({
+    shouldValidate: "onBlur",
+    shouldRevalidate: "onInput",
+    onValidate({ formData }) {
+      return parseWithZod(formData, { schema: SignupSchema });
+    },
+    async onSubmit(e, { formData }) {
+      e.preventDefault();
+
+      const fn = async () => {
+        const username = formData.get("username")?.toString() ?? "";
+        const email = formData.get("email")?.toString() ?? "";
+        const password = formData.get("password")?.toString() ?? "";
+
+        await register({ username, email, password });
+
+        redirect(joinPath([Paths.auth, Paths.verify]));
+      };
+
+      try {
+        await fn();
+      } catch (e) {
+        const { error } = await handleError(e, { onRetry: fn });
+
+        if (error) {
+          throw error;
+        }
+      }
+    },
+  });
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -69,53 +67,85 @@ export default function SignUp() {
               <CardDescription>Create a new account</CardDescription>
             </CardHeader>
             <CardContent>
-              <fetcher.Form method="post">
+              <form {...getFormProps(form)}>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
-                    <Label htmlFor="username">Username</Label>
+                    <Label htmlFor={fields.username.id}>Username</Label>
                     <Input
-                      id="username"
-                      name="username"
+                      id={fields.username.id}
+                      name={fields.username.name}
                       type="text"
                       placeholder="Your Name"
                       required
                     />
+                    {fields.username.errors?.length
+                      ? fields.username.errors.map((error) => (
+                          <p key={error} className="text-sm text-red-500">
+                            {error}
+                          </p>
+                        ))
+                      : null}
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
+                    <Label htmlFor={fields.email.id}>Email</Label>
                     <Input
-                      id="email"
-                      name="email"
+                      id={fields.email.id}
+                      name={fields.email.name}
                       type="email"
                       placeholder="m@example.com"
                       required
                     />
+                    {fields.email.errors?.length
+                      ? fields.email.errors.map((error) => (
+                          <p key={error} className="text-sm text-red-500">
+                            {error}
+                          </p>
+                        ))
+                      : null}
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
-                      <Label htmlFor="password">Password</Label>
+                      <Label htmlFor={fields.password.id}>Password</Label>
                     </div>
                     <Input
-                      id="password"
-                      name="password"
+                      id={fields.password.id}
+                      name={fields.password.name}
                       type="password"
                       required
                     />
+                    {fields.password.errors?.length
+                      ? fields.password.errors.map((error) => (
+                          <p key={error} className="text-sm text-red-500">
+                            {error}
+                          </p>
+                        ))
+                      : null}
                   </div>
                   <div className="grid gap-2">
                     <div className="flex items-center">
-                      <Label htmlFor="repeat-password">Repeat Password</Label>
+                      <Label htmlFor={fields.confirm.id}>Repeat Password</Label>
                     </div>
                     <Input
-                      id="repeat-password"
-                      name="repeat-password"
+                      id={fields.confirm.id}
+                      name={fields.confirm.name}
                       type="password"
                       required
                     />
+                    {fields.confirm.errors?.length
+                      ? fields.confirm.errors.map((error) => (
+                          <p key={error} className="text-sm text-red-500">
+                            {error}
+                          </p>
+                        ))
+                      : null}
                   </div>
-                  {error && <p className="text-sm text-red-500">{error}</p>}
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating an account..." : "Sign up"}
+                  {error ? (
+                    <p className="text-sm text-red-500">
+                      {getErrorMessage(error)}
+                    </p>
+                  ) : null}
+                  <Button type="submit" className="w-full" disabled={isPending}>
+                    {isPending ? "Creating an account..." : "Sign up"}
                   </Button>
                 </div>
                 <div className="mt-4 text-center text-sm">
@@ -127,7 +157,7 @@ export default function SignUp() {
                     Login
                   </Link>
                 </div>
-              </fetcher.Form>
+              </form>
             </CardContent>
           </Card>
         </div>
