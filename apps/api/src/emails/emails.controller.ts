@@ -23,7 +23,7 @@ export class EmailsController {
   @Get(':id/track-open')
   @PublicRoute()
   async trackOpen(@Param('id', ParseIntPipe) id: number, @Res() res: Response) {
-    await this.emailsService.recordOpen({ id });
+    await this.emailsService.recordOpen(id);
 
     // Return a 1x1 transparent gif
     const buffer = Buffer.from(

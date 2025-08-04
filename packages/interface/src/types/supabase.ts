@@ -96,6 +96,38 @@ export type Database = {
           },
         ]
       }
+      email_open_events: {
+        Row: {
+          created_at: string
+          emailId: number | null
+          id: number
+          opened_at: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          emailId?: number | null
+          id?: number
+          opened_at: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          emailId?: number | null
+          id?: number
+          opened_at?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_b24da482ee134d7532fd27c747d"
+            columns: ["emailId"]
+            isOneToOne: false
+            referencedRelation: "emails"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       emails: {
         Row: {
           context: Json | null
@@ -103,7 +135,6 @@ export type Database = {
           error_log: string | null
           failed_at: string | null
           id: number
-          opened_at: string | null
           sent_at: string | null
           subject: string
           template: string
@@ -117,7 +148,6 @@ export type Database = {
           error_log?: string | null
           failed_at?: string | null
           id?: number
-          opened_at?: string | null
           sent_at?: string | null
           subject: string
           template: string
@@ -131,7 +161,6 @@ export type Database = {
           error_log?: string | null
           failed_at?: string | null
           id?: number
-          opened_at?: string | null
           sent_at?: string | null
           subject?: string
           template?: string
