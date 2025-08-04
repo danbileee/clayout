@@ -7,7 +7,7 @@ import {
   createMockCounter,
   createMockCounters,
   faker,
-} from '../test/test-utils';
+} from '../../test/test-utils';
 
 describe('CountersService', () => {
   let service: CountersService;

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CountersController } from './counters.controller';
 import { CountersService } from './counters.service';
-import { createMockService } from '../test/jest-setup';
+import { createMockService } from '../../test/jest-setup';
 
 describe('CountersController', () => {
   let controller: CountersController;

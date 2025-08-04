@@ -14,13 +14,15 @@ export const UserSchema = z.object<
   confirm: z.string().min(1).max(20),
 });
 
-export const SignupSchema = UserSchema.refine(
-  (data) => data.password === data.confirm,
-  {
-    message: "Passwords don't match",
-    path: ["confirm"],
-  }
-);
+export const SignupSchema = UserSchema.pick({
+  username: true,
+  email: true,
+  password: true,
+  confirm: true,
+}).refine((data) => data.password === data.confirm, {
+  message: "Passwords don't match",
+  path: ["confirm"],
+});
 
 export const LoginSchema = UserSchema.pick({ email: true, password: true });
 

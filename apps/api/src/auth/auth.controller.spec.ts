@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../users/users.service';
 import { EmailsService } from '../emails/emails.service';
-import { createMockService } from '../test/jest-setup';
+import { createMockService } from '../../test/jest-setup';
 
 describe('AuthController', () => {
   let controller: AuthController;
