@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { createMockRepositoryProvider } from '../test/test-utils';
+import { createMockRepositoryProvider } from '../../test/test-utils';
 import { UserEntity } from './entities/user.entity';
 
 describe('UsersController', () => {

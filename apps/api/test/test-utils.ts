@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CounterEntity } from '../counters/entities/counter.entity';
+import { CounterEntity } from '../src/counters/entities/counter.entity';
 import { faker } from '@faker-js/faker';
 
 // Common mock repository factory
@@ -14,6 +14,7 @@ export const createMockRepository = () => ({
   increment: jest.fn(),
   count: jest.fn(),
   findAndCount: jest.fn(),
+  exists: jest.fn(),
   createQueryBuilder: jest.fn(() => ({
     where: jest.fn().mockReturnThis(),
     andWhere: jest.fn().mockReturnThis(),
