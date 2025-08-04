@@ -153,7 +153,9 @@ export class AuthController {
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
-    return { message: 'Waiting for resetting password' };
+    return {
+      message: `We've sent you a password reset link. Please check your inbox!`,
+    };
   }
 
   @Post('reset-password')
@@ -184,6 +186,8 @@ export class AuthController {
       sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     });
 
-    return { message: 'Password reset successful' };
+    return {
+      message: `Your password has been reset successfully! Redirecting to home...`,
+    };
   }
 }

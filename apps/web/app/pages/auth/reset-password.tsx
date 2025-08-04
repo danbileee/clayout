@@ -23,6 +23,7 @@ import { getFormProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { ResetPasswordSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
+import { toast } from "sonner";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
@@ -58,7 +59,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
   }
 }
 
-export default function Page() {
+export default function ResetPassword() {
   const navigate = useNavigate();
   const { query } = useLoaderData<typeof loader>();
   const {
@@ -85,9 +86,11 @@ export default function Page() {
           throw new Error(`Token not found`);
         }
 
-        await resetPassword({
+        const response = await resetPassword({
           params: { password, token },
         });
+
+        toast.success(response.data.message);
 
         // Add a little delay for smooth UX
         setTimeout(() => {

@@ -17,6 +17,7 @@ import { ForgotPasswordSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
 import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
+import { toast } from "sonner";
 
 export default function ForgotPassword() {
   const {
@@ -38,9 +39,11 @@ export default function ForgotPassword() {
       const fn = async () => {
         const email = formData.get("email")?.toString() ?? "";
 
-        return await forgotPassword({
+        const response = await forgotPassword({
           params: { email },
         });
+
+        toast.success(response.data.message);
       };
 
       try {
