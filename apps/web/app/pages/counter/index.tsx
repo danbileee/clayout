@@ -2,18 +2,13 @@ import { getCoutners, getCoutnersKey } from "@/apis/counters";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import { isAuthenticated } from "@/lib/axios/isAuthenticated";
-import { AuthMetas, useAuthContext } from "@/providers/AuthProvider";
-import { joinPath, Paths } from "@/routes";
-import { useEffect, useMemo } from "react";
-import { redirect, useLoaderData } from "react-router";
+import { useMemo } from "react";
+import { useLoaderData } from "react-router";
 import { CountersForm } from "./CountersForm";
+import { useAuthMeta } from "@/hooks/useAuthMeta";
 
 export async function clientLoader() {
   const { meta, error } = await isAuthenticated();
-
-  if (meta?.auth === AuthMetas.RefreshTokenExpired) {
-    return redirect(joinPath([Paths.login]));
-  }
 
   if (error) {
     throw error;
@@ -26,7 +21,7 @@ export async function clientLoader() {
 
 export default function Counter() {
   const { meta } = useLoaderData<typeof clientLoader>();
-  const { refetchUser } = useAuthContext();
+  useAuthMeta(meta);
   const ts = useMemo(() => Date.now().toString(), []);
   const {
     data,
@@ -37,17 +32,6 @@ export default function Counter() {
     queryKey: getCoutnersKey({ ts }),
     queryFn: () => getCoutners({ params: { ts } }),
   });
-
-  /**
-   * @useEffect
-   * Refetch user when the token is refreshed
-   */
-  useEffect(() => {
-    if (meta?.auth === AuthMetas.AccessTokenRefreshed) {
-      refetchUser();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <div>

@@ -33,6 +33,11 @@ async function bootstrap() {
   });
 
   /**
+   * Cookies
+   */
+  app.use(cookieParser());
+
+  /**
    * API Versioning
    */
   app.enableVersioning({
@@ -53,11 +58,6 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-
-  /**
-   * Cookies
-   */
-  app.use(cookieParser());
 
   await app.listen(process.env.PORT ?? 3000);
 }

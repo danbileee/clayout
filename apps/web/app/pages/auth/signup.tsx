@@ -12,13 +12,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { joinPath, Paths } from "@/routes";
-import { Link, redirect } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { SignupSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
 import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 
 export default function SignUp() {
+  const navigate = useNavigate();
   const {
     mutateAsync: register,
     isPending,
@@ -42,7 +43,7 @@ export default function SignUp() {
 
         await register({ username, email, password });
 
-        redirect(joinPath([Paths.auth, Paths.verify]));
+        navigate(joinPath([Paths.auth, Paths.verify]));
       };
 
       try {
