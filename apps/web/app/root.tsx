@@ -1,8 +1,16 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+  useRouteError,
+} from "react-router";
 import "./style.css";
 import { QueryClientProvider } from "./providers/QueryClientProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 import { Toaster } from "./components/ui/toaster";
+import { getErrorInfo } from "./lib/sentry/getErrorInfo";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -22,6 +30,22 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 }
 
+export function ErrorBoundary() {
+  const error = useRouteError();
+  const { message, details, stack } = getErrorInfo(error);
+
+  return (
+    <main>
+      <h1>{message}</h1>
+      <p>{details}</p>
+      {stack && (
+        <pre>
+          <code>{stack}</code>
+        </pre>
+      )}
+    </main>
+  );
+}
 export default function App() {
   return (
     <QueryClientProvider>

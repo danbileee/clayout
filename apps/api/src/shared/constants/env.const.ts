@@ -31,6 +31,10 @@ export const EnvKeys = {
   SMTP_PASS: 'SMTP_PASS',
   SMTP_FROM_NAME: 'SMTP_FROM_NAME',
   SMTP_FROM_EMAIL: 'SMTP_FROM_EMAIL',
+  /**
+   * Sentry
+   */
+  SENTRY_DSN: 'SENTRY_DSN',
 } as const;
 
 export type EnvKey = keyof typeof EnvKeys;
