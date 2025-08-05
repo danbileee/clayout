@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
+    "build": "nest build && pnpm sentry:sourcemaps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -19,7 +19,7 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "gentype:dev": "supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts",
-    "log:sourcemap": "npx @sentry/wizard@latest -i sourcemaps --saas --org wev --project clayout-api"
+    "sentry:sourcemaps": "sentry-cli sourcemaps inject --org wev --project clayout-api ./dist && sentry-cli sourcemaps upload --org wev --project clayout-api ./dist"
   },
   "dependencies": {
     "@clayout/interface": "workspace:*",
@@ -32,6 +32,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^11.0.0",
+    "@sentry/cli": "^2.50.2",
     "@sentry/nestjs": "^10.1.0",
     "@supabase/supabase-js": "^2.50.3",
     "bcrypt": "^6.0.0",
