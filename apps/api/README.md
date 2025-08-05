@@ -2,7 +2,7 @@
 
 ## Local
 
-### Start Supabse DB
+### Start Supabase DB
 
 ```sh
 supabase start
@@ -48,11 +48,53 @@ supabase db push
 
 This applies your local migrations to your remote Supabase project.
 
+## Post-Deployment Migration Workflow
+
+If you've already deployed schema changes to production without creating migration files, you can generate them retroactively:
+
+### 1. Generate Migration from Current Schema
+
+```sh
+# Create a new migration file
+supabase migration new create_example_table
+
+# Get the current schema diff
+supabase db diff --schema public
+```
+
+### 2. Populate the Migration File
+
+Copy the output from `supabase db diff` into your newly created migration file. This captures all current schema changes including:
+
+- Tables and their structure
+- Indexes and constraints
+- Foreign key relationships
+- Row Level Security (RLS) settings
+- Permissions for different roles
+
+### 3. Verify the Migration
+
+```sh
+# Reset local database to test the migration
+supabase db reset
+
+# Verify no differences remain
+supabase db diff --schema public
+```
+
+### 4. Update TypeScript Types
+
+```sh
+# Regenerate types to match current schema
+supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts
+```
+
 This workflow ensures that:
 
-You can develop and test locally first
-Your schema changes are tracked in version control
-You can easily deploy the same changes to production
+- You can develop and test locally first
+- Your schema changes are tracked in version control
+- You can easily deploy the same changes to production
+- **Post-deployment migrations are properly captured for future deployments**
 
 ### Open API server
 
