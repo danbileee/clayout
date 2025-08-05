@@ -15,7 +15,6 @@ describe('AuthService', () => {
   let jwtService: jest.Mocked<JwtService>;
   let configService: jest.Mocked<ConfigService>;
   let usersService: jest.Mocked<UsersService>;
-  let emailsService: jest.Mocked<EmailsService>;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -59,7 +58,6 @@ describe('AuthService', () => {
     jwtService = module.get(JwtService);
     configService = module.get(ConfigService);
     usersService = module.get(UsersService);
-    emailsService = module.get(EmailsService);
 
     // Setup default config values
     configService.get.mockReturnValue('test-secret');
