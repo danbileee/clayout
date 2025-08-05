@@ -18,7 +18,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "gentype:dev": "supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts"
+    "gentype:dev": "supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts",
+    "log:sourcemap": "npx @sentry/wizard@latest -i sourcemaps --saas --org wev --project clayout-api"
   },
   "dependencies": {
     "@clayout/interface": "workspace:*",
@@ -31,6 +32,7 @@
     "@nestjs/mapped-types": "*",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/typeorm": "^11.0.0",
+    "@sentry/nestjs": "^10.1.0",
     "@supabase/supabase-js": "^2.50.3",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",

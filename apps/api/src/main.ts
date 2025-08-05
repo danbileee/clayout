@@ -1,3 +1,4 @@
+import './instrument';
 import 'dotenv/config';
 import * as cookieParser from 'cookie-parser';
 import { NestFactory } from '@nestjs/core';

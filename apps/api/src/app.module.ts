@@ -1,19 +1,21 @@
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
+import { AppService } from './app.service';
+import { AppController } from './app.controller';
 import { EnvKeys } from 'src/shared/constants/env.const';
 import { CountersModule } from './counters/counters.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { RoleGuard } from './users/guards/role.guard';
 import { AccessTokenGuard, CsrfTokenGuard } from './auth/guards/token.guard';
 import { EmailsModule } from './emails/emails.module';
 
 @Module({
   imports: [
+    SentryModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
     }),
@@ -41,6 +43,10 @@ import { EmailsModule } from './emails/emails.module';
   controllers: [AppController],
   providers: [
     AppService,
+    {
+      provide: APP_FILTER,
+      useClass: SentryGlobalFilter,
+    },
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
