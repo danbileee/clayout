@@ -108,7 +108,7 @@ alter table "public"."emails" validate constraint "FK_1c41bc3d329b0edc905b6409db
 alter table "public"."users" add constraint "UQ_97672ac88f789774dd47f7c8be3" UNIQUE using index "UQ_97672ac88f789774dd47f7c8be3";
 alter table "public"."users" add constraint "UQ_fe0bb3f6520ee0469504521e710" UNIQUE using index "UQ_fe0bb3f6520ee0469504521e710";
 
--- Grant permissions to anon role
+-- Grant permissions to all roles
 grant delete on table "public"."counters" to "anon";
 grant insert on table "public"."counters" to "anon";
 grant references on table "public"."counters" to "anon";
@@ -116,6 +116,22 @@ grant select on table "public"."counters" to "anon";
 grant trigger on table "public"."counters" to "anon";
 grant truncate on table "public"."counters" to "anon";
 grant update on table "public"."counters" to "anon";
+
+grant delete on table "public"."counters" to "authenticated";
+grant insert on table "public"."counters" to "authenticated";
+grant references on table "public"."counters" to "authenticated";
+grant select on table "public"."counters" to "authenticated";
+grant trigger on table "public"."counters" to "authenticated";
+grant truncate on table "public"."counters" to "authenticated";
+grant update on table "public"."counters" to "authenticated";
+
+grant delete on table "public"."counters" to "service_role";
+grant insert on table "public"."counters" to "service_role";
+grant references on table "public"."counters" to "service_role";
+grant select on table "public"."counters" to "service_role";
+grant trigger on table "public"."counters" to "service_role";
+grant truncate on table "public"."counters" to "service_role";
+grant update on table "public"."counters" to "service_role";
 
 grant delete on table "public"."email_click_events" to "anon";
 grant insert on table "public"."email_click_events" to "anon";
@@ -125,39 +141,6 @@ grant trigger on table "public"."email_click_events" to "anon";
 grant truncate on table "public"."email_click_events" to "anon";
 grant update on table "public"."email_click_events" to "anon";
 
-grant delete on table "public"."email_open_events" to "anon";
-grant insert on table "public"."email_open_events" to "anon";
-grant references on table "public"."email_open_events" to "anon";
-grant select on table "public"."email_open_events" to "anon";
-grant trigger on table "public"."email_open_events" to "anon";
-grant truncate on table "public"."email_open_events" to "anon";
-grant update on table "public"."email_open_events" to "anon";
-
-grant delete on table "public"."emails" to "anon";
-grant insert on table "public"."emails" to "anon";
-grant references on table "public"."emails" to "anon";
-grant select on table "public"."emails" to "anon";
-grant trigger on table "public"."emails" to "anon";
-grant truncate on table "public"."emails" to "anon";
-grant update on table "public"."emails" to "anon";
-
-grant delete on table "public"."users" to "anon";
-grant insert on table "public"."users" to "anon";
-grant references on table "public"."users" to "anon";
-grant select on table "public"."users" to "anon";
-grant trigger on table "public"."users" to "anon";
-grant truncate on table "public"."users" to "anon";
-grant update on table "public"."users" to "anon";
-
--- Grant permissions to authenticated role
-grant delete on table "public"."counters" to "authenticated";
-grant insert on table "public"."counters" to "authenticated";
-grant references on table "public"."counters" to "authenticated";
-grant select on table "public"."counters" to "authenticated";
-grant trigger on table "public"."counters" to "authenticated";
-grant truncate on table "public"."counters" to "authenticated";
-grant update on table "public"."counters" to "authenticated";
-
 grant delete on table "public"."email_click_events" to "authenticated";
 grant insert on table "public"."email_click_events" to "authenticated";
 grant references on table "public"."email_click_events" to "authenticated";
@@ -165,39 +148,6 @@ grant select on table "public"."email_click_events" to "authenticated";
 grant trigger on table "public"."email_click_events" to "authenticated";
 grant truncate on table "public"."email_click_events" to "authenticated";
 grant update on table "public"."email_click_events" to "authenticated";
-
-grant delete on table "public"."email_open_events" to "authenticated";
-grant insert on table "public"."email_open_events" to "authenticated";
-grant references on table "public"."email_open_events" to "authenticated";
-grant select on table "public"."email_open_events" to "authenticated";
-grant trigger on table "public"."email_open_events" to "authenticated";
-grant truncate on table "public"."email_open_events" to "authenticated";
-grant update on table "public"."email_open_events" to "authenticated";
-
-grant delete on table "public"."emails" to "authenticated";
-grant insert on table "public"."emails" to "authenticated";
-grant references on table "public"."emails" to "authenticated";
-grant select on table "public"."emails" to "authenticated";
-grant trigger on table "public"."emails" to "authenticated";
-grant truncate on table "public"."emails" to "authenticated";
-grant update on table "public"."emails" to "authenticated";
-
-grant delete on table "public"."users" to "authenticated";
-grant insert on table "public"."users" to "authenticated";
-grant references on table "public"."users" to "authenticated";
-grant select on table "public"."users" to "authenticated";
-grant trigger on table "public"."users" to "authenticated";
-grant truncate on table "public"."users" to "authenticated";
-grant update on table "public"."users" to "authenticated";
-
--- Grant permissions to service_role
-grant delete on table "public"."counters" to "service_role";
-grant insert on table "public"."counters" to "service_role";
-grant references on table "public"."counters" to "service_role";
-grant select on table "public"."counters" to "service_role";
-grant trigger on table "public"."counters" to "service_role";
-grant truncate on table "public"."counters" to "service_role";
-grant update on table "public"."counters" to "service_role";
 
 grant delete on table "public"."email_click_events" to "service_role";
 grant insert on table "public"."email_click_events" to "service_role";
@@ -207,6 +157,22 @@ grant trigger on table "public"."email_click_events" to "service_role";
 grant truncate on table "public"."email_click_events" to "service_role";
 grant update on table "public"."email_click_events" to "service_role";
 
+grant delete on table "public"."email_open_events" to "anon";
+grant insert on table "public"."email_open_events" to "anon";
+grant references on table "public"."email_open_events" to "anon";
+grant select on table "public"."email_open_events" to "anon";
+grant trigger on table "public"."email_open_events" to "anon";
+grant truncate on table "public"."email_open_events" to "anon";
+grant update on table "public"."email_open_events" to "anon";
+
+grant delete on table "public"."email_open_events" to "authenticated";
+grant insert on table "public"."email_open_events" to "authenticated";
+grant references on table "public"."email_open_events" to "authenticated";
+grant select on table "public"."email_open_events" to "authenticated";
+grant trigger on table "public"."email_open_events" to "authenticated";
+grant truncate on table "public"."email_open_events" to "authenticated";
+grant update on table "public"."email_open_events" to "authenticated";
+
 grant delete on table "public"."email_open_events" to "service_role";
 grant insert on table "public"."email_open_events" to "service_role";
 grant references on table "public"."email_open_events" to "service_role";
@@ -215,6 +181,22 @@ grant trigger on table "public"."email_open_events" to "service_role";
 grant truncate on table "public"."email_open_events" to "service_role";
 grant update on table "public"."email_open_events" to "service_role";
 
+grant delete on table "public"."emails" to "anon";
+grant insert on table "public"."emails" to "anon";
+grant references on table "public"."emails" to "anon";
+grant select on table "public"."emails" to "anon";
+grant trigger on table "public"."emails" to "anon";
+grant truncate on table "public"."emails" to "anon";
+grant update on table "public"."emails" to "anon";
+
+grant delete on table "public"."emails" to "authenticated";
+grant insert on table "public"."emails" to "authenticated";
+grant references on table "public"."emails" to "authenticated";
+grant select on table "public"."emails" to "authenticated";
+grant trigger on table "public"."emails" to "authenticated";
+grant truncate on table "public"."emails" to "authenticated";
+grant update on table "public"."emails" to "authenticated";
+
 grant delete on table "public"."emails" to "service_role";
 grant insert on table "public"."emails" to "service_role";
 grant references on table "public"."emails" to "service_role";
@@ -222,6 +204,22 @@ grant select on table "public"."emails" to "service_role";
 grant trigger on table "public"."emails" to "service_role";
 grant truncate on table "public"."emails" to "service_role";
 grant update on table "public"."emails" to "service_role";
+
+grant delete on table "public"."users" to "anon";
+grant insert on table "public"."users" to "anon";
+grant references on table "public"."users" to "anon";
+grant select on table "public"."users" to "anon";
+grant trigger on table "public"."users" to "anon";
+grant truncate on table "public"."users" to "anon";
+grant update on table "public"."users" to "anon";
+
+grant delete on table "public"."users" to "authenticated";
+grant insert on table "public"."users" to "authenticated";
+grant references on table "public"."users" to "authenticated";
+grant select on table "public"."users" to "authenticated";
+grant trigger on table "public"."users" to "authenticated";
+grant truncate on table "public"."users" to "authenticated";
+grant update on table "public"."users" to "authenticated";
 
 grant delete on table "public"."users" to "service_role";
 grant insert on table "public"."users" to "service_role";
