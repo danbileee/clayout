@@ -16,8 +16,6 @@ import {
   useLoaderData,
   useNavigate,
 } from "react-router";
-import { useEffect } from "react";
-import { joinPath, Paths } from "@/routes";
 import { useMutation } from "@tanstack/react-query";
 import { getFormProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
@@ -94,7 +92,7 @@ export default function ResetPassword() {
 
         // Add a little delay for smooth UX
         setTimeout(() => {
-          window.location.href = `/`;
+          navigate("/");
         }, 1000);
       };
 
@@ -109,20 +107,6 @@ export default function ResetPassword() {
       }
     },
   });
-
-  /**
-   * @useEffect
-   * Navigate to the login page after reseting password
-   *  */
-  useEffect(() => {
-    if (form.status === "success") {
-      // TODO: Toast로 상황 설명
-
-      setTimeout(() => {
-        navigate(joinPath([Paths.login]));
-      }, 5000);
-    }
-  }, [navigate, form.status]);
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">

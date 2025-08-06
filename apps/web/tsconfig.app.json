@@ -29,5 +29,5 @@
       "@/*": ["./app/*"]
     }
   },
-  "include": ["app", "vite-env.d.ts"]
+  "include": ["app", "vite-env.d.ts", "instrument.server.mjs"]
 }
