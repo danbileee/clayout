@@ -36,6 +36,16 @@ export class AuthController {
   getCsrfToken(@Res({ passthrough: true }) res: Response) {
     const csrfToken = randomBytes(32).toString('hex');
 
+    // Clear any previous variants to avoid duplicates (host-only and domain-scoped)
+    res.clearCookie('csrfToken');
+
+    if (process.env.COOKIE_DOMAIN && process.env.NODE_ENV === 'production') {
+      res.clearCookie('csrfToken', {
+        domain: process.env.COOKIE_DOMAIN,
+        path: '/',
+      });
+    }
+
     res.cookie('csrfToken', csrfToken, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
@@ -45,6 +55,7 @@ export class AuthController {
         process.env.COOKIE_DOMAIN && process.env.NODE_ENV === 'production'
           ? process.env.COOKIE_DOMAIN
           : undefined,
+      path: '/',
     });
 
     return { csrfToken };
@@ -99,6 +110,12 @@ export class AuthController {
     res.clearCookie('refreshToken');
     res.clearCookie('basicToken');
     res.clearCookie('csrfToken');
+    if (process.env.COOKIE_DOMAIN && process.env.NODE_ENV === 'production') {
+      res.clearCookie('csrfToken', {
+        domain: process.env.COOKIE_DOMAIN,
+        path: '/',
+      });
+    }
 
     return { message: 'Logout successful' };
   }
