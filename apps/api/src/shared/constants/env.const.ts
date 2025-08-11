@@ -12,6 +12,10 @@ export const EnvKeys = {
   API_HOST: 'API_HOST',
   WEB_HOST: 'WEB_HOST',
   /**
+   * Cookies
+   */
+  COOKIE_DOMAIN: 'COOKIE_DOMAIN',
+  /**
    * CORS
    */
   CORS_ENABLE_ORIGIN_LOCAL: 'CORS_ENABLE_ORIGIN_LOCAL',
