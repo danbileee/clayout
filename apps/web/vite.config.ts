@@ -18,10 +18,6 @@ const sentryConfig: SentryReactRouterBuildOptions = {
 // https://vite.dev/config/
 export default defineConfig((config) => {
   return {
-    /**
-     * @property plugins
-     * the order matters. cloudflare plugin should come at last.
-     */
     plugins: [
       tailwindcss(),
       reactRouter(),

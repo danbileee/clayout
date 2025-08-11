@@ -39,7 +39,7 @@ export class AuthController {
     res.cookie('csrfToken', csrfToken, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
     });
 
     return { csrfToken };
