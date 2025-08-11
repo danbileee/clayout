@@ -20,7 +20,7 @@ When developing locally with Supabase, the workflow is:
 
 ```sh
 # Generate type definitions according to the table schema
-supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts
+pnpm supabase:gentypes
 ```
 
 3. Create migration files to track your schema changes. This is the recommended approach for production:
@@ -86,7 +86,7 @@ supabase db diff --schema public
 
 ```sh
 # Regenerate types to match current schema
-supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts
+pnpm supabase:gentypes
 ```
 
 This workflow ensures that:
