@@ -39,7 +39,12 @@ export class AuthController {
     res.cookie('csrfToken', csrfToken, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      // Ensure the cookie is readable across app subdomains in production
+      domain:
+        process.env.COOKIE_DOMAIN && process.env.NODE_ENV === 'production'
+          ? process.env.COOKIE_DOMAIN
+          : undefined,
     });
 
     return { csrfToken };
