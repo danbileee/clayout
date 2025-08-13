@@ -6,9 +6,9 @@ import { UsersService } from '../users/users.service';
 import { EmailsService } from '../emails/emails.service';
 import { createMockService } from '../../test/jest-setup';
 import { UnauthorizedException } from '@nestjs/common';
-import { UserRoles } from '../users/constants/role.const';
 import { TokenTypes } from './constants/token.const';
 import { UserEntity } from '../users/entities/user.entity';
+import { UserRoles } from '@clayout/interface';
 
 describe('AuthService', () => {
   let service: AuthService;

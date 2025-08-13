@@ -12,8 +12,8 @@ import {
   BYPASS_ROLE_KEY,
 } from '../decorators/author.decorator';
 import { AuthorService } from '../services/author.service';
-import { UserRole } from 'src/users/constants/role.const';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { UserRole } from '@clayout/interface';
 
 @Injectable()
 export class AuthorGuard implements CanActivate {

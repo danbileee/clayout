@@ -1,0 +1,63 @@
+import { IsDate, IsJSON, IsOptional, IsString, Matches } from 'class-validator';
+import { BaseEntity } from 'src/shared/entities/base.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
+import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import {
+  KebabCase,
+  SiteCategories,
+  SiteStatus,
+  SiteStatuses,
+} from '@clayout/interface';
+import { SitePageEntity } from './site-page.entity';
+
+@Entity('sites')
+export class SiteEntity extends BaseEntity {
+  @Column({
+    unique: true,
+  })
+  @IsString()
+  @Matches(KebabCase)
+  slug: string;
+
+  @Column()
+  @IsString()
+  name: string;
+
+  @Column({
+    type: 'enum',
+    enum: Object.values(SiteStatuses),
+    default: SiteStatuses.Draft,
+  })
+  status: SiteStatus;
+
+  @Column({
+    type: 'enum',
+    enum: Object.values(SiteCategories),
+    default: SiteCategories.None,
+  })
+  category: SiteStatus;
+
+  @Column({
+    nullable: true,
+    type: 'jsonb',
+  })
+  @IsJSON()
+  meta: Record<string, any>;
+
+  @Column({
+    nullable: true,
+    type: 'timestamptz',
+    precision: 6,
+  })
+  @IsOptional()
+  @IsDate()
+  last_published_at?: Date;
+
+  @ManyToOne(() => UserEntity, (user) => user.sites, {
+    nullable: false,
+  })
+  author: UserEntity;
+
+  @OneToMany(() => SitePageEntity, (page) => page.site)
+  pages: SitePageEntity[];
+}

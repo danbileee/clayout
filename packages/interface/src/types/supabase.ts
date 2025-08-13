@@ -17,10 +17,10 @@ export type Database = {
     Functions: {
       graphql: {
         Args: {
-          variables?: Json
+          extensions?: Json
           operationName?: string
           query?: string
-          extensions?: Json
+          variables?: Json
         }
         Returns: Json
       }
@@ -178,6 +178,205 @@ export type Database = {
           },
         ]
       }
+      site_blocks: {
+        Row: {
+          created_at: string
+          data: Json | null
+          id: number
+          name: string
+          pageId: number
+          slug: string
+          type: Database["public"]["Enums"]["site_blocks_type_enum"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          data?: Json | null
+          id?: number
+          name: string
+          pageId: number
+          slug: string
+          type?: Database["public"]["Enums"]["site_blocks_type_enum"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          data?: Json | null
+          id?: number
+          name?: string
+          pageId?: number
+          slug?: string
+          type?: Database["public"]["Enums"]["site_blocks_type_enum"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_04adc5fbb09eb32db0c746eee20"
+            columns: ["pageId"]
+            isOneToOne: false
+            referencedRelation: "site_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_domains: {
+        Row: {
+          created_at: string
+          hostname: string
+          id: number
+          is_verified: boolean
+          siteId: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          hostname: string
+          id?: number
+          is_verified?: boolean
+          siteId: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          hostname?: string
+          id?: number
+          is_verified?: boolean
+          siteId?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_b64cc9e1f0a969eea87380c462d"
+            columns: ["siteId"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_pages: {
+        Row: {
+          category: Database["public"]["Enums"]["site_pages_category_enum"]
+          created_at: string
+          id: number
+          name: string
+          siteId: number
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          category?: Database["public"]["Enums"]["site_pages_category_enum"]
+          created_at?: string
+          id?: number
+          name: string
+          siteId: number
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["site_pages_category_enum"]
+          created_at?: string
+          id?: number
+          name?: string
+          siteId?: number
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_4029d13e5c69a098b2076c761c3"
+            columns: ["siteId"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_releases: {
+        Row: {
+          created_at: string
+          html_snapshot: string
+          id: number
+          published_at: string | null
+          siteId: number
+          updated_at: string
+          version: number
+        }
+        Insert: {
+          created_at?: string
+          html_snapshot: string
+          id?: number
+          published_at?: string | null
+          siteId: number
+          updated_at?: string
+          version: number
+        }
+        Update: {
+          created_at?: string
+          html_snapshot?: string
+          id?: number
+          published_at?: string | null
+          siteId?: number
+          updated_at?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_5c72a2f81f04dd6c238771c591f"
+            columns: ["siteId"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sites: {
+        Row: {
+          authorId: number
+          category: Database["public"]["Enums"]["sites_category_enum"]
+          created_at: string
+          id: number
+          last_published_at: string | null
+          meta: Json | null
+          name: string
+          slug: string
+          status: Database["public"]["Enums"]["sites_status_enum"]
+          updated_at: string
+        }
+        Insert: {
+          authorId: number
+          category?: Database["public"]["Enums"]["sites_category_enum"]
+          created_at?: string
+          id?: number
+          last_published_at?: string | null
+          meta?: Json | null
+          name: string
+          slug: string
+          status?: Database["public"]["Enums"]["sites_status_enum"]
+          updated_at?: string
+        }
+        Update: {
+          authorId?: number
+          category?: Database["public"]["Enums"]["sites_category_enum"]
+          created_at?: string
+          id?: number
+          last_published_at?: string | null
+          meta?: Json | null
+          name?: string
+          slug?: string
+          status?: Database["public"]["Enums"]["sites_status_enum"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "FK_a5c4bd58c29138cf04e170dfa67"
+            columns: ["authorId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           created_at: string
@@ -216,6 +415,16 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      site_blocks_type_enum: "None" | "Text" | "Image" | "Button"
+      site_pages_category_enum: "Static" | "List" | "Article"
+      sites_category_enum:
+        | "None"
+        | "Blog"
+        | "Newsletter"
+        | "Portfolio"
+        | "Hyperlink"
+        | "Commerce"
+      sites_status_enum: "Draft" | "Published" | "Reviewing" | "Fixing"
       users_role_enum: "None" | "Guest" | "Registrant" | "User" | "Admin"
     }
     CompositeTypes: {
@@ -224,21 +433,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -256,14 +469,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -279,14 +494,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -302,14 +519,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -317,14 +536,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
@@ -335,6 +556,17 @@ export const Constants = {
   },
   public: {
     Enums: {
+      site_blocks_type_enum: ["None", "Text", "Image", "Button"],
+      site_pages_category_enum: ["Static", "List", "Article"],
+      sites_category_enum: [
+        "None",
+        "Blog",
+        "Newsletter",
+        "Portfolio",
+        "Hyperlink",
+        "Commerce",
+      ],
+      sites_status_enum: ["Draft", "Published", "Reviewing", "Fixing"],
       users_role_enum: ["None", "Guest", "Registrant", "User", "Admin"],
     },
   },

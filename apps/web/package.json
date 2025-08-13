@@ -9,9 +9,10 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' react-router dev",
     "start": "NODE_OPTIONS='--import ./instrument.server.mjs' react-router-serve ./build/server/index.js",
+    "prebuild": "pnpm --filter @clayout/interface build",
     "build:client": "vite build",
     "build:server": "vite build --ssr",
-    "build": "pnpm build:client && pnpm build:server",
+    "build": "pnpm prebuild && pnpm build:client && pnpm build:server",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -44,7 +45,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
-    "zod": "^3.25.76"
+    "zod": "^3.23.8"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.9.4",

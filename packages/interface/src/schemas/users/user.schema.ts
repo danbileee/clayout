@@ -1,5 +1,5 @@
 import { z, ZodType } from "zod";
-import { Tables } from "../types";
+import { Tables } from "../../types";
 
 export const UserSchema = z.object<
   Record<

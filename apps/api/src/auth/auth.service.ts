@@ -7,10 +7,10 @@ import { EnvKeys } from 'src/shared/constants/env.const';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 import { Tokens } from './interfaces/auth.interface';
-import { UserRoles } from 'src/users/constants/role.const';
 import { TokenType, TokenTypes } from './constants/token.const';
 import { EmailsService } from 'src/emails/emails.service';
 import { Request } from 'express';
+import { UserRoles } from '@clayout/interface';
 
 type TokenOptions = { tokenType: TokenType } & JwtSignOptions;
 

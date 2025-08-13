@@ -9,6 +9,7 @@
     "prepare": "husky",
     "build:api": "pnpm --filter @clayout/api build",
     "build:web": "pnpm --filter @clayout/web build",
+    "build:interface": "pnpm --filter @clayout/interface build",
     "test:all": "pnpm run --recursive test",
     "lint:all": "pnpm run --recursive lint"
   },

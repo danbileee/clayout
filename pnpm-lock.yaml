@@ -250,7 +250,7 @@ importers:
         specifier: ^4.1.11
         version: 4.1.11
       zod:
-        specifier: ^3.25.76
+        specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
       '@cloudflare/vite-plugin':
@@ -317,7 +317,7 @@ importers:
   packages/interface:
     dependencies:
       zod:
-        specifier: ^3.25.76
+        specifier: ^3.23.8
         version: 3.25.76
 
 packages:

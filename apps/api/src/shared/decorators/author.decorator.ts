@@ -1,5 +1,5 @@
+import { UserRole } from '@clayout/interface';
 import { SetMetadata, Type } from '@nestjs/common';
-import { UserRole } from 'src/users/constants/role.const';
 
 export const AUTHOR_SERVICE_KEY = 'author_service';
 export const BYPASS_ROLE_KEY = 'bypass_role';

@@ -1,4 +1,5 @@
 pnpm lint:all
 pnpm test:all
+pnpm build:interface
 pnpm build:api
 pnpm build:web
