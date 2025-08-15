@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   UsePipes,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SitesService } from './sites.service';
 import { CreateSiteDto, UpdateSiteDto } from './dto/site.dto';
@@ -35,8 +36,8 @@ export class SitesController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.sitesService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.sitesService.findOne(id);
   }
 
   @UseGuards(AuthorGuard)
@@ -44,8 +45,11 @@ export class SitesController {
     service: SitesService,
   })
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSiteDto: UpdateSiteDto) {
-    return this.sitesService.update(+id, updateSiteDto);
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateSiteDto: UpdateSiteDto,
+  ) {
+    return this.sitesService.update(id, updateSiteDto);
   }
 
   @UseGuards(AuthorGuard)
@@ -53,7 +57,7 @@ export class SitesController {
     service: SitesService,
   })
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.sitesService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.sitesService.remove(id);
   }
 }
