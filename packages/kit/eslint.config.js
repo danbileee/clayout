@@ -11,7 +11,7 @@ import path from "path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config([
-  globalIgnores(["dist", "build", ".react-router"]),
+  globalIgnores(["dist"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -26,7 +26,7 @@ export default tseslint.config([
       globals: globals.browser,
       parserOptions: {
         tsconfigRootDir: __dirname,
-        project: "./tsconfig.eslint.json",
+        project: "./tsconfig.json",
       },
     },
     rules: {
@@ -65,7 +65,6 @@ export default tseslint.config([
       "sonarjs/no-dead-store": "off",
       "sonarjs/todo-tag": "warn",
       "sonarjs/prefer-read-only-props": "off",
-      "sonarjs/no-useless-intersection": "warn",
     },
   },
 ]);
