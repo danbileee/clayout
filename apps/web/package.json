@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' react-router dev",
     "start": "NODE_OPTIONS='--import ./instrument.server.mjs' react-router-serve ./build/server/index.js",
-    "prebuild": "pnpm --filter @clayout/interface build",
+    "prebuild": "pnpm -w --filter @clayout/interface build",
     "build:client": "vite build",
     "build:server": "vite build --ssr",
     "build": "pnpm prebuild && pnpm build:client && pnpm build:server",

@@ -2,21 +2,18 @@
   "name": "@clayout/interface",
   "version": "0.0.1",
   "description": "",
-  "main": "dist/index.js",
-  "module": "dist/esm/index.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "require": "./dist/index.js",
-      "import": "./dist/esm/index.js",
-      "default": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
     }
   },
   "scripts": {
-    "build": "pnpm run build:cjs && pnpm run build:esm",
-    "build:cjs": "tsc -p tsconfig.cjs.json",
-    "build:esm": "tsc -p tsconfig.esm.json && node -e \"require('fs').mkdirSync('dist/esm',{recursive:true}); require('fs').writeFileSync('dist/esm/package.json', JSON.stringify({type:'module'}))\"",
+    "build": "rollup -c",
     "prepare": "pnpm build",
     "test": "echo \"No test specified\""
   },
@@ -26,5 +23,10 @@
   "packageManager": "pnpm@10.4.1",
   "dependencies": {
     "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@rollup/plugin-typescript": "^12.1.4",
+    "rollup": "^4.46.2",
+    "rollup-plugin-dts": "^6.2.1"
   }
 }

@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prebuild": "pnpm --filter @clayout/interface build",
+    "prebuild": "pnpm -w --filter @clayout/interface build",
     "build": "nest build",
     "build:prod": "pnpm prebuild && nest build && pnpm sentry:sourcemaps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
