@@ -1,4 +1,10 @@
-import { IsDate, IsJSON, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsDate,
+  IsObject,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
@@ -9,6 +15,7 @@ import {
   SiteStatuses,
 } from '@clayout/interface';
 import { SitePageEntity } from './site-page.entity';
+import { SiteBlockEntity } from './site-block.entity';
 
 @Entity('sites')
 export class SiteEntity extends BaseEntity {
@@ -41,7 +48,7 @@ export class SiteEntity extends BaseEntity {
     nullable: true,
     type: 'jsonb',
   })
-  @IsJSON()
+  @IsObject()
   meta: Record<string, any>;
 
   @Column({
@@ -60,4 +67,7 @@ export class SiteEntity extends BaseEntity {
 
   @OneToMany(() => SitePageEntity, (page) => page.site)
   pages: SitePageEntity[];
+
+  @OneToMany(() => SiteBlockEntity, (block) => block.site)
+  blocks: SiteBlockEntity[];
 }

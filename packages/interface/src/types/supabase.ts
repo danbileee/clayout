@@ -180,32 +180,38 @@ export type Database = {
       }
       site_blocks: {
         Row: {
+          container_style: Json | null
           created_at: string
           data: Json | null
           id: number
           name: string
           pageId: number
           slug: string
+          style: Json | null
           type: Database["public"]["Enums"]["site_blocks_type_enum"]
           updated_at: string
         }
         Insert: {
+          container_style?: Json | null
           created_at?: string
           data?: Json | null
           id?: number
           name: string
           pageId: number
           slug: string
+          style?: Json | null
           type?: Database["public"]["Enums"]["site_blocks_type_enum"]
           updated_at?: string
         }
         Update: {
+          container_style?: Json | null
           created_at?: string
           data?: Json | null
           id?: number
           name?: string
           pageId?: number
           slug?: string
+          style?: Json | null
           type?: Database["public"]["Enums"]["site_blocks_type_enum"]
           updated_at?: string
         }
@@ -259,6 +265,7 @@ export type Database = {
           category: Database["public"]["Enums"]["site_pages_category_enum"]
           created_at: string
           id: number
+          meta: Json | null
           name: string
           siteId: number
           slug: string
@@ -268,6 +275,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
           created_at?: string
           id?: number
+          meta?: Json | null
           name: string
           siteId: number
           slug: string
@@ -277,6 +285,7 @@ export type Database = {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
           created_at?: string
           id?: number
+          meta?: Json | null
           name?: string
           siteId?: number
           slug?: string

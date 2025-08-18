@@ -65,6 +65,7 @@ export default tseslint.config([
       "sonarjs/no-dead-store": "off",
       "sonarjs/todo-tag": "warn",
       "sonarjs/prefer-read-only-props": "off",
+      "sonarjs/table-header": "off",
     },
   },
 ]);

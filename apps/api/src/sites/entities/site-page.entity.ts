@@ -1,4 +1,4 @@
-import { IsString, Matches } from 'class-validator';
+import { IsObject, IsString, Matches } from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import {
@@ -28,6 +28,13 @@ export class SitePageEntity extends BaseEntity {
     default: SitePageCategories.Static,
   })
   category: SitePageCategory;
+
+  @Column({
+    nullable: true,
+    type: 'jsonb',
+  })
+  @IsObject()
+  meta: Record<string, any>;
 
   @ManyToOne(() => SiteEntity, (site) => site.pages, {
     nullable: false,
