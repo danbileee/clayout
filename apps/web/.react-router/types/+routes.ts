@@ -37,6 +37,9 @@ type Pages = {
   "/reset-password": {
     params: {};
   };
+  "/editor": {
+    params: {};
+  };
   "/counter": {
     params: {};
   };
@@ -45,7 +48,7 @@ type Pages = {
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/auth/confirm" | "/auth/error" | "/auth/oauth" | "/auth/verify" | "/login" | "/signup" | "/forgot-password" | "/reset-password" | "/counter";
+    page: "/" | "/auth/confirm" | "/auth/error" | "/auth/oauth" | "/auth/verify" | "/login" | "/signup" | "/forgot-password" | "/reset-password" | "/editor" | "/counter";
   };
   "./pages/home/index.tsx": {
     id: "pages/home/index";
@@ -86,6 +89,14 @@ type RouteFiles = {
   "./pages/auth/reset-password.tsx": {
     id: "pages/auth/reset-password";
     page: "/reset-password";
+  };
+  "./pages/editor/layout.tsx": {
+    id: "pages/editor/layout";
+    page: "/editor";
+  };
+  "./pages/editor/index.tsx": {
+    id: "pages/editor/index";
+    page: "/editor";
   };
   "./pages/counter/index.tsx": {
     id: "pages/counter/index";

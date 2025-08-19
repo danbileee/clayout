@@ -25,6 +25,10 @@ export const Paths = {
   "forgot-password": "forgot-password",
   "reset-password": "reset-password",
   /**
+   * Editor
+   */
+  editor: "editor",
+  /**
    * Counter (dummy)
    */
   counter: "counter",
@@ -74,6 +78,13 @@ export default [
       Paths["reset-password"],
       getComponentEntry([Paths.auth, Paths["reset-password"]])
     ),
+  ]),
+
+  /**
+   * Editor
+   */
+  layout(getLayoutEntry([Paths.editor]), [
+    ...prefix(Paths.editor, [index(getIndexEntry([Paths.editor]))]),
   ]),
 
   /**
