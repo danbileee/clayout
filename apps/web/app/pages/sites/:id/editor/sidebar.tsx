@@ -1,6 +1,7 @@
 import { styled } from "styled-components";
 import { BLOCKBAR_WIDTH, MENU_WIDTH, SIDEBAR_WIDTH } from "./constants";
 import { Button } from "@/components/ui/button";
+import { rem } from "@/utils/rem";
 
 export function EditorSidebar() {
   return (
@@ -19,20 +20,21 @@ export function EditorSidebar() {
 
 const Aside = styled.aside`
   display: flex;
-  width: ${SIDEBAR_WIDTH}px;
+  width: ${rem(SIDEBAR_WIDTH)};
+  height: 100svh;
 `;
 
 const Menu = styled.div`
-  width: ${MENU_WIDTH}px;
+  width: ${rem(MENU_WIDTH)};
 `;
 
 const Blockbar = styled.div`
-  width: ${BLOCKBAR_WIDTH}px;
-  padding: 20px;
+  width: ${rem(BLOCKBAR_WIDTH)};
+  padding: ${rem(20)};
 `;
 
 const Buttons = styled.div`
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
+  gap: ${rem(20)};
 `;

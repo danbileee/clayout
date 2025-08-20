@@ -6,17 +6,7 @@ import { handleError } from "@/lib/axios/handleError";
 import { isAuthenticated } from "@/lib/axios/isAuthenticated";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import { joinPath, Paths } from "@/routes";
-import {
-  useLoaderData,
-  useNavigate,
-  type LoaderFunctionArgs,
-} from "react-router";
-
-export async function loader({ params }: LoaderFunctionArgs) {
-  return {
-    id: params.id ? parseInt(params.id, 10) : undefined,
-  };
-}
+import { useLoaderData, useNavigate } from "react-router";
 
 export async function clientLoader() {
   const { meta, error } = await isAuthenticated();

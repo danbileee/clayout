@@ -1,10 +1,15 @@
-import { cn } from "@/lib/utils";
 import { Outlet } from "react-router";
+import { styled } from "styled-components";
 
 export default function Layout() {
   return (
-    <div className={cn("flex", "w-full")}>
+    <Wrapper>
       <Outlet />
-    </div>
+    </Wrapper>
   );
 }
+
+const Wrapper = styled.div`
+  display: flex;
+  width: 100%;
+`;

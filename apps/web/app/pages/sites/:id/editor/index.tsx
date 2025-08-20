@@ -1,10 +1,6 @@
 import { useAuthMeta } from "@/hooks/useAuthMeta";
 import { isAuthenticated } from "@/lib/axios/isAuthenticated";
-import {
-  useLoaderData,
-  useNavigate,
-  type LoaderFunctionArgs,
-} from "react-router";
+import { useLoaderData, useNavigate } from "react-router";
 import { EditorSidebar } from "./sidebar";
 import { EditorViewer } from "./viewer";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
@@ -12,12 +8,6 @@ import { getSite, getSiteQueryKey } from "@/apis/sites";
 import { handleError } from "@/lib/axios/handleError";
 import { joinPath, Paths } from "@/routes";
 import { useParamsId } from "@/hooks/useParamsId";
-
-export async function loader({ params }: LoaderFunctionArgs) {
-  return {
-    id: params.id ? parseInt(params.id, 10) : undefined,
-  };
-}
 
 export async function clientLoader() {
   const { meta, error } = await isAuthenticated();

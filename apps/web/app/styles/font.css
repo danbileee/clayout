@@ -1,1 +1,5 @@
 @import url("https://fonts.googleapis.com/css2?family=Edu+NSW+ACT+Cursive:wght@400..700&family=Libertinus+Sans:ital,wght@0,400;0,700;1,400&display=swap");
+
+html {
+  font-size: 16px;
+}
