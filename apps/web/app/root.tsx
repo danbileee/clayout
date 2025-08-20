@@ -6,7 +6,7 @@ import {
   ScrollRestoration,
   useRouteError,
 } from "react-router";
-import "./style.css";
+import "./styles/index.css";
 import { QueryClientProvider } from "./providers/QueryClientProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 import { Toaster } from "./components/ui/toaster";
@@ -38,7 +38,7 @@ export function ErrorBoundary() {
     <main>
       <h1>{message}</h1>
       <p>{details}</p>
-      {stack && (
+      {stack && !import.meta.env.PROD && (
         <pre>
           <code>{stack}</code>
         </pre>

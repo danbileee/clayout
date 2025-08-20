@@ -11,6 +11,7 @@ import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
 import {
   KebabCase,
   SiteCategories,
+  SiteCategory,
   SiteStatus,
   SiteStatuses,
 } from '@clayout/interface';
@@ -42,7 +43,7 @@ export class SiteEntity extends BaseEntity {
     enum: Object.values(SiteCategories),
     default: SiteCategories.None,
   })
-  category: SiteStatus;
+  category: SiteCategory;
 
   @Column({
     nullable: true,

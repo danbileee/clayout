@@ -1,0 +1,2 @@
+pnpm build:api
+pnpm build:web

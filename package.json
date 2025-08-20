@@ -10,6 +10,8 @@
     "build:api": "pnpm --filter @clayout/api build",
     "build:web": "pnpm --filter @clayout/web build",
     "build:interface": "pnpm --filter @clayout/interface build",
+    "build:kit": "pnpm --filter @clayout/kit build",
+    "supabase:typegen": "pnpm --filter @clayout/api supabase:typegen",
     "deploy:router": "pnpm --filter @clayout/router deploy",
     "test:all": "pnpm run --recursive test",
     "lint:all": "pnpm run --recursive lint"

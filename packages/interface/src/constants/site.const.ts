@@ -10,6 +10,7 @@ export type SiteStatus = keyof typeof SiteStatuses;
 export const SiteCategories = {
   None: "None",
   Blog: "Blog",
+  "Landing Page": "Landing Page",
   Newsletter: "Newsletter",
   Portfolio: "Portfolio",
   Hyperlink: "Hyperlink",

@@ -25,6 +25,10 @@ export const Paths = {
   "forgot-password": "forgot-password",
   "reset-password": "reset-password",
   /**
+   * Site
+   */
+  sites: "sites",
+  /**
    * Editor
    */
   editor: "editor",
@@ -36,19 +40,38 @@ export const Paths = {
 
 export type Path = keyof typeof Paths;
 
-export function joinPath(paths: Path[]) {
+export type DynamicPath = ":id";
+
+export function joinPath(
+  paths: (Path | DynamicPath)[],
+  options?: {
+    ids?: { key: DynamicPath; value: number }[];
+  }
+) {
+  const { ids } = options ?? {};
+
+  if (ids?.length) {
+    // eslint-disable-next-line sonarjs/function-return-type
+    const mapped = paths.map((path) => {
+      const matched = ids.find((id) => id.key === path);
+      return matched?.value ?? path;
+    });
+
+    return `/${mapped.join("/")}`;
+  }
+
   return `/${paths.join("/")}`;
 }
 
-function getComponentEntry(paths: Path[]) {
+function getComponentEntry(paths: (Path | DynamicPath)[]) {
   return `./pages${joinPath(paths)}.tsx`;
 }
 
-function getIndexEntry(paths: Path[]) {
+function getIndexEntry(paths: (Path | DynamicPath)[]) {
   return `./pages${joinPath(paths)}/index.tsx`;
 }
 
-function getLayoutEntry(paths: Path[]) {
+function getLayoutEntry(paths: (Path | DynamicPath)[]) {
   return `./pages${joinPath(paths)}/layout.tsx`;
 }
 
@@ -81,10 +104,21 @@ export default [
   ]),
 
   /**
-   * Editor
+   * Site
    */
-  layout(getLayoutEntry([Paths.editor]), [
-    ...prefix(Paths.editor, [index(getIndexEntry([Paths.editor]))]),
+  ...prefix(Paths.sites, [
+    index(getIndexEntry([Paths.sites])),
+    ...prefix(":id" satisfies DynamicPath, [
+      index(getIndexEntry([Paths.sites, ":id"])),
+      /**
+       * Editor
+       */
+      ...prefix(Paths.editor, [
+        layout(getLayoutEntry([Paths.sites, ":id", Paths.editor]), [
+          index(getIndexEntry([Paths.sites, ":id", Paths.editor])),
+        ]),
+      ]),
+    ]),
   ]),
 
   /**

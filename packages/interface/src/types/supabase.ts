@@ -186,6 +186,7 @@ export type Database = {
           id: number
           name: string
           pageId: number
+          siteId: number
           slug: string
           style: Json | null
           type: Database["public"]["Enums"]["site_blocks_type_enum"]
@@ -198,6 +199,7 @@ export type Database = {
           id?: number
           name: string
           pageId: number
+          siteId: number
           slug: string
           style?: Json | null
           type?: Database["public"]["Enums"]["site_blocks_type_enum"]
@@ -210,6 +212,7 @@ export type Database = {
           id?: number
           name?: string
           pageId?: number
+          siteId?: number
           slug?: string
           style?: Json | null
           type?: Database["public"]["Enums"]["site_blocks_type_enum"]
@@ -221,6 +224,13 @@ export type Database = {
             columns: ["pageId"]
             isOneToOne: false
             referencedRelation: "site_pages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "FK_2e9c736c4ab706d49188947ad92"
+            columns: ["siteId"]
+            isOneToOne: false
+            referencedRelation: "sites"
             referencedColumns: ["id"]
           },
         ]
@@ -429,6 +439,7 @@ export type Database = {
       sites_category_enum:
         | "None"
         | "Blog"
+        | "Landing Page"
         | "Newsletter"
         | "Portfolio"
         | "Hyperlink"
@@ -570,6 +581,7 @@ export const Constants = {
       sites_category_enum: [
         "None",
         "Blog",
+        "Landing Page",
         "Newsletter",
         "Portfolio",
         "Hyperlink",

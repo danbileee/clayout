@@ -1,5 +1,5 @@
 pnpm lint:all
 pnpm test:all
+pnpm supabase:typegen
 pnpm build:interface
-pnpm build:api
-pnpm build:web
+pnpm build:kit

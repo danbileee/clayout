@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--import ./instrument.server.mjs' react-router dev",
     "start": "NODE_OPTIONS='--import ./instrument.server.mjs' react-router-serve ./build/server/index.js",
-    "prebuild": "pnpm -w --filter @clayout/interface build",
+    "prebuild": "pnpm -w --filter @clayout/api supabase:typegen && pnpm -w --filter @clayout/interface build && pnpm -w --filter @clayout/kit build",
     "build:client": "vite build",
     "build:server": "vite build --ssr",
     "build": "pnpm prebuild && pnpm build:client && pnpm build:server",
@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@clayout/interface": "workspace:*",
+    "@clayout/kit": "workspace:*",
     "@conform-to/react": "^1.8.2",
     "@conform-to/zod": "^1.8.2",
     "@radix-ui/react-label": "^2.1.7",

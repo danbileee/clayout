@@ -5,15 +5,16 @@ import { Tables } from "../../types";
 type BlockSchemaObject = Record<
   keyof Pick<
     Tables<"site_blocks">,
-    "slug" | "name" | "type" | "data" | "style" | "container_style"
+    "id" | "slug" | "name" | "type" | "data" | "style" | "container_style"
   >,
   ZodTypeAny
 >;
 
 const siteBlockShapeBase = {
+  id: z.number().optional(),
   slug: z.string(),
   name: z.string(),
-} satisfies Pick<BlockSchemaObject, "slug" | "name">;
+} satisfies Pick<BlockSchemaObject, "id" | "slug" | "name">;
 
 const aligns = {
   left: "left",
@@ -23,19 +24,19 @@ const aligns = {
 } as const;
 
 const containerStyleShapeBase = {
-  width: z.string(),
-  align: z.nativeEnum(aligns),
-  backgroundColor: z.string(),
-  backgroundSize: z.string(),
-  backgroundPosition: z.string(),
-  backgroundRepeat: z.string(),
-  backgroundImage: z.string(),
-  borderWidth: z.string(),
-  borderStyle: z.string(),
-  borderColor: z.string(),
-  borderRadius: z.string(),
-  padding: z.string(),
-  margin: z.string(),
+  width: z.string().optional(),
+  align: z.nativeEnum(aligns).optional(),
+  backgroundColor: z.string().optional(),
+  backgroundSize: z.string().optional(),
+  backgroundPosition: z.string().optional(),
+  backgroundRepeat: z.string().optional(),
+  backgroundImage: z.string().optional(),
+  borderWidth: z.string().optional(),
+  borderStyle: z.string().optional(),
+  borderColor: z.string().optional(),
+  borderRadius: z.string().optional(),
+  padding: z.string().optional(),
+  margin: z.string().optional(),
 };
 
 export const TextBlockSchema = z.object({
@@ -48,8 +49,10 @@ export const TextBlockSchema = z.object({
     .optional(),
   style: z
     .object({
+      color: z.string(),
       fontFamily: z.string(),
       fontSize: z.string(),
+      fontWeight: z.string(),
       lineHeight: z.string(),
       margin: z.string(),
     })

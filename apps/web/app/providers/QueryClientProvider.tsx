@@ -5,6 +5,7 @@ import {
   type QueryClientProviderProps,
 } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { isAxiosError } from "axios";
 import type { ReactElement, ReactNode } from "react";
 
 const getQueryClient = (queryClientConfig?: QueryClientConfig): QueryClient =>
@@ -14,9 +15,10 @@ const getQueryClient = (queryClientConfig?: QueryClientConfig): QueryClient =>
         staleTime: 1000 * 15,
         refetchOnWindowFocus: false,
         retry: false,
-        throwOnError: true,
         refetchOnMount: false,
         refetchOnReconnect: false,
+        throwOnError: (error) =>
+          isAxiosError(error) ? error.status !== 401 : true,
       },
       mutations: {
         retry: false,

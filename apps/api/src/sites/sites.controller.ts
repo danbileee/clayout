@@ -7,8 +7,8 @@ import {
   Param,
   Delete,
   UseGuards,
-  UsePipes,
   ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { SitesService } from './sites.service';
 import { CreateSiteDto, UpdateSiteDto } from './dto/site.dto';
@@ -17,7 +17,11 @@ import { UserRoleWeights } from 'src/users/constants/role.const';
 import { AuthorGuard } from 'src/shared/guards/author.guard';
 import { Author } from 'src/shared/decorators/author.decorator';
 import { ZodValidationPipe } from 'src/shared/pipes/zod.pipe';
-import { SiteSchema } from '@clayout/interface';
+import { Pagination, SiteSchema } from '@clayout/interface';
+import { PaginateSiteDto } from './dto/site.dto';
+import { SiteEntity } from './entities/site.entity';
+import { User } from 'src/users/decorators/user.decorator';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 @Roles({ minWeight: UserRoleWeights.User })
 @Controller('sites')
@@ -25,39 +29,49 @@ export class SitesController {
   constructor(private readonly sitesService: SitesService) {}
 
   @Post()
-  @UsePipes(new ZodValidationPipe(SiteSchema))
-  create(@Body() createSiteDto: CreateSiteDto) {
-    return this.sitesService.create(createSiteDto);
+  create(
+    @User() user: UserEntity,
+    @Body(new ZodValidationPipe(SiteSchema)) createSiteDto: CreateSiteDto,
+  ) {
+    return this.sitesService.create(user, createSiteDto);
   }
 
   @Get()
-  findAll() {
-    return this.sitesService.findAll();
+  findAll(
+    @User('id') userId: number,
+    @Query() paginateSiteDto: PaginateSiteDto,
+  ): Promise<{ results: Pagination<SiteEntity> }> {
+    return this.sitesService.paginate(userId, paginateSiteDto);
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-    return this.sitesService.findOne(id);
-  }
-
   @UseGuards(AuthorGuard)
   @Author({
     service: SitesService,
   })
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.sitesService.getById({ id });
+  }
+
   @Patch(':id')
+  @UseGuards(AuthorGuard)
+  @Author({
+    service: SitesService,
+  })
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body() updateSiteDto: UpdateSiteDto,
+    @Body(new ZodValidationPipe(SiteSchema.optional()))
+    updateSiteDto: UpdateSiteDto,
   ) {
     return this.sitesService.update(id, updateSiteDto);
   }
 
+  @Delete(':id')
   @UseGuards(AuthorGuard)
   @Author({
     service: SitesService,
   })
-  @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
-    return this.sitesService.remove(id);
+    return this.sitesService.delete(id);
   }
 }
