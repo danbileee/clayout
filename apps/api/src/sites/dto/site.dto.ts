@@ -10,7 +10,7 @@ export type UpdateSiteDto = DeepPartial<CreateSiteDto>;
 
 export class PaginateSiteDto extends PaginationDto.createWithConfig<SiteEntity>(
   {
-    allowedSortFields: ['created_at', 'updated_at', 'last_published_at'],
-    allowedFilterFields: ['created_at', 'updated_at', 'id', 'category'],
+    allowedSortFields: ['createdAt', 'updatedAt', 'lastPublishedAt'],
+    allowedFilterFields: ['createdAt', 'updatedAt', 'id', 'category'],
   },
 ) {}

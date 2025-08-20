@@ -6,7 +6,7 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prebuild": "pnpm -w --filter @clayout/api supabase:typegen && pnpm -w --filter @clayout/interface build && pnpm -w --filter @clayout/kit build",
+    "prebuild": "pnpm -w --filter @clayout/interface build && pnpm -w --filter @clayout/kit build",
     "build": "pnpm prebuild && nest build",
     "build:prod": "pnpm prebuild && nest build && pnpm sentry:sourcemaps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

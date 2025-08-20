@@ -17,5 +17,5 @@ export class SiteDomainEntity extends BaseEntity {
 
   @Column({ type: 'boolean', default: false })
   @IsBoolean()
-  is_verified: boolean;
+  isVerified: boolean;
 }

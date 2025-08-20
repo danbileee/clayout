@@ -61,8 +61,9 @@ export class SitesService implements AuthorService {
       where: { id: savedSite.id },
       relations: {
         author: true,
-        pages: true,
-        blocks: true,
+        pages: {
+          blocks: true,
+        },
       },
     });
 
@@ -97,8 +98,9 @@ export class SitesService implements AuthorService {
       where: { id },
       relations: {
         author: true,
-        pages: true,
-        blocks: true,
+        pages: {
+          blocks: true,
+        },
       },
     });
 
@@ -160,14 +162,23 @@ export class SitesService implements AuthorService {
       ...matchedSite,
       ...restSite,
     });
+    const finalSite = await this.sitesRepository.findOne({
+      where: { id: newSite.id },
+      relations: {
+        author: true,
+        pages: {
+          blocks: true,
+        },
+      },
+    });
 
-    return { site: newSite };
+    return { site: finalSite };
   }
 
-  async delete(id: number): Promise<number> {
+  async delete(id: number): Promise<{ id: number }> {
     await this.sitesRepository.delete({ id });
 
-    return id;
+    return { id };
   }
 
   async isAuthor(userId: number, resourceId: number): Promise<boolean> {

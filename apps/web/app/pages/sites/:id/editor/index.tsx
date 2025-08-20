@@ -1,11 +1,17 @@
 import { useAuthMeta } from "@/hooks/useAuthMeta";
 import { isAuthenticated } from "@/lib/axios/isAuthenticated";
-import { useLoaderData, type LoaderFunctionArgs } from "react-router";
+import {
+  useLoaderData,
+  useNavigate,
+  type LoaderFunctionArgs,
+} from "react-router";
 import { EditorSidebar } from "./sidebar";
 import { EditorViewer } from "./viewer";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import { getSite, getSiteQueryKey } from "@/apis/sites";
 import { handleError } from "@/lib/axios/handleError";
+import { joinPath, Paths } from "@/routes";
+import { useParamsId } from "@/hooks/useParamsId";
 
 export async function loader({ params }: LoaderFunctionArgs) {
   return {
@@ -26,18 +32,23 @@ export async function clientLoader() {
 }
 
 export default function Editor() {
-  const { id = 0 } = useLoaderData<typeof loader>();
+  const navigate = useNavigate();
+  const id = useParamsId();
   const { meta } = useLoaderData<typeof clientLoader>();
   useAuthMeta(meta);
   const { data } = useClientQuery({
     queryKey: getSiteQueryKey({ id }),
     queryFn: async (ctx) => {
       const fn = async () => await getSite({ params: { id } });
+      const redirect = async () => navigate(joinPath([Paths.login]));
 
       try {
         return await fn();
       } catch (e) {
-        const { error, data } = await handleError(e, { onRetry: fn });
+        const { error, data } = await handleError(e, {
+          onRetry: fn,
+          onRedirect: redirect,
+        });
 
         if (error) {
           throw error;

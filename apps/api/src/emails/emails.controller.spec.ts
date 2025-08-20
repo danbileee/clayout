@@ -84,7 +84,7 @@ describe('EmailsController', () => {
       const emailId = 1;
       const clickData: RecordEmailClickDto = {
         link: 'https://example.com',
-        button_text: 'Click Here',
+        buttonText: 'Click Here',
       };
 
       emailsService.recordClick.mockResolvedValue({} as EmailClickEventEntity);

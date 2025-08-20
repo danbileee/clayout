@@ -6,6 +6,16 @@ import { z } from "zod";
 import qs from "qs";
 import type { PaginationParams } from "../pagination";
 
+export type SiteBlock = Omit<Tables<"site_blocks">, "siteId" | "pageId">;
+
+export type SitePageWithRelations = Omit<Tables<"site_pages">, "siteId"> & {
+  blocks: SiteBlock[];
+};
+
+export type SiteWithRelations = Omit<Tables<"sites">, "authorId"> & {
+  pages: SitePageWithRelations[];
+};
+
 /**
  * GET (all)
  */
@@ -51,7 +61,7 @@ interface GetOneQueryParams {}
 interface GetOneParams extends GetOneEndpointParams, GetOneQueryParams {}
 
 interface GetOneResponse {
-  site: Tables<"sites">;
+  site: SiteWithRelations;
 }
 
 export function getSiteQueryKey({ id, ...params }: Partial<GetOneParams>) {
@@ -84,7 +94,7 @@ interface PostBody extends z.infer<typeof SiteSchema> {}
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
 interface PostResponse {
-  site: Tables<"sites">;
+  site: SiteWithRelations;
 }
 
 export async function postSites(args: {
@@ -116,7 +126,7 @@ interface PatchParams
     PatchBody {}
 
 interface PatchResponse {
-  site: Tables<"sites">;
+  site: SiteWithRelations;
 }
 
 export async function patchSites(args: {
@@ -151,7 +161,7 @@ interface DeleteParams
     DeleteBody {}
 
 interface DeleteResponse {
-  site: Tables<"sites">;
+  id: number;
 }
 
 export async function deleteSites(args: {

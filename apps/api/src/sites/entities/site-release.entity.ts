@@ -23,7 +23,7 @@ export class SiteReleaseEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  published_at?: Date;
+  publishedAt?: Date;
 
   @Column()
   @IsInt()

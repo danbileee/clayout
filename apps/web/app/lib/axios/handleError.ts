@@ -4,7 +4,7 @@ import { getErrorMessage } from "./getErrorMessage";
 
 interface Params<Data extends AxiosResponse> {
   onRetry?: () => Promise<Data | void>;
-  onRedirect?: () => void;
+  onRedirect?: () => Promise<void>;
 }
 
 interface Returns<Data extends AxiosResponse> {
@@ -30,7 +30,7 @@ export async function handleError<Data extends AxiosResponse>(
       };
     } catch (retryError: unknown) {
       if (isAxiosError(retryError) && retryError.response?.status === 401) {
-        onRedirect?.();
+        await onRedirect?.();
       }
 
       const retryErrorMessage = getErrorMessage(retryError);

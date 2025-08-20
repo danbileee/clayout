@@ -1,15 +1,16 @@
 import type { z } from "zod";
+import type { SiteBlockSchema } from "@clayout/interface";
 import { TextBlock } from "./modules/Text";
 import { ImageBlock } from "./modules/Image";
-import type { SiteBlockSchema } from "@clayout/interface";
+import { ButtonBlock } from "./modules/Button";
 
-const SiteBlocks = [TextBlock, ImageBlock];
+const SiteBlocks = [TextBlock, ImageBlock, ButtonBlock];
 
 interface Options {
   renderType: "site" | "email" | "form";
 }
 
-export default class BlockRegistry {
+export class BlockRegistry {
   find(block: z.infer<typeof SiteBlockSchema>, options?: Options) {
     const blocksMap: Record<Options["renderType"], typeof SiteBlocks> = {
       site: SiteBlocks,

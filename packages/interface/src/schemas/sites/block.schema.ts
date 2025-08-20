@@ -5,7 +5,7 @@ import { Tables } from "../../types";
 type BlockSchemaObject = Record<
   keyof Pick<
     Tables<"site_blocks">,
-    "id" | "slug" | "name" | "type" | "data" | "style" | "container_style"
+    "id" | "slug" | "name" | "type" | "data" | "style" | "containerStyle"
   >,
   ZodTypeAny
 >;
@@ -57,7 +57,7 @@ export const TextBlockSchema = z.object({
       margin: z.string(),
     })
     .optional(),
-  container_style: z.object(containerStyleShapeBase),
+  containerStyle: z.object(containerStyleShapeBase),
 });
 
 export const ImageBlockSchema = z.object({
@@ -75,7 +75,7 @@ export const ImageBlockSchema = z.object({
       width: z.string(),
     })
     .optional(),
-  container_style: z.object(containerStyleShapeBase),
+  containerStyle: z.object(containerStyleShapeBase),
 });
 
 export const ButtonBlockSchema = z.object({
@@ -103,7 +103,7 @@ export const ButtonBlockSchema = z.object({
       textAlign: z.nativeEnum(aligns),
     })
     .optional(),
-  container_style: z.object(containerStyleShapeBase),
+  containerStyle: z.object(containerStyleShapeBase),
 });
 
 export const SiteBlockSchema = z.discriminatedUnion("type", [

@@ -1,15 +1,18 @@
+import type { SiteWithRelations } from "@/apis/sites";
 import { SIDEBAR_WIDTH } from "./constants";
-import type { Tables } from "@clayout/interface";
 import { styled } from "styled-components";
+import { Page } from "./page";
 
 interface Props {
-  site: Tables<"sites">;
+  site: SiteWithRelations;
 }
 
 export function EditorViewer({ site }: Props) {
+  const [page] = site.pages;
+
   return (
     <Main>
-      <Canvas></Canvas>
+      <Canvas>{page ? <Page page={page} /> : null}</Canvas>
     </Main>
   );
 }

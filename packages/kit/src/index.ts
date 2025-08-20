@@ -1,1 +1,1 @@
-export const KIT = "kit!";
+export * from "./blocks";

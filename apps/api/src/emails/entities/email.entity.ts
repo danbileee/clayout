@@ -39,7 +39,7 @@ export class EmailEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  sent_at?: Date;
+  sentAt?: Date;
 
   @Column({
     nullable: true,
@@ -48,14 +48,14 @@ export class EmailEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  failed_at?: Date;
+  failedAt?: Date;
 
   @Column({
     nullable: true,
   })
   @IsOptional()
   @IsString()
-  error_log?: string;
+  errorLog?: string;
 
   @ManyToOne(() => UserEntity, (user) => user.email)
   user: UserEntity;
@@ -64,5 +64,5 @@ export class EmailEntity extends BaseEntity {
     () => EmailClickEventEntity,
     (emailClickEvent) => emailClickEvent.email,
   )
-  email_click_events: EmailClickEventEntity[];
+  emailClickEvents: EmailClickEventEntity[];
 }

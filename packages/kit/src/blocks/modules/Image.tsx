@@ -13,7 +13,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
       padding = "0px 0px 0px 0px",
       align,
       ...restContainerStyles
-    } = this.block.container_style ?? {};
+    } = this.block.containerStyle ?? {};
     const { width } = this.block.style ?? {};
     const { url, link, alt } = this.block.data ?? {};
 
@@ -96,7 +96,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
       padding = "0px 0px 0px 0px",
       align,
       ...restContainerStyles
-    } = this.block.container_style ?? {};
+    } = this.block.containerStyle ?? {};
     const { width } = this.block.style ?? {};
     const { url, link, alt } = this.block.data ?? {};
 

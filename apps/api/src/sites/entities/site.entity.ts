@@ -59,7 +59,7 @@ export class SiteEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  last_published_at?: Date;
+  lastPublishedAt?: Date;
 
   @ManyToOne(() => UserEntity, (user) => user.sites, {
     nullable: false,

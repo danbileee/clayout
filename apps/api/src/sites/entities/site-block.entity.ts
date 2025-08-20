@@ -47,7 +47,7 @@ export class SiteBlockEntity extends BaseEntity {
   })
   @IsOptional()
   @IsObject()
-  container_style: Record<string, any>;
+  containerStyle: Record<string, any>;
 
   @ManyToOne(() => SitePageEntity, (page) => page.blocks, {
     nullable: false,

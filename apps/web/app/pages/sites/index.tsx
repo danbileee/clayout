@@ -49,11 +49,15 @@ export default function Sites() {
             },
           },
         });
+      const redirect = async () => navigate(joinPath([Paths.login]));
 
       try {
         return await fn();
       } catch (e) {
-        const { error, data } = await handleError(e, { onRetry: fn });
+        const { error, data } = await handleError(e, {
+          onRetry: fn,
+          onRedirect: redirect,
+        });
 
         if (error) {
           throw error;
@@ -80,31 +84,31 @@ export default function Sites() {
           status: SiteStatuses.Draft,
           pages: [
             {
-              slug: "new-page-1",
+              slug: `new-page-${now}`,
               name: "New Page",
               category: SitePageCategories.Static,
               blocks: [
                 {
                   type: SiteBlockTypes.Image,
                   name: "Image Block",
-                  slug: "image-block-1",
+                  slug: `image-block-${now}`,
                   data: {
-                    url: "https://i.ytimg.com/vi/CGC0BhQwnik/hqdefault.jpg?sqp=-oaymwEnCNACELwBSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLBFiTNkOCpCcIk5R_Yek8JIqyud8A",
+                    url: "https://i.ytimg.com/vi/fK9CNdJK9lo/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA2y_V7p3K3rc1MT0byoni-LpQoVA",
                     link: "https://youtu.be/CGC0BhQwnik?si=XGgxXwxqDl2dsJAy",
-                    alt: "자기 십자가를 지고",
+                    alt: "Blackberry Creme Brulee",
                   },
                   style: {
                     width: "100%",
                   },
-                  container_style: {
-                    padding: "20px",
+                  containerStyle: {
+                    padding: "20px 20px 20px 20px",
                     backgroundColor: "black",
                   },
                 },
                 {
                   type: SiteBlockTypes.Text,
                   name: "Text Block",
-                  slug: "text-block-1",
+                  slug: `text-block-${now}`,
                   data: {
                     value:
                       "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance. Everyone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers. Everyone has the right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay.",
@@ -115,24 +119,24 @@ export default function Sites() {
                     fontSize: "18px",
                     lineHeight: "1.41",
                     fontWeight: "normal",
-                    margin: "2px 0px",
+                    margin: "2px 0px 2px 0px",
                   },
-                  container_style: {
-                    padding: "40px",
+                  containerStyle: {
+                    padding: "40px 40px 40px 40px",
                     backgroundColor: "black",
                   },
                 },
                 {
                   type: SiteBlockTypes.Button,
                   name: "Button Block",
-                  slug: "button-block-1",
+                  slug: `button-block-${now}`,
                   data: {
                     link: "https://www.youtube.com/@lifeisworship.studio",
                     text: "View Channel",
                   },
                   style: {
                     backgroundColor: "white",
-                    padding: "8px 10px",
+                    padding: "8px 10px 8px 10px",
                     color: "black",
                     fontFamily: `"Libertinus Sans", sans-serif`,
                     fontSize: "24px",
@@ -144,8 +148,8 @@ export default function Sites() {
                     textDecoration: "underline",
                     textAlign: "right",
                   },
-                  container_style: {
-                    padding: "20px",
+                  containerStyle: {
+                    padding: "20px 20px 20px 20px",
                     backgroundColor: "black",
                   },
                 },

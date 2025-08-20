@@ -12,7 +12,7 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
       margin = "0px 0px 0px 0px",
       align,
       ...restContainerStyles
-    } = this.block.container_style ?? {};
+    } = this.block.containerStyle ?? {};
     const { link, text } = this.block.data ?? {};
 
     return (
@@ -51,7 +51,7 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
       margin = "0px 0px 0px 0px",
       align,
       ...restContainerStyles
-    } = this.block.container_style ?? {};
+    } = this.block.containerStyle ?? {};
     const { link, text } = this.block.data ?? {};
 
     const containerStyle = getComposedStyleString(restContainerStyles);

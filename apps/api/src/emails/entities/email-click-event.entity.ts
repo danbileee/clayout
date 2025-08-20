@@ -11,7 +11,7 @@ export class EmailClickEventEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  clicked_at?: Date;
+  clickedAt?: Date;
 
   @Column()
   @IsString()
@@ -19,8 +19,8 @@ export class EmailClickEventEntity extends BaseEntity {
 
   @Column()
   @IsString()
-  button_text: string;
+  buttonText: string;
 
-  @ManyToOne(() => EmailEntity, (email) => email.email_click_events)
+  @ManyToOne(() => EmailEntity, (email) => email.emailClickEvents)
   email: EmailEntity;
 }

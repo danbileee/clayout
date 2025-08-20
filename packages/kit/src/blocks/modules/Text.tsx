@@ -9,7 +9,7 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
 
   renderToJsx() {
     const { margin = "0px 0px 0px 0px", ...restContainerStyles } =
-      this.block.container_style ?? {};
+      this.block.containerStyle ?? {};
 
     return (
       <tr>
@@ -43,7 +43,7 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
 
   renderToString() {
     const { margin = "0px 0px 0px 0px", ...restContainerStyles } =
-      this.block.container_style ?? {};
+      this.block.containerStyle ?? {};
     const style = getComposedStyleString({
       ...restContainerStyles,
       ...this.block.style,

@@ -46,7 +46,7 @@ export default function AuthConfirm() {
       params: {
         id: data.email_id,
         link: window.location.href,
-        button_text: data.button_text,
+        buttonText: data.button_text,
       },
     });
 

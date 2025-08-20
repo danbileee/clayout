@@ -11,8 +11,8 @@ export class EmailOpenEventEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  opened_at?: Date;
+  openedAt?: Date;
 
-  @ManyToOne(() => EmailEntity, (email) => email.email_click_events)
+  @ManyToOne(() => EmailEntity, (email) => email.emailClickEvents)
   email: EmailEntity;
 }

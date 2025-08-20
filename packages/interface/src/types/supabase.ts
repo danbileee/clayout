@@ -37,54 +37,54 @@ export type Database = {
       counters: {
         Row: {
           count: number
-          created_at: string
+          createdAt: string
           id: number
-          updated_at: string
+          updatedAt: string
           value: string | null
         }
         Insert: {
           count?: number
-          created_at?: string
+          createdAt?: string
           id?: number
-          updated_at?: string
+          updatedAt?: string
           value?: string | null
         }
         Update: {
           count?: number
-          created_at?: string
+          createdAt?: string
           id?: number
-          updated_at?: string
+          updatedAt?: string
           value?: string | null
         }
         Relationships: []
       }
       email_click_events: {
         Row: {
-          button_text: string
-          clicked_at: string
-          created_at: string
+          buttonText: string
+          clickedAt: string
+          createdAt: string
           emailId: number | null
           id: number
           link: string
-          updated_at: string
+          updatedAt: string
         }
         Insert: {
-          button_text: string
-          clicked_at: string
-          created_at?: string
+          buttonText: string
+          clickedAt: string
+          createdAt?: string
           emailId?: number | null
           id?: number
           link: string
-          updated_at?: string
+          updatedAt?: string
         }
         Update: {
-          button_text?: string
-          clicked_at?: string
-          created_at?: string
+          buttonText?: string
+          clickedAt?: string
+          createdAt?: string
           emailId?: number | null
           id?: number
           link?: string
-          updated_at?: string
+          updatedAt?: string
         }
         Relationships: [
           {
@@ -98,25 +98,25 @@ export type Database = {
       }
       email_open_events: {
         Row: {
-          created_at: string
+          createdAt: string
           emailId: number | null
           id: number
-          opened_at: string
-          updated_at: string
+          openedAt: string
+          updatedAt: string
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           emailId?: number | null
           id?: number
-          opened_at: string
-          updated_at?: string
+          openedAt: string
+          updatedAt?: string
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           emailId?: number | null
           id?: number
-          opened_at?: string
-          updated_at?: string
+          openedAt?: string
+          updatedAt?: string
         }
         Relationships: [
           {
@@ -131,41 +131,41 @@ export type Database = {
       emails: {
         Row: {
           context: Json | null
-          created_at: string
-          error_log: string | null
-          failed_at: string | null
+          createdAt: string
+          errorLog: string | null
+          failedAt: string | null
           id: number
-          sent_at: string | null
+          sentAt: string | null
           subject: string
           template: string
           to: string
-          updated_at: string
+          updatedAt: string
           userId: number | null
         }
         Insert: {
           context?: Json | null
-          created_at?: string
-          error_log?: string | null
-          failed_at?: string | null
+          createdAt?: string
+          errorLog?: string | null
+          failedAt?: string | null
           id?: number
-          sent_at?: string | null
+          sentAt?: string | null
           subject: string
           template: string
           to: string
-          updated_at?: string
+          updatedAt?: string
           userId?: number | null
         }
         Update: {
           context?: Json | null
-          created_at?: string
-          error_log?: string | null
-          failed_at?: string | null
+          createdAt?: string
+          errorLog?: string | null
+          failedAt?: string | null
           id?: number
-          sent_at?: string | null
+          sentAt?: string | null
           subject?: string
           template?: string
           to?: string
-          updated_at?: string
+          updatedAt?: string
           userId?: number | null
         }
         Relationships: [
@@ -180,8 +180,8 @@ export type Database = {
       }
       site_blocks: {
         Row: {
-          container_style: Json | null
-          created_at: string
+          containerStyle: Json | null
+          createdAt: string
           data: Json | null
           id: number
           name: string
@@ -190,11 +190,11 @@ export type Database = {
           slug: string
           style: Json | null
           type: Database["public"]["Enums"]["site_blocks_type_enum"]
-          updated_at: string
+          updatedAt: string
         }
         Insert: {
-          container_style?: Json | null
-          created_at?: string
+          containerStyle?: Json | null
+          createdAt?: string
           data?: Json | null
           id?: number
           name: string
@@ -203,11 +203,11 @@ export type Database = {
           slug: string
           style?: Json | null
           type?: Database["public"]["Enums"]["site_blocks_type_enum"]
-          updated_at?: string
+          updatedAt?: string
         }
         Update: {
-          container_style?: Json | null
-          created_at?: string
+          containerStyle?: Json | null
+          createdAt?: string
           data?: Json | null
           id?: number
           name?: string
@@ -216,7 +216,7 @@ export type Database = {
           slug?: string
           style?: Json | null
           type?: Database["public"]["Enums"]["site_blocks_type_enum"]
-          updated_at?: string
+          updatedAt?: string
         }
         Relationships: [
           {
@@ -237,28 +237,28 @@ export type Database = {
       }
       site_domains: {
         Row: {
-          created_at: string
+          createdAt: string
           hostname: string
           id: number
-          is_verified: boolean
+          isVerified: boolean
           siteId: number
-          updated_at: string
+          updatedAt: string
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           hostname: string
           id?: number
-          is_verified?: boolean
+          isVerified?: boolean
           siteId: number
-          updated_at?: string
+          updatedAt?: string
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           hostname?: string
           id?: number
-          is_verified?: boolean
+          isVerified?: boolean
           siteId?: number
-          updated_at?: string
+          updatedAt?: string
         }
         Relationships: [
           {
@@ -273,33 +273,33 @@ export type Database = {
       site_pages: {
         Row: {
           category: Database["public"]["Enums"]["site_pages_category_enum"]
-          created_at: string
+          createdAt: string
           id: number
           meta: Json | null
           name: string
           siteId: number
           slug: string
-          updated_at: string
+          updatedAt: string
         }
         Insert: {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
-          created_at?: string
+          createdAt?: string
           id?: number
           meta?: Json | null
           name: string
           siteId: number
           slug: string
-          updated_at?: string
+          updatedAt?: string
         }
         Update: {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
-          created_at?: string
+          createdAt?: string
           id?: number
           meta?: Json | null
           name?: string
           siteId?: number
           slug?: string
-          updated_at?: string
+          updatedAt?: string
         }
         Relationships: [
           {
@@ -313,30 +313,30 @@ export type Database = {
       }
       site_releases: {
         Row: {
-          created_at: string
+          createdAt: string
           html_snapshot: string
           id: number
-          published_at: string | null
+          publishedAt: string | null
           siteId: number
-          updated_at: string
+          updatedAt: string
           version: number
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           html_snapshot: string
           id?: number
-          published_at?: string | null
+          publishedAt?: string | null
           siteId: number
-          updated_at?: string
+          updatedAt?: string
           version: number
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           html_snapshot?: string
           id?: number
-          published_at?: string | null
+          publishedAt?: string | null
           siteId?: number
-          updated_at?: string
+          updatedAt?: string
           version?: number
         }
         Relationships: [
@@ -353,38 +353,38 @@ export type Database = {
         Row: {
           authorId: number
           category: Database["public"]["Enums"]["sites_category_enum"]
-          created_at: string
+          createdAt: string
           id: number
-          last_published_at: string | null
+          lastPublishedAt: string | null
           meta: Json | null
           name: string
           slug: string
           status: Database["public"]["Enums"]["sites_status_enum"]
-          updated_at: string
+          updatedAt: string
         }
         Insert: {
           authorId: number
           category?: Database["public"]["Enums"]["sites_category_enum"]
-          created_at?: string
+          createdAt?: string
           id?: number
-          last_published_at?: string | null
+          lastPublishedAt?: string | null
           meta?: Json | null
           name: string
           slug: string
           status?: Database["public"]["Enums"]["sites_status_enum"]
-          updated_at?: string
+          updatedAt?: string
         }
         Update: {
           authorId?: number
           category?: Database["public"]["Enums"]["sites_category_enum"]
-          created_at?: string
+          createdAt?: string
           id?: number
-          last_published_at?: string | null
+          lastPublishedAt?: string | null
           meta?: Json | null
           name?: string
           slug?: string
           status?: Database["public"]["Enums"]["sites_status_enum"]
-          updated_at?: string
+          updatedAt?: string
         }
         Relationships: [
           {
@@ -398,30 +398,30 @@ export type Database = {
       }
       users: {
         Row: {
-          created_at: string
+          createdAt: string
           email: string
           id: number
           password: string
           role: Database["public"]["Enums"]["users_role_enum"]
-          updated_at: string
+          updatedAt: string
           username: string
         }
         Insert: {
-          created_at?: string
+          createdAt?: string
           email: string
           id?: number
           password: string
           role?: Database["public"]["Enums"]["users_role_enum"]
-          updated_at?: string
+          updatedAt?: string
           username: string
         }
         Update: {
-          created_at?: string
+          createdAt?: string
           email?: string
           id?: number
           password?: string
           role?: Database["public"]["Enums"]["users_role_enum"]
-          updated_at?: string
+          updatedAt?: string
           username?: string
         }
         Relationships: []
