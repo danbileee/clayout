@@ -14,7 +14,7 @@ export class SiteReleaseEntity extends BaseEntity {
 
   @Column({ type: 'text' })
   @IsString()
-  html_snapshot: string;
+  htmlSnapshot: string;
 
   @Column({
     nullable: true,

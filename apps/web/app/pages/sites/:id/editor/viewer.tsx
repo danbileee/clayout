@@ -1,4 +1,4 @@
-import type { SiteWithRelations } from "@/apis/sites";
+import type { SiteWithRelations } from "@clayout/interface";
 import { css, styled } from "styled-components";
 import useMeasure from "react-use-measure";
 import { SIDEBAR_WIDTH } from "./constants";

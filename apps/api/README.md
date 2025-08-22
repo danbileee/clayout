@@ -28,6 +28,12 @@ pnpm supabase:gentypes
 ```sh
 # Create a new migration
 supabase migration new create_example_table
+
+# Check the migration status
+supabase migration list
+
+# Backup before production
+supabase db dump --data-only > backup.sql
 ```
 
 This creates a timestamped SQL file in the supabase/migrations folder where you can add your CREATE TABLE statements and other schema changes.

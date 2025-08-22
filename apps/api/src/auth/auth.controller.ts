@@ -9,13 +9,18 @@ import {
   Get,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUserDto } from 'src/users/dtos/user.dto';
-import { LoginDto } from './dtos/auth.dto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
 import { BasicTokenGuard, RefreshTokenGuard } from './guards/token.guard';
 import { Request, Response } from 'express';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { randomBytes } from 'crypto';
+import { ZodValidationPipe } from 'src/shared/pipes/zod.pipe';
+import {
+  LoginDto,
+  LoginSchema,
+  RegisterDto,
+  RegisterSchema,
+} from '@clayout/interface';
 
 @Controller('auth')
 export class AuthController {
@@ -83,7 +88,7 @@ export class AuthController {
   @Post('login')
   @PublicRoute()
   async postLogin(
-    @Body() loginUserDto: LoginDto,
+    @Body(new ZodValidationPipe(LoginSchema)) loginUserDto: LoginDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken, refreshToken } =
@@ -123,10 +128,10 @@ export class AuthController {
   @Post('register')
   @PublicRoute()
   async postRegiter(
-    @Body() createUserDto: CreateUserDto,
+    @Body(new ZodValidationPipe(RegisterSchema)) registerDto: RegisterDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { basicToken } = await this.authService.register(createUserDto);
+    const { basicToken } = await this.authService.register(registerDto);
 
     res.cookie('basicToken', basicToken, {
       httpOnly: true,

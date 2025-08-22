@@ -3,14 +3,17 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateSiteDto, UpdateSiteDto } from './dto/site.dto';
+import {
+  CreateSiteDto,
+  Pagination,
+  UpdateSiteDto,
+  PaginateSiteDto,
+} from '@clayout/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Pagination } from '@clayout/interface';
 import { AuthorService } from 'src/shared/services/author.service';
 import { PaginationService } from 'src/shared/services/pagination.service';
 import { SiteEntity } from './entities/site.entity';
-import { PaginateSiteDto } from './dto/site.dto';
 import { SitePageEntity } from './entities/site-page.entity';
 import { SiteBlockEntity } from './entities/site-block.entity';
 import { UserEntity } from 'src/users/entities/user.entity';

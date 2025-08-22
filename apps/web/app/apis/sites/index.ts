@@ -1,20 +1,16 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
 import { getQueryKey } from "@/lib/react-query/getQueryKey";
-import type { CursorPagination, SiteSchema, Tables } from "@clayout/interface";
+import type {
+  CursorPagination,
+  SitesWithRelations,
+  SiteWithRelations,
+  Tables,
+  CreateSiteDto,
+  UpdateSiteDto,
+  PaginateSiteDto,
+} from "@clayout/interface";
 import { type AxiosResponse } from "axios";
-import { z } from "zod";
 import qs from "qs";
-import type { PaginationParams } from "../pagination";
-
-export type SiteBlock = Omit<Tables<"site_blocks">, "siteId" | "pageId">;
-
-export type SitePageWithRelations = Omit<Tables<"site_pages">, "siteId"> & {
-  blocks: SiteBlock[];
-};
-
-export type SiteWithRelations = Omit<Tables<"sites">, "authorId"> & {
-  pages: SitePageWithRelations[];
-};
 
 /**
  * GET (all)
@@ -22,14 +18,12 @@ export type SiteWithRelations = Omit<Tables<"sites">, "authorId"> & {
 
 interface GetAllEndpointParams {}
 
-interface GetAllQueryParams {
-  pagination: PaginationParams;
-}
+interface GetAllQueryParams extends PaginateSiteDto {}
 
 interface GetAllParams extends GetAllEndpointParams, GetAllQueryParams {}
 
 interface GetAllResponse {
-  results: CursorPagination<Tables<"sites">>;
+  results: CursorPagination<SitesWithRelations>;
 }
 
 export function getSitesQueryKey(params?: Partial<GetAllParams>) {
@@ -42,7 +36,7 @@ export async function getSites(args: {
 }) {
   const { params, request } = args;
   const axios = createAxiosInstance(request);
-  const queryString = qs.stringify(params.pagination, { addQueryPrefix: true });
+  const queryString = qs.stringify(params, { addQueryPrefix: true });
   return await axios.get<
     GetAllResponse,
     AxiosResponse<GetAllResponse, GetAllParams>,
@@ -89,7 +83,7 @@ interface PostEndpointParams {}
 
 interface PostQueryParams {}
 
-interface PostBody extends z.infer<typeof SiteSchema> {}
+interface PostBody extends CreateSiteDto {}
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
@@ -118,7 +112,7 @@ interface PatchEndpointParams extends Pick<Tables<"sites">, "id"> {}
 
 interface PatchQueryParams {}
 
-interface PatchBody extends Partial<z.infer<typeof SiteSchema>> {}
+interface PatchBody extends UpdateSiteDto {}
 
 interface PatchParams
   extends PatchEndpointParams,

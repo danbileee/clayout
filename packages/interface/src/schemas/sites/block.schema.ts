@@ -57,7 +57,7 @@ export const TextBlockSchema = z.object({
       margin: z.string(),
     })
     .optional(),
-  containerStyle: z.object(containerStyleShapeBase),
+  containerStyle: z.object(containerStyleShapeBase).optional(),
 });
 
 export const ImageBlockSchema = z.object({
@@ -75,7 +75,7 @@ export const ImageBlockSchema = z.object({
       width: z.string(),
     })
     .optional(),
-  containerStyle: z.object(containerStyleShapeBase),
+  containerStyle: z.object(containerStyleShapeBase).optional(),
 });
 
 export const ButtonBlockSchema = z.object({
@@ -103,7 +103,7 @@ export const ButtonBlockSchema = z.object({
       textAlign: z.nativeEnum(aligns),
     })
     .optional(),
-  containerStyle: z.object(containerStyleShapeBase),
+  containerStyle: z.object(containerStyleShapeBase).optional(),
 });
 
 export const SiteBlockSchema = z.discriminatedUnion("type", [

@@ -11,17 +11,22 @@ import {
   Query,
 } from '@nestjs/common';
 import { SitesService } from './sites.service';
-import { CreateSiteDto, UpdateSiteDto } from './dto/site.dto';
+import {
+  CreateSiteDto,
+  Pagination,
+  UpdateSiteDto,
+  SiteSchema,
+  PaginateSiteDto,
+  PaginateSiteSchema,
+} from '@clayout/interface';
 import { Roles } from 'src/users/decorators/role.decorator';
 import { UserRoleWeights } from 'src/users/constants/role.const';
 import { AuthorGuard } from 'src/shared/guards/author.guard';
 import { Author } from 'src/shared/decorators/author.decorator';
 import { ZodValidationPipe } from 'src/shared/pipes/zod.pipe';
-import { Pagination, SiteSchema } from '@clayout/interface';
-import { PaginateSiteDto } from './dto/site.dto';
-import { SiteEntity } from './entities/site.entity';
 import { User } from 'src/users/decorators/user.decorator';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { SiteEntity } from './entities/site.entity';
 
 @Roles({ minWeight: UserRoleWeights.User })
 @Controller('sites')
@@ -39,7 +44,8 @@ export class SitesController {
   @Get()
   findAll(
     @User('id') userId: number,
-    @Query() paginateSiteDto: PaginateSiteDto,
+    @Query(new ZodValidationPipe(PaginateSiteSchema))
+    paginateSiteDto: PaginateSiteDto,
   ): Promise<{ results: Pagination<SiteEntity> }> {
     return this.sitesService.paginate(userId, paginateSiteDto);
   }

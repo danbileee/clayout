@@ -8,7 +8,7 @@ import { EmailEntity } from './entities/email.entity';
 import { EmailClickEventEntity } from './entities/email-click-event.entity';
 import { EmailOpenEventEntity } from './entities/email-open-event.entity';
 import { UserEntity } from '../users/entities/user.entity';
-import { RecordEmailClickDto } from './dtos/email.dto';
+import { RecordEmailClickDto } from '@clayout/interface';
 
 describe('EmailsController', () => {
   let controller: EmailsController;

@@ -3,9 +3,9 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EmailEntity } from './entities/email.entity';
-import { RecordEmailClickDto, SendEmailDto } from './dtos/email.dto';
 import { EmailClickEventEntity } from './entities/email-click-event.entity';
 import { EmailOpenEventEntity } from './entities/email-open-event.entity';
+import { RecordEmailClickDto, SendEmailDto } from '@clayout/interface';
 
 @Injectable()
 export class EmailsService {

@@ -1,17 +1,23 @@
 import { z, ZodType } from "zod";
 import { Tables } from "../../types";
 
-export const UserSchema = z.object<
-  Record<
-    keyof Pick<Tables<"users">, "username" | "email" | "password">,
-    ZodType
-  > &
-    Record<"confirm", ZodType>
->({
+const userShape = {
   username: z.string().min(1).max(20),
   email: z.string().email(),
   password: z.string().min(3).max(20),
   confirm: z.string().min(1).max(20),
+} satisfies Record<
+  keyof Pick<Tables<"users">, "username" | "email" | "password">,
+  ZodType
+> &
+  Record<"confirm", ZodType>;
+
+export const UserSchema = z.object(userShape);
+
+export const RegisterSchema = UserSchema.pick({
+  username: true,
+  email: true,
+  password: true,
 });
 
 export const SignupSchema = UserSchema.pick({

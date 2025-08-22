@@ -1,6 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 import { Constants, Tables } from "../../types";
 import { SitePageSchema } from "./page.schema";
+import { PaginationSchema } from "../pagination.schema";
 
 export const SiteMetaSchema = z.object({});
 
@@ -19,3 +20,10 @@ const siteShape = {
 };
 
 export const SiteSchema = z.object(siteShape);
+
+export const PaginateSiteSchema = PaginationSchema.createWithConfig<
+  Tables<"sites">
+>({
+  allowedSortFields: ["createdAt", "updatedAt", "lastPublishedAt"],
+  allowedFilterFields: ["createdAt", "updatedAt", "id", "category"],
+});

@@ -1,6 +1,5 @@
 import { BlockRegistry } from "@clayout/kit";
-import { SiteBlockSchema } from "@clayout/interface";
-import type { SiteBlock } from "@/apis/sites";
+import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
 
 interface Props {
   block: SiteBlock;

@@ -9,7 +9,7 @@ import { UserEntity } from '../users/entities/user.entity';
 import { InternalServerErrorException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { RecordEmailClickDto } from './dtos/email.dto';
+import { RecordEmailClickDto } from '@clayout/interface';
 
 describe('EmailsService', () => {
   let service: EmailsService;

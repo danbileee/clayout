@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import {
   FilterOption,
-  PaginationDto,
+  BasePaginationSchema,
   PaginationOptions,
-} from '../dtos/pagination.dto';
+} from '@clayout/interface';
 import {
   Between,
   FindManyOptions,
@@ -19,7 +19,7 @@ import { EnvKeys } from '../constants/env.const';
 import { CursorPagination, PagePagination } from '@clayout/interface';
 
 interface PaginationParams<T> {
-  paginationDto: PaginationDto;
+  paginationDto: typeof BasePaginationSchema._type;
   repository: Repository<T>;
   findManyOptions?: FindManyOptions<T>;
   path: string;

@@ -1,4 +1,4 @@
-import type { SiteWithRelations } from "@/apis/sites";
+import type { SiteWithRelations } from "@clayout/interface";
 import { Button } from "@/components/ui/button";
 import { forwardRef } from "react";
 import { styled } from "styled-components";

@@ -43,10 +43,8 @@ export default function Sites() {
       const fn = async () =>
         await getSites({
           params: {
-            pagination: {
-              from: ctx.pageParam,
-              take: 20,
-            },
+            from: ctx.pageParam,
+            take: 20,
           },
         });
       const redirect = async () => navigate(joinPath([Paths.login]));
