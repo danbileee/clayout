@@ -13,6 +13,7 @@ import { RoleGuard } from './users/guards/role.guard';
 import { AccessTokenGuard, CsrfTokenGuard } from './auth/guards/token.guard';
 import { EmailsModule } from './emails/emails.module';
 import { SitesModule } from './sites/sites.module';
+import { AssetsModule } from './assets/assets.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { SitesModule } from './sites/sites.module';
     UsersModule,
     EmailsModule,
     SitesModule,
+    AssetsModule,
   ],
   controllers: [AppController],
   providers: [

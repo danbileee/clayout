@@ -39,6 +39,15 @@ export const EnvKeys = {
    * Sentry
    */
   SENTRY_DSN: 'SENTRY_DSN',
+  /**
+   * Cloudflare
+   */
+  CF_ACCESS_KEY_ID: 'CF_ACCESS_KEY_ID',
+  CF_SECRET_ACCESS_KEY: 'CF_SECRET_ACCESS_KEY',
+  CF_R2_URL: 'CF_R2_URL',
+  CF_R2_TOKEN: 'CF_R2_TOKEN',
+  CF_R2_ASSETS_BUCKET: 'CF_R2_ASSETS_BUCKET',
+  CF_R2_BUNDLES_BUCKET: 'CF_R2_BUNDLES_BUCKET',
 } as const;
 
 export type EnvKey = keyof typeof EnvKeys;

@@ -80,4 +80,13 @@ export class SitesController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.sitesService.delete(id);
   }
+
+  @Patch(':id/publish')
+  @UseGuards(AuthorGuard)
+  @Author({
+    service: SitesService,
+  })
+  publish(@Param('id', ParseIntPipe) id: number) {
+    return this.sitesService.publish(id);
+  }
 }

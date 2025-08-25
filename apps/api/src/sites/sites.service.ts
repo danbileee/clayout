@@ -8,7 +8,9 @@ import {
   Pagination,
   UpdateSiteDto,
   PaginateSiteDto,
+  SiteBlockSchema,
 } from '@clayout/interface';
+import { BlockRegistry } from '@clayout/kit';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthorService } from 'src/shared/services/author.service';
@@ -17,6 +19,7 @@ import { SiteEntity } from './entities/site.entity';
 import { SitePageEntity } from './entities/site-page.entity';
 import { SiteBlockEntity } from './entities/site-block.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { SiteFile } from './interfaces/site.interface';
 
 @Injectable()
 export class SitesService implements AuthorService {
@@ -182,6 +185,71 @@ export class SitesService implements AuthorService {
     await this.sitesRepository.delete({ id });
 
     return { id };
+  }
+
+  async publish(id: number): Promise<boolean> {
+    const site = await this.sitesRepository.findOne({
+      where: {
+        id,
+      },
+      relations: {
+        author: true,
+        pages: {
+          blocks: true,
+        },
+      },
+    });
+
+    const files: File[] = [];
+
+    return true;
+  }
+
+  generateSiteFiles(site: SiteEntity) {
+    const files: SiteFile[] = [];
+
+    for (const page of site.pages) {
+      const html = this.renderBlocks(site, page);
+
+      files.push({
+        path: `${page.slug || 'index'}.html`,
+        content: html,
+        contentType: 'text/html',
+      });
+    }
+
+    files.push({
+      path: 'styles.css',
+      content: 'body { font-family: sans-serif; }',
+      contentType: 'text/css',
+    });
+
+    return files;
+  }
+
+  renderBlocks(site: SiteEntity, page: SitePageEntity) {
+    return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${site.name}</title>
+  </head>
+  <body>
+    <table cellPadding="0" cellSpacing="0" style={{ width: "768px" }}>
+      <tbody>
+        ${page.blocks
+          .map((block) => {
+            const parsedBlock = SiteBlockSchema.parse(block);
+            const matchedBlock = new BlockRegistry().find(parsedBlock);
+
+            return matchedBlock.renderToString();
+          })
+          .join(`\n`)}
+      </tbody>
+    </table>
+  </body>
+</html>`;
   }
 
   async isAuthor(userId: number, resourceId: number): Promise<boolean> {

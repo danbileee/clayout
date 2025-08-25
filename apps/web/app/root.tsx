@@ -34,15 +34,27 @@ export function ErrorBoundary() {
   const error = useRouteError();
   const { message, details, stack } = getErrorInfo(error);
 
+  if (error instanceof Error && error.message.includes("useContext")) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-xl font-semibold mb-2">Loading...</h1>
+          <p className="text-gray-600">Please wait while we load the page.</p>
+        </div>
+      </div>
+    );
+  }
   return (
-    <main>
-      <h1>{message}</h1>
-      <p>{details}</p>
-      {stack && !import.meta.env.PROD && (
-        <pre>
-          <code>{stack}</code>
-        </pre>
-      )}
+    <main className="flex items-center justify-center min-h-screen">
+      <div className="text-center">
+        <h1 className="text-xl font-semibold mb-2">{message}</h1>
+        <p className="text-gray-600">{details}</p>
+        {stack && !import.meta.env.PROD && (
+          <pre>
+            <code>{stack}</code>
+          </pre>
+        )}
+      </div>
     </main>
   );
 }

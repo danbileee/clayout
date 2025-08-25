@@ -1,7 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 import { Constants, Tables } from "../../types";
 import { SitePageSchema } from "./page.schema";
-import { PaginationSchema } from "../pagination.schema";
+import { PaginationSchema } from "../pagination";
 
 export const SiteMetaSchema = z.object({});
 

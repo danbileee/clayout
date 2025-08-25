@@ -34,6 +34,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      assets: {
+        Row: {
+          createdAt: Date
+          id: number
+          order: number
+          path: string
+          targetId: number
+          targetType: Database["public"]["Enums"]["asset_types_enum"]
+          updatedAt: Date
+        }
+        Insert: {
+          createdAt: Date
+          id: number
+          order?: number
+          path: string
+          targetId: number
+          targetType: Database["public"]["Enums"]["asset_types_enum"]
+          updatedAt: Date
+        }
+        Update: {
+          createdAt?: Date
+          id: number
+          order?: number
+          path?: string
+          targetId?: number
+          targetType?: Database["public"]["Enums"]["asset_types_enum"]
+          updatedAt?: Date
+        }
+        Relationships: []
+      }
       counters: {
         Row: {
           count: number
@@ -44,15 +74,15 @@ export type Database = {
         }
         Insert: {
           count?: number
-          createdAt?: Date
-          id?: number
-          updatedAt?: Date
+          createdAt: Date
+          id: number
+          updatedAt: Date
           value?: string | null
         }
         Update: {
           count?: number
           createdAt?: Date
-          id?: number
+          id: number
           updatedAt?: Date
           value?: string | null
         }
@@ -71,18 +101,18 @@ export type Database = {
         Insert: {
           buttonText: string
           clickedAt: Date
-          createdAt?: Date
+          createdAt: Date
           emailId?: number | null
-          id?: number
+          id: number
           link: string
-          updatedAt?: Date
+          updatedAt: Date
         }
         Update: {
           buttonText?: string
           clickedAt?: Date
           createdAt?: Date
           emailId?: number | null
-          id?: number
+          id: number
           link?: string
           updatedAt?: Date
         }
@@ -105,16 +135,16 @@ export type Database = {
           updatedAt: Date
         }
         Insert: {
-          createdAt?: Date
+          createdAt: Date
           emailId?: number | null
-          id?: number
+          id: number
           openedAt: Date
-          updatedAt?: Date
+          updatedAt: Date
         }
         Update: {
           createdAt?: Date
           emailId?: number | null
-          id?: number
+          id: number
           openedAt?: Date
           updatedAt?: Date
         }
@@ -144,15 +174,15 @@ export type Database = {
         }
         Insert: {
           context?: Json | null
-          createdAt?: Date
+          createdAt: Date
           errorLog?: string | null
           failedAt?: Date | null
-          id?: number
+          id: number
           sentAt?: Date | null
           subject: string
           template: string
           to: string
-          updatedAt?: Date
+          updatedAt: Date
           userId?: number | null
         }
         Update: {
@@ -160,7 +190,7 @@ export type Database = {
           createdAt?: Date
           errorLog?: string | null
           failedAt?: Date | null
-          id?: number
+          id: number
           sentAt?: Date | null
           subject?: string
           template?: string
@@ -194,22 +224,22 @@ export type Database = {
         }
         Insert: {
           containerStyle?: Json | null
-          createdAt?: Date
+          createdAt: Date
           data?: Json | null
-          id?: number
+          id: number
           name: string
           pageId: number
           siteId: number
           slug: string
           style?: Json | null
           type?: Database["public"]["Enums"]["site_blocks_type_enum"]
-          updatedAt?: Date
+          updatedAt: Date
         }
         Update: {
           containerStyle?: Json | null
           createdAt?: Date
           data?: Json | null
-          id?: number
+          id: number
           name?: string
           pageId?: number
           siteId?: number
@@ -220,14 +250,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "FK_04adc5fbb09eb32db0c746eee20"
+            foreignKeyName: "FK_site_blocks_page"
             columns: ["pageId"]
             isOneToOne: false
             referencedRelation: "site_pages"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "FK_2e9c736c4ab706d49188947ad92"
+            foreignKeyName: "FK_site_blocks_site"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -245,24 +275,24 @@ export type Database = {
           updatedAt: Date
         }
         Insert: {
-          createdAt?: Date
+          createdAt: Date
           hostname: string
-          id?: number
+          id: number
           isVerified?: boolean
           siteId: number
-          updatedAt?: Date
+          updatedAt: Date
         }
         Update: {
           createdAt?: Date
           hostname?: string
-          id?: number
+          id: number
           isVerified?: boolean
           siteId?: number
           updatedAt?: Date
         }
         Relationships: [
           {
-            foreignKeyName: "FK_b64cc9e1f0a969eea87380c462d"
+            foreignKeyName: "FK_site_domains_site"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -283,18 +313,18 @@ export type Database = {
         }
         Insert: {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
-          createdAt?: Date
-          id?: number
+          createdAt: Date
+          id: number
           meta?: Json | null
           name: string
           siteId: number
           slug: string
-          updatedAt?: Date
+          updatedAt: Date
         }
         Update: {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
           createdAt?: Date
-          id?: number
+          id: number
           meta?: Json | null
           name?: string
           siteId?: number
@@ -303,7 +333,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "FK_4029d13e5c69a098b2076c761c3"
+            foreignKeyName: "FK_site_pages_site"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -322,18 +352,18 @@ export type Database = {
           version: number
         }
         Insert: {
-          createdAt?: Date
+          createdAt: Date
           htmlSnapshot: string
-          id?: number
+          id: number
           publishedAt?: string | null
           siteId: number
-          updatedAt?: Date
+          updatedAt: Date
           version: number
         }
         Update: {
           createdAt?: Date
           htmlSnapshot?: string
-          id?: number
+          id: number
           publishedAt?: string | null
           siteId?: number
           updatedAt?: Date
@@ -341,7 +371,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "FK_5c72a2f81f04dd6c238771c591f"
+            foreignKeyName: "FK_site_releases_site"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -365,20 +395,20 @@ export type Database = {
         Insert: {
           authorId: number
           category?: Database["public"]["Enums"]["sites_category_enum"]
-          createdAt?: Date
-          id?: number
+          createdAt: Date
+          id: number
           lastPublishedAt?: Date | null
           meta?: Json | null
           name: string
           slug: string
           status?: Database["public"]["Enums"]["sites_status_enum"]
-          updatedAt?: Date
+          updatedAt: Date
         }
         Update: {
           authorId?: number
           category?: Database["public"]["Enums"]["sites_category_enum"]
           createdAt?: Date
-          id?: number
+          id: number
           lastPublishedAt?: Date | null
           meta?: Json | null
           name?: string
@@ -388,7 +418,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "FK_a5c4bd58c29138cf04e170dfa67"
+            foreignKeyName: "FK_sites_author"
             columns: ["authorId"]
             isOneToOne: false
             referencedRelation: "users"
@@ -407,18 +437,18 @@ export type Database = {
           username: string
         }
         Insert: {
-          createdAt?: Date
+          createdAt: Date
           email: string
-          id?: number
+          id: number
           password: string
           role?: Database["public"]["Enums"]["users_role_enum"]
-          updatedAt?: Date
+          updatedAt: Date
           username: string
         }
         Update: {
           createdAt?: Date
           email?: string
-          id?: number
+          id: number
           password?: string
           role?: Database["public"]["Enums"]["users_role_enum"]
           updatedAt?: Date
@@ -434,6 +464,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
+      asset_types_enum: "Site" | "SitePage" | "SiteBlock"
       site_blocks_type_enum: "None" | "Text" | "Image" | "Button"
       site_pages_category_enum: "Static" | "List" | "Article"
       sites_category_enum:
@@ -576,6 +607,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      asset_types_enum: ["Site", "SitePage", "SiteBlock"],
       site_blocks_type_enum: ["None", "Text", "Image", "Button"],
       site_pages_category_enum: ["Static", "List", "Article"],
       sites_category_enum: [
