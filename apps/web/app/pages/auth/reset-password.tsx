@@ -26,14 +26,14 @@ import { toast } from "sonner";
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
   const token = requestUrl.searchParams.get("token") ?? "";
-  const email_id = requestUrl.searchParams.get("email_id") ?? "";
-  const button_text = requestUrl.searchParams.get("button_text") ?? "";
+  const emailId = requestUrl.searchParams.get("emailId") ?? "";
+  const buttonText = requestUrl.searchParams.get("buttonText") ?? "";
 
   try {
     await postEmailsTrackClick({
       params: {
-        id: email_id,
-        button_text: button_text,
+        id: emailId,
+        buttonText: buttonText,
         link: request.url,
       },
       request,

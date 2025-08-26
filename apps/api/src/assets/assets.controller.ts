@@ -51,9 +51,11 @@ export class AssetsController {
   }
 
   @Get(':id')
-  async findOne(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<{ asset: AssetEntity }> {
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<{
+    asset: AssetEntity & {
+      target: unknown;
+    };
+  }> {
     return await this.assetsService.getById(id);
   }
 

@@ -4,6 +4,7 @@ import { AssetsService } from './assets.service';
 import { AssetEntity } from './entities/asset.entity';
 import { PaginationService } from 'src/shared/services/pagination.service';
 import { UploaderService } from 'src/shared/services/uploader.service';
+import { DataSource } from 'typeorm';
 import {
   createMockRepositoryProvider,
   createMockRepository,
@@ -14,6 +15,7 @@ describe('AssetsService', () => {
   let mockRepository: ReturnType<typeof createMockRepository>;
   let mockPaginationService: Partial<PaginationService>;
   let mockUploaderService: Partial<UploaderService>;
+  let mockDataSource: Partial<DataSource>;
 
   beforeEach(async () => {
     mockPaginationService = {
@@ -22,6 +24,10 @@ describe('AssetsService', () => {
 
     mockUploaderService = {
       getSignedUrl: jest.fn(),
+    };
+
+    mockDataSource = {
+      getRepository: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -35,6 +41,10 @@ describe('AssetsService', () => {
         {
           provide: UploaderService,
           useValue: mockUploaderService,
+        },
+        {
+          provide: DataSource,
+          useValue: mockDataSource,
         },
       ],
     }).compile();

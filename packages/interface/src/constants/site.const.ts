@@ -2,7 +2,8 @@ export const SiteStatuses = {
   Draft: "Draft",
   Published: "Published",
   Reviewing: "Reviewing",
-  Fixing: "Fixing",
+  Updating: "Updating",
+  Error: "Error",
 } as const;
 
 export type SiteStatus = keyof typeof SiteStatuses;

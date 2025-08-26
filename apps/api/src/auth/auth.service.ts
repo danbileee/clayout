@@ -197,8 +197,8 @@ export class AuthService {
     const queryString = qs.stringify(
       {
         token: basicToken,
-        email_id: createdEmail.id,
-        button_text: `Verify email`,
+        emailId: createdEmail.id,
+        buttonText: `Verify email`,
       },
       { addQueryPrefix: true },
     );
@@ -265,8 +265,8 @@ export class AuthService {
     const queryString = qs.stringify(
       {
         token: basicToken,
-        email_id: createdEmail.id,
-        button_text: `Reset password`,
+        emailId: createdEmail.id,
+        buttonText: `Reset password`,
       },
       { addQueryPrefix: true },
     );

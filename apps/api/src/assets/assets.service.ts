@@ -1,9 +1,10 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationService } from 'src/shared/services/pagination.service';
 import { AssetEntity } from './entities/asset.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import {
+  AssetTypes,
   CreateAssetDto,
   PaginateAssetDto,
   Pagination,
@@ -11,10 +12,14 @@ import {
   UploadAssetInputDto,
 } from '@clayout/interface';
 import { UploaderService } from 'src/shared/services/uploader.service';
+import { SiteBlockEntity } from 'src/sites/entities/site-block.entity';
+import { SitePageEntity } from 'src/sites/entities/site-page.entity';
+import { SiteEntity } from 'src/sites/entities/site.entity';
 
 @Injectable()
 export class AssetsService {
   constructor(
+    private readonly dataSource: DataSource,
     private readonly paginationService: PaginationService,
     private readonly uploaderService: UploaderService,
     @InjectRepository(AssetEntity)
@@ -46,14 +51,45 @@ export class AssetsService {
     return { asset: savedAsset };
   }
 
-  async getById(id: number): Promise<{ asset: AssetEntity }> {
+  async getById(
+    id: number,
+  ): Promise<{ asset: AssetEntity & { target: unknown } }> {
     const matchedAsset = await this.assetsRepository.findOne({ where: { id } });
 
     if (!matchedAsset) {
-      throw new BadRequestException(`Asset not found`);
+      throw new NotFoundException(`Asset not found`);
     }
 
-    return { asset: matchedAsset };
+    let target: unknown;
+
+    switch (matchedAsset.targetType) {
+      case AssetTypes.Site:
+        target = await this.dataSource.getRepository(SiteEntity).findOne({
+          where: { id: matchedAsset.targetId },
+        });
+        break;
+      case AssetTypes.SitePage:
+        target = await this.dataSource.getRepository(SitePageEntity).findOne({
+          where: { id: matchedAsset.targetId },
+        });
+        break;
+      case AssetTypes.SiteBlock:
+        target = await this.dataSource.getRepository(SiteBlockEntity).findOne({
+          where: { id: matchedAsset.targetId },
+        });
+        break;
+      default:
+        throw new NotFoundException(
+          `Unknown target type: ${matchedAsset.targetType}`,
+        );
+    }
+
+    return {
+      asset: {
+        ...matchedAsset,
+        target,
+      },
+    };
   }
 
   async update(
@@ -65,7 +101,7 @@ export class AssetsService {
     });
 
     if (!matchedAsset) {
-      throw new BadRequestException(`Asset not found`);
+      throw new NotFoundException(`Asset not found`);
     }
 
     const updatedAsset: AssetEntity = {

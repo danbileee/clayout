@@ -4,9 +4,11 @@ import { createMockRepositoryProvider } from '../../test/test-utils';
 import { SiteEntity } from './entities/site.entity';
 import { SitePageEntity } from './entities/site-page.entity';
 import { SiteBlockEntity } from './entities/site-block.entity';
+import { SiteReleaseEntity } from './entities/site-release.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { PaginationService } from '../shared/services/pagination.service';
+import { UploaderService } from '../shared/services/uploader.service';
 import { ConfigService } from '@nestjs/config';
 
 describe('SitesService', () => {
@@ -20,10 +22,17 @@ describe('SitesService', () => {
         createMockRepositoryProvider(SiteEntity),
         createMockRepositoryProvider(SitePageEntity),
         createMockRepositoryProvider(SiteBlockEntity),
+        createMockRepositoryProvider(SiteReleaseEntity),
         {
           provide: PaginationService,
           useValue: {
             paginate: jest.fn(),
+          },
+        },
+        {
+          provide: UploaderService,
+          useValue: {
+            getSignedUrl: jest.fn(),
           },
         },
         {

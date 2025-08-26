@@ -1,5 +1,5 @@
 export interface SiteFile {
-  path: string;
+  name: string;
   content: Buffer | string;
   contentType: string;
 }

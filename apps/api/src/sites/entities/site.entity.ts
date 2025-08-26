@@ -17,6 +17,8 @@ import {
 } from '@clayout/interface';
 import { SitePageEntity } from './site-page.entity';
 import { SiteBlockEntity } from './site-block.entity';
+import { SiteReleaseEntity } from './site-release.entity';
+import { SiteDomainEntity } from './site-domain.entity';
 
 @Entity('sites')
 export class SiteEntity extends BaseEntity {
@@ -71,4 +73,10 @@ export class SiteEntity extends BaseEntity {
 
   @OneToMany(() => SiteBlockEntity, (block) => block.site)
   blocks: SiteBlockEntity[];
+
+  @OneToMany(() => SiteReleaseEntity, (siteRelease) => siteRelease.site)
+  releases: SiteReleaseEntity[];
+
+  @OneToMany(() => SiteDomainEntity, (siteDomain) => siteDomain.site)
+  domains: SiteDomainEntity[];
 }

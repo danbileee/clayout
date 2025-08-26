@@ -1,5 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EmailEntity } from './entities/email.entity';
@@ -98,7 +98,7 @@ export class EmailsService {
     });
 
     if (!matchedEmail) {
-      throw new InternalServerErrorException(`Email not found.`);
+      throw new NotFoundException(`Email not found.`);
     }
 
     const createdEvent = this.emailOpenEventsRepository.create({
@@ -121,7 +121,7 @@ export class EmailsService {
     });
 
     if (!matchedEmail) {
-      throw new InternalServerErrorException(`Email not found.`);
+      throw new NotFoundException(`Email not found.`);
     }
 
     const createdEvent = this.emailClickEventsRepository.create({

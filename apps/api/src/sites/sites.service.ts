@@ -8,9 +8,8 @@ import {
   Pagination,
   UpdateSiteDto,
   PaginateSiteDto,
-  SiteBlockSchema,
+  SiteStatuses,
 } from '@clayout/interface';
-import { BlockRegistry } from '@clayout/kit';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AuthorService } from 'src/shared/services/author.service';
@@ -19,18 +18,28 @@ import { SiteEntity } from './entities/site.entity';
 import { SitePageEntity } from './entities/site-page.entity';
 import { SiteBlockEntity } from './entities/site-block.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { UploaderService } from 'src/shared/services/uploader.service';
+import { generateSiteFiles } from './utils/generateSiteFiles';
+import { ConfigService } from '@nestjs/config';
+import { EnvKeys } from 'src/shared/constants/env.const';
+import { SiteReleaseEntity } from './entities/site-release.entity';
+import { randomBytes } from 'crypto';
 import { SiteFile } from './interfaces/site.interface';
 
 @Injectable()
 export class SitesService implements AuthorService {
   constructor(
     private readonly paginationService: PaginationService,
+    private readonly uploaderService: UploaderService,
+    private readonly configService: ConfigService,
     @InjectRepository(SiteEntity)
     private readonly sitesRepository: Repository<SiteEntity>,
     @InjectRepository(SitePageEntity)
     private readonly sitesPagesRepository: Repository<SitePageEntity>,
     @InjectRepository(SiteBlockEntity)
     private readonly sitesBlocksRepository: Repository<SiteBlockEntity>,
+    @InjectRepository(SiteReleaseEntity)
+    private readonly sitesReleasesRepository: Repository<SiteReleaseEntity>,
   ) {}
 
   async create(
@@ -197,59 +206,106 @@ export class SitesService implements AuthorService {
         pages: {
           blocks: true,
         },
+        domains: true,
       },
     });
 
-    const files: File[] = [];
+    if (!site) {
+      throw new NotFoundException(`Site not found`);
+    }
+
+    const files = generateSiteFiles(site);
+    const release = await this.createRelease(site, files);
+
+    for (const file of files) {
+      await this.uploadBundle({
+        file,
+        siteId: site.id,
+        releaseVersion: release.version,
+      });
+    }
+
+    const hostnames = [
+      ...site.domains.map((domain) => domain.hostname),
+      `${site.slug}.clayout.app`,
+    ];
+
+    for (const hostname of hostnames) {
+      await this.updateKV({
+        hostname,
+        siteId: site.id,
+        releaseVersion: release.version,
+      });
+    }
+
+    const now = Date.now();
+
+    await this.sitesReleasesRepository.save({
+      ...release,
+      publishedAt: now,
+    });
+    await this.sitesRepository.save({
+      ...site,
+      status: SiteStatuses.Published,
+      lastPublishedAt: now,
+    });
 
     return true;
   }
 
-  generateSiteFiles(site: SiteEntity) {
-    const files: SiteFile[] = [];
-
-    for (const page of site.pages) {
-      const html = this.renderBlocks(site, page);
-
-      files.push({
-        path: `${page.slug || 'index'}.html`,
-        content: html,
-        contentType: 'text/html',
-      });
-    }
-
-    files.push({
-      path: 'styles.css',
-      content: 'body { font-family: sans-serif; }',
-      contentType: 'text/css',
+  async createRelease(
+    site: SiteEntity,
+    files: SiteFile[],
+  ): Promise<SiteReleaseEntity> {
+    const htmlSnapshot = files[0]?.content?.toString();
+    const release = this.sitesReleasesRepository.create({
+      htmlSnapshot,
+      version: randomBytes(6).toString('hex'),
+      site,
     });
 
-    return files;
+    return await this.sitesReleasesRepository.save(release);
   }
 
-  renderBlocks(site: SiteEntity, page: SitePageEntity) {
-    return `<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${site.name}</title>
-  </head>
-  <body>
-    <table cellPadding="0" cellSpacing="0" style={{ width: "768px" }}>
-      <tbody>
-        ${page.blocks
-          .map((block) => {
-            const parsedBlock = SiteBlockSchema.parse(block);
-            const matchedBlock = new BlockRegistry().find(parsedBlock);
+  async uploadBundle({
+    file,
+    siteId,
+    releaseVersion,
+  }: {
+    file: SiteFile;
+    siteId: number;
+    releaseVersion: string;
+  }) {
+    await this.uploaderService.upload({
+      Bucket: this.configService.get(EnvKeys.CF_R2_BUNDLES_BUCKET),
+      Key: `sites/${siteId}/${releaseVersion}/${file.name}`,
+      ContentType: file.contentType,
+      Body:
+        typeof file.content === 'string'
+          ? Buffer.from(file.content)
+          : file.content,
+    });
+  }
 
-            return matchedBlock.renderToString();
-          })
-          .join(`\n`)}
-      </tbody>
-    </table>
-  </body>
-</html>`;
+  async updateKV({
+    hostname,
+    siteId,
+    releaseVersion,
+  }: {
+    hostname: string;
+    siteId: number;
+    releaseVersion: string;
+  }) {
+    const url = `${this.configService.get(EnvKeys.CF_KV_URL)}/${this.configService.get(EnvKeys.CF_KV_SITE_ROUTING_NAME)}/values/domain:${hostname}`;
+
+    await fetch(url, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${this.configService.get(EnvKeys.CF_KV_TOKEN)}`,
+        'Content-Type': 'text/plain',
+      },
+      body: `${siteId}:${releaseVersion}`,
+    });
   }
 
   async isAuthor(userId: number, resourceId: number): Promise<boolean> {

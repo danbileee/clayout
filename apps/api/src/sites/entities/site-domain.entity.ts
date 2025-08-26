@@ -5,12 +5,6 @@ import { SiteEntity } from './site.entity';
 
 @Entity('site_domains')
 export class SiteDomainEntity extends BaseEntity {
-  @ManyToOne(() => SiteEntity, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  site: SiteEntity;
-
   @Column({ unique: true })
   @IsString()
   hostname: string;
@@ -18,4 +12,10 @@ export class SiteDomainEntity extends BaseEntity {
   @Column({ type: 'boolean', default: false })
   @IsBoolean()
   isVerified: boolean;
+
+  @ManyToOne(() => SiteEntity, (site) => site.domains, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  site: SiteEntity;
 }

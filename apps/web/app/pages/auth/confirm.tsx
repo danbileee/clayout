@@ -10,14 +10,14 @@ import { useMutation } from "@tanstack/react-query";
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
   const token = requestUrl.searchParams.get("token") ?? "";
-  const email_id = requestUrl.searchParams.get("email_id") ?? "";
-  const button_text = requestUrl.searchParams.get("button_text") ?? "";
+  const emailId = requestUrl.searchParams.get("emailId") ?? "";
+  const buttonText = requestUrl.searchParams.get("buttonText") ?? "";
 
   return {
     data: {
       token,
-      email_id,
-      button_text,
+      emailId,
+      buttonText,
     },
   };
 }
@@ -44,9 +44,9 @@ export default function AuthConfirm() {
     });
     await trackClickEmail({
       params: {
-        id: data.email_id,
+        id: data.emailId,
         link: window.location.href,
-        buttonText: data.button_text,
+        buttonText: data.buttonText,
       },
     });
 

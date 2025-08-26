@@ -1,4 +1,4 @@
-import { IsDate, IsInt, IsOptional, IsString } from 'class-validator';
+import { IsDate, IsOptional, IsString } from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Column, Entity, Index, ManyToOne } from 'typeorm';
 import { SiteEntity } from './site.entity';
@@ -6,12 +6,6 @@ import { SiteEntity } from './site.entity';
 @Entity('site_releases')
 @Index(['site', 'version'], { unique: true })
 export class SiteReleaseEntity extends BaseEntity {
-  @ManyToOne(() => SiteEntity, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  site: SiteEntity;
-
   @Column({ type: 'text' })
   @IsString()
   htmlSnapshot: string;
@@ -26,6 +20,12 @@ export class SiteReleaseEntity extends BaseEntity {
   publishedAt?: Date;
 
   @Column()
-  @IsInt()
-  version: number;
+  @IsString()
+  version: string;
+
+  @ManyToOne(() => SiteEntity, (site) => site.releases, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  site: SiteEntity;
 }

@@ -6,7 +6,7 @@ import { EmailEntity } from './entities/email.entity';
 import { EmailClickEventEntity } from './entities/email-click-event.entity';
 import { EmailOpenEventEntity } from './entities/email-open-event.entity';
 import { UserEntity } from '../users/entities/user.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { RecordEmailClickDto } from '@clayout/interface';
@@ -179,7 +179,7 @@ describe('EmailsService', () => {
       emailsRepository.findOne.mockResolvedValue(null);
 
       await expect(service.recordOpen(emailId)).rejects.toThrow(
-        InternalServerErrorException,
+        NotFoundException,
       );
       await expect(service.recordOpen(emailId)).rejects.toThrow(
         'Email not found.',
@@ -233,7 +233,7 @@ describe('EmailsService', () => {
       emailsRepository.findOne.mockResolvedValue(null);
 
       await expect(service.recordClick(clickData, emailId)).rejects.toThrow(
-        InternalServerErrorException,
+        NotFoundException,
       );
       await expect(service.recordClick(clickData, emailId)).rejects.toThrow(
         'Email not found.',
