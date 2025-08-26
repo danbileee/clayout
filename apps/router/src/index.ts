@@ -10,72 +10,116 @@
  *
  * Learn more at https://developers.cloudflare.com/workers/
  */
+import { Hono } from "hono";
 
 const DEFAULT_DOMAIN = ".clayout.app";
 
-export default {
-  async fetch(request, env, ctx) {
-    const url = new URL(request.url);
-    const host = url.hostname;
+type Bindings = {
+  SITE_ROUTING_KV: KVNamespace;
+  CLAYOUT_BUNDLES_R2: R2Bucket;
+};
 
-    if (!host) {
-      return new Response("Bad Request: Invalid hostname", { status: 404 });
+type Variables = {
+  siteId: string;
+  releaseVersion: string;
+};
+
+const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
+
+/**
+ * Global middleware for
+ * 1. host validation
+ * 2. reserved subdomains
+ * 3. setting variables
+ */
+app.use("*", async (ctx, next) => {
+  const url = new URL(ctx.req.url);
+  const hostname = url.hostname;
+
+  if (!hostname) {
+    return ctx.text("Bad Request: Invalid hostname", 404);
+  }
+
+  // Reserved subdomain passthrough
+  if (hostname.endsWith(DEFAULT_DOMAIN)) {
+    const subdomain = hostname.replace(DEFAULT_DOMAIN, "");
+    const reservedListRaw = await ctx.env.SITE_ROUTING_KV.get(
+      "reserved_subdomains",
+      { type: "json" }
+    );
+    const reservedList =
+      Array.isArray(reservedListRaw) &&
+      reservedListRaw.every((v) => typeof v === "string")
+        ? (reservedListRaw as string[])
+        : [];
+
+    if (
+      reservedList.map((s) => s.toLowerCase()).includes(subdomain.toLowerCase())
+    ) {
+      // Forward original request unchanged
+      return fetch(ctx.req.raw);
     }
+  }
 
-    // 📡 Send to the original request URL when the subdomain is reserved
-    if (host.endsWith(DEFAULT_DOMAIN)) {
-      const subdomain = host.replace(".clayout.app", "");
-      const reservedListRaw = await env.SITE_ROUTING_KV.get(
-        "reserved_subdomains",
-        { type: "json" }
-      );
-      const reservedList =
-        Array.isArray(reservedListRaw) && reservedListRaw.every(String)
-          ? (reservedListRaw satisfies string[])
-          : [];
+  const kvValue = await ctx.env.SITE_ROUTING_KV.get(`domain:${hostname}`);
 
-      if (
-        reservedList
-          .map((s) => s.toLowerCase())
-          .includes(subdomain.toLowerCase())
-      ) {
-        return fetch(request.url, request);
-      }
-    }
+  if (!kvValue) {
+    return ctx.text("Site not found", 404);
+  }
 
-    // 🔍 Always query KV for latest mapping
-    const siteId = await env.SITE_ROUTING_KV.get(`domain:${host}`);
+  const [siteId, releaseVersion] = kvValue.split(":");
 
-    if (!siteId) {
-      return new Response("Site not found", { status: 404 });
-    }
+  if (!siteId) {
+    return ctx.text("Site id not found", 404);
+  }
 
-    // 🔑 Only serve verification path
-    if (url.pathname === "/.clayout-verification") {
-      const token = await env.SITE_ROUTING_KV.get(`token:${siteId}`);
-      return new Response(token, { status: 200 });
-    }
+  if (!releaseVersion) {
+    return ctx.text("Invalid release version", 404);
+  }
 
-    // 🗂 Determine file path
-    let path = url.pathname;
-    if (path === "/") path = "/index.html";
-    const objectKey = `${siteId}${path}`;
+  ctx.set("siteId", siteId);
+  ctx.set("releaseVersion", releaseVersion);
 
-    // 📦 Fetch from R2
-    const object = await env.STATIC_R2.get(objectKey);
-    if (!object) {
-      return new Response("Not found", { status: 404 });
-    }
+  await next();
+});
 
-    // ✅ Return the file
-    return new Response(object.body, {
-      headers: {
-        "Content-Type": getContentType(path),
-        "Cache-Control": "public, max-age=3600",
-      },
-    });
-  },
-} satisfies ExportedHandler<Env>;
+/**
+ * Serve domain verification token
+ */
+app.get("/.clayout-verification", async (ctx) => {
+  const siteId = ctx.get("siteId") as string;
+  const token = await ctx.env.SITE_ROUTING_KV.get(`token:${siteId}`);
+
+  return ctx.text(token ?? "", 200);
+});
+
+/**
+ * Static file handler from R2
+ */
+app.get("*", async (ctx) => {
+  const siteId = ctx.get("siteId") as string;
+  const releaseVersion = ctx.get("releaseVersion") as string;
+  const url = new URL(ctx.req.url);
+  let path = url.pathname;
+
+  if (path === "/") path = "/index.html";
+
+  const objectKey = `sites/${siteId}/${releaseVersion}${path}`;
+  const object = await ctx.env.CLAYOUT_BUNDLES_R2.get(objectKey);
+
+  if (!object) {
+    return ctx.text("Not found", 404);
+  }
+
+  return new Response(object.body, {
+    headers: {
+      "Content-Type": getContentType(path),
+      "Cache-Control": "public, max-age=3600",
+    },
+  });
+});
+
+export default app;
 
 function getContentType(path: string) {
   if (path.endsWith(".html")) return "text/html; charset=utf-8";

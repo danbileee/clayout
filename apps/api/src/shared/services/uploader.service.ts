@@ -19,8 +19,10 @@ export class UploaderService {
       endpoint: this.configService.get(EnvKeys.CF_R2_URL),
       forcePathStyle: true,
       credentials: {
-        accessKeyId: this.configService.get(EnvKeys.CF_ACCESS_KEY_ID),
-        secretAccessKey: this.configService.get(EnvKeys.CF_SECRET_ACCESS_KEY),
+        accessKeyId: this.configService.get(EnvKeys.CF_R2_ACCESS_KEY_ID),
+        secretAccessKey: this.configService.get(
+          EnvKeys.CF_R2_SECRET_ACCESS_KEY,
+        ),
       },
     });
   }

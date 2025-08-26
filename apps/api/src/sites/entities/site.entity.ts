@@ -63,6 +63,13 @@ export class SiteEntity extends BaseEntity {
   @IsDate()
   lastPublishedAt?: Date;
 
+  @Column({
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  lastPublishedVersion?: string;
+
   @ManyToOne(() => UserEntity, (user) => user.sites, {
     nullable: false,
   })
@@ -74,9 +81,9 @@ export class SiteEntity extends BaseEntity {
   @OneToMany(() => SiteBlockEntity, (block) => block.site)
   blocks: SiteBlockEntity[];
 
-  @OneToMany(() => SiteReleaseEntity, (siteRelease) => siteRelease.site)
+  @OneToMany(() => SiteReleaseEntity, (release) => release.site)
   releases: SiteReleaseEntity[];
 
-  @OneToMany(() => SiteDomainEntity, (siteDomain) => siteDomain.site)
+  @OneToMany(() => SiteDomainEntity, (domain) => domain.site)
   domains: SiteDomainEntity[];
 }

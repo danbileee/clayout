@@ -13,7 +13,7 @@
     "build:kit": "pnpm --filter @clayout/kit build",
     "gen-supabase-types": "pnpm --filter @clayout/api gen-supabase-types",
     "improve-supabase-types": "pnpm --filter @clayout/api improve-supabase-types",
-    "deploy:router": "pnpm --filter @clayout/router deploy",
+    "deploy:router": "pnpm --filter @clayout/router run deploy",
     "test:all": "pnpm run --recursive test",
     "lint:all": "pnpm run --recursive lint"
   },

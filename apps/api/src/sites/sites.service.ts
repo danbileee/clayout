@@ -196,7 +196,7 @@ export class SitesService implements AuthorService {
     return { id };
   }
 
-  async publish(id: number): Promise<boolean> {
+  async publish(id: number): Promise<{ site: SiteEntity }> {
     const site = await this.sitesRepository.findOne({
       where: {
         id,
@@ -248,9 +248,16 @@ export class SitesService implements AuthorService {
       ...site,
       status: SiteStatuses.Published,
       lastPublishedAt: now,
+      lastPublishedVersion: release.version,
     });
 
-    return true;
+    const publishedSite = await this.sitesRepository.findOne({
+      where: {
+        id: site.id,
+      },
+    });
+
+    return { site: publishedSite };
   }
 
   async createRelease(

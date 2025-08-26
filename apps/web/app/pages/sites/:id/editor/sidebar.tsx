@@ -25,7 +25,7 @@ export function EditorSidebar() {
   const handleUploadImage = async (e: ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
 
-    if (!files) return;
+    if (!files || !files.length) return;
 
     const [file] = Array.from(files);
 
