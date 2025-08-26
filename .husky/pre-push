@@ -1,4 +1,0 @@
-pnpm build:interface
-pnpm build:kit
-pnpm build:api
-pnpm build:web
