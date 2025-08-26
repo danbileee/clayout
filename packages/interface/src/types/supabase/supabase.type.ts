@@ -349,7 +349,7 @@ export type Database = {
           publishedAt: string | null
           siteId: number
           updatedAt: Date
-          version: number
+          version: string
         }
         Insert: {
           createdAt: Date
@@ -358,7 +358,7 @@ export type Database = {
           publishedAt?: string | null
           siteId: number
           updatedAt: Date
-          version: number
+          version: string
         }
         Update: {
           createdAt?: Date
@@ -367,7 +367,7 @@ export type Database = {
           publishedAt?: string | null
           siteId?: number
           updatedAt?: Date
-          version?: number
+          version?: string
         }
         Relationships: [
           {
@@ -475,7 +475,12 @@ export type Database = {
         | "Portfolio"
         | "Hyperlink"
         | "Commerce"
-      sites_status_enum: "Draft" | "Published" | "Reviewing" | "Fixing"
+      sites_status_enum:
+        | "Draft"
+        | "Published"
+        | "Reviewing"
+        | "Updating"
+        | "Error"
       users_role_enum: "None" | "Guest" | "Registrant" | "User" | "Admin"
     }
     CompositeTypes: {
@@ -619,7 +624,13 @@ export const Constants = {
         "Hyperlink",
         "Commerce",
       ],
-      sites_status_enum: ["Draft", "Published", "Reviewing", "Fixing"],
+      sites_status_enum: [
+        "Draft",
+        "Published",
+        "Reviewing",
+        "Updating",
+        "Error",
+      ],
       users_role_enum: ["None", "Guest", "Registrant", "User", "Admin"],
     },
   },

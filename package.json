@@ -11,8 +11,8 @@
     "build:web": "pnpm --filter @clayout/web build",
     "build:interface": "pnpm --filter @clayout/interface build",
     "build:kit": "pnpm --filter @clayout/kit build",
-    "gen-types": "pnpm --filter @clayout/api gen-types",
-    "improve-types": "pnpm --filter @clayout/api improve-types",
+    "gen-supabase-types": "pnpm --filter @clayout/api gen-supabase-types",
+    "improve-supabase-types": "pnpm --filter @clayout/api improve-supabase-types",
     "deploy:router": "pnpm --filter @clayout/router deploy",
     "test:all": "pnpm run --recursive test",
     "lint:all": "pnpm run --recursive lint"

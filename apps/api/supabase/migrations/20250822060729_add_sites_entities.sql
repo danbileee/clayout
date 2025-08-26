@@ -1,5 +1,5 @@
 -- Create enums for site-related entities
-create type "public"."sites_status_enum" as enum ('Draft', 'Published', 'Reviewing', 'Fixing');
+create type "public"."sites_status_enum" as enum ('Draft', 'Published', 'Reviewing', 'Updating', 'Error');
 create type "public"."sites_category_enum" as enum ('None', 'Blog', 'Landing Page', 'Newsletter', 'Portfolio', 'Hyperlink', 'Commerce');
 create type "public"."site_pages_category_enum" as enum ('Static', 'List', 'Article');
 create type "public"."site_blocks_type_enum" as enum ('None', 'Text', 'Image', 'Button');

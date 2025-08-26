@@ -2,29 +2,54 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Define which columns should be converted from string to Date for each table
-// Note: Database uses snake_case, but we want camelCase in generated types
+// Support both snake_case and camelCase formats
 const DATE_COLUMNS = {
-  sites: ['created_at', 'updated_at', 'last_published_at'],
-  users: ['created_at', 'updated_at'],
-  counters: ['created_at', 'updated_at'],
-  emails: ['created_at', 'updated_at', 'failed_at', 'sent_at'],
-  email_click_events: ['created_at', 'updated_at', 'clicked_at'],
-  email_open_events: ['created_at', 'updated_at', 'opened_at'],
-  site_pages: ['created_at', 'updated_at'],
-  site_blocks: ['created_at', 'updated_at'],
-  site_domains: ['created_at', 'updated_at'],
-  site_releases: ['created_at', 'updated_at'],
-  assets: ['created_at', 'updated_at'],
+  sites: [
+    'created_at',
+    'updated_at',
+    'last_published_at',
+    'createdAt',
+    'updatedAt',
+    'lastPublishedAt',
+  ],
+  users: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
+  counters: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
+  emails: [
+    'created_at',
+    'updated_at',
+    'failed_at',
+    'sent_at',
+    'createdAt',
+    'updatedAt',
+    'failedAt',
+    'sentAt',
+  ],
+  email_click_events: [
+    'created_at',
+    'updated_at',
+    'clicked_at',
+    'createdAt',
+    'updatedAt',
+    'clickedAt',
+  ],
+  email_open_events: [
+    'created_at',
+    'updated_at',
+    'opened_at',
+    'createdAt',
+    'updatedAt',
+    'openedAt',
+  ],
+  site_pages: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
+  site_blocks: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
+  site_domains: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
+  site_releases: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
+  assets: ['created_at', 'updated_at', 'createdAt', 'updatedAt'],
 };
 
 // Helper function to convert snake_case to camelCase
 function snakeToCamel(str: string): string {
   return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
-}
-
-// Helper function to convert camelCase to snake_case
-function camelToSnake(str: string): string {
-  return str.replace(/[A-Z]/g, (letter) => `_${letter.toLowerCase()}`);
 }
 
 function transformDateTypes(content: string): string {
@@ -63,8 +88,14 @@ function makeRequiredColumns(content: string): string {
   let transformed = content;
 
   // Make BaseEntity columns required in Insert types
-  // Note: Column names are now in camelCase after the conversion step
-  const insertRequiredColumns = ['id', 'createdAt', 'updatedAt'];
+  // Support both snake_case and camelCase
+  const insertRequiredColumns = [
+    'id',
+    'created_at',
+    'updated_at',
+    'createdAt',
+    'updatedAt',
+  ];
 
   // Make required in Insert type (remove the ?)
   insertRequiredColumns.forEach((column) => {
@@ -95,7 +126,6 @@ function convertSnakeCaseToCamelCase(content: string): string {
 
   // Convert all snake_case column names to camelCase in the generated types
   // This regex matches snake_case column names in the type definitions
-  // We need to be more specific to avoid converting other parts of the code
   const snakeCasePattern =
     /(\s*)([a-z_]+):\s*(Date|number|string|boolean|Json|Database\["public"\]\["Enums"\]\["[^"]+"\])(\s*\|\s*null)?(\s*,?)/g;
 
@@ -130,6 +160,33 @@ function convertSnakeCaseToCamelCase(content: string): string {
   return transformed;
 }
 
+function fixAssetTargetTypeEnum(content: string): string {
+  let transformed = content;
+
+  // Fix the targetType field to use the proper enum type
+  // Replace string type with the proper enum reference for targetType
+  const targetTypePatterns = [
+    // Row type
+    /(\s*target_type:\s*)string(\s*,?)/g,
+    /(\s*targetType:\s*)string(\s*,?)/g,
+    // Insert type
+    /(\s*target_type\?:\s*)string(\s*,?)/g,
+    /(\s*targetType\?:\s*)string(\s*,?)/g,
+    // Update type
+    /(\s*target_type\?:\s*)string(\s*,?)/g,
+    /(\s*targetType\?:\s*)string(\s*,?)/g,
+  ];
+
+  targetTypePatterns.forEach((pattern) => {
+    transformed = transformed.replace(
+      pattern,
+      `$1Database["public"]["Enums"]["asset_types_enum"]$2`,
+    );
+  });
+
+  return transformed;
+}
+
 function main() {
   try {
     const filePath = path.join(
@@ -157,6 +214,9 @@ function main() {
     console.log('🔄 Making BaseEntity columns required...');
     transformed = makeRequiredColumns(transformed);
 
+    console.log('🔄 Fixing asset targetType enum...');
+    transformed = fixAssetTargetTypeEnum(transformed);
+
     console.log('💾 Writing transformed file...');
     fs.writeFileSync(filePath, transformed);
 
@@ -166,6 +226,7 @@ function main() {
     console.log(
       '📝 BaseEntity columns (id, createdAt, updatedAt) are required in Insert types, only id is required in Update types',
     );
+    console.log('📝 Asset targetType now uses proper enum type');
   } catch (error) {
     console.error('❌ Error:', error);
     process.exit(1);

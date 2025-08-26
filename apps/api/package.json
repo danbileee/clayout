@@ -20,8 +20,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "gen-types": "supabase gen types typescript --local > ../../packages/interface/src/types/supabase/supabase.type.ts",
-    "improve-types": "ts-node scripts/improve-supabase-types.ts",
+    "gen-supabase-types": "supabase gen types typescript --local > ../../packages/interface/src/types/supabase/supabase.type.ts",
+    "improve-supabase-types": "ts-node scripts/improve-supabase-types.ts",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org wev --project clayout-api ./dist && sentry-cli sourcemaps upload --org wev --project clayout-api ./dist"
   },
   "dependencies": {
