@@ -15,9 +15,10 @@ export function renderSiteBlocks({ site, page }: Params): string {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>${site.name}</title>
+    <link rel="stylesheet" href="./styles.css" type="text/css" />
   </head>
   <body>
-    <table cellPadding="0" cellSpacing="0" style={{ width: "768px" }}>
+    <table cellPadding="0" cellSpacing="0" style="width: 768px;">
       <tbody>
         ${page.blocks
           .map((block) => {

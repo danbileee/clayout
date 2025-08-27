@@ -238,7 +238,7 @@ export class SitesService implements AuthorService {
       });
     }
 
-    const now = Date.now();
+    const now = new Date();
 
     await this.sitesReleasesRepository.save({
       ...release,
@@ -303,16 +303,22 @@ export class SitesService implements AuthorService {
     siteId: number;
     releaseVersion: string;
   }) {
-    const url = `${this.configService.get(EnvKeys.CF_KV_URL)}/${this.configService.get(EnvKeys.CF_KV_SITE_ROUTING_NAME)}/values/domain:${hostname}`;
+    const url = `${this.configService.get(EnvKeys.CF_KV_URL)}/${this.configService.get(EnvKeys.CF_KV_SITE_ROUTING_ID)}/values/domain:${hostname}`;
+    const body = `${siteId}:${releaseVersion}`;
+    const token = this.configService.get(EnvKeys.CF_KV_TOKEN);
 
-    await fetch(url, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${this.configService.get(EnvKeys.CF_KV_TOKEN)}`,
-        'Content-Type': 'text/plain',
-      },
-      body: `${siteId}:${releaseVersion}`,
-    });
+    try {
+      await fetch(url, {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'text/plain',
+        },
+        body,
+      });
+    } catch (error) {
+      console.error({ error, url, body, token });
+    }
   }
 
   async isAuthor(userId: number, resourceId: number): Promise<boolean> {

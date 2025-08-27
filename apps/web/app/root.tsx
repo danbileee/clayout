@@ -44,6 +44,7 @@ export function ErrorBoundary() {
       </div>
     );
   }
+
   return (
     <main className="flex items-center justify-center min-h-screen">
       <div className="text-center">

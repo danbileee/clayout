@@ -62,25 +62,25 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
     });
 
     return `<tr>
-              <td align="center" valign="top" style="width: 100%;">
-                <table border="0" cellpadding="0" cellspacing="0" style="width: ${getMaxWidth(
-                  "100%",
-                  margin
-                )}; margin: ${margin};">
-                  <tbody>
-                    <tr>
-                      <td align="${align}" valign="top" style="${containerStyle}" class="button">
-                        <a
-                          href="${link}"
-                          style="${style}"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >${text}</a>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>`;
+  <td align="center" valign="top" style="width: 100%;">
+    <table border="0" cellpadding="0" cellspacing="0" style="width: ${getMaxWidth(
+      "100%",
+      margin
+    )}; margin: ${margin};">
+      <tbody>
+        <tr>
+          <td align="${align}" valign="top" style="${containerStyle}" class="button">
+            <a
+              href="${link}"
+              style="${style}"
+              target="_blank"
+              rel="noopener noreferrer"
+            >${text}</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+</tr>`;
   }
 }

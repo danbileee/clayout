@@ -50,20 +50,22 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
     });
 
     return `<tr>
-              <td align="center" valign="top" style="width: 100%;">
-                <table border="0" cellpadding="0" cellspacing="0" style="width: ${getMaxWidth(
-                  "100%",
-                  margin
-                )}; margin: ${margin};">
-                  <tbody>
-                    <tr>
-                      <td align="left" valign="top" style="${style}" class="text">
-                        ${this.block.data?.value}
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </td>
-            </tr>`;
+  <td align="center" valign="top" style="width: 100%;">
+    <table border="0" cellpadding="0" cellspacing="0" style="width: ${getMaxWidth(
+      "100%",
+      margin
+    )}; margin: ${margin};">
+      <tbody>
+        <tr>
+          <td align="left" valign="top" style="${style}" class="text">
+            <p>
+              ${this.block.data?.value}
+            </p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </td>
+</tr>`;
   }
 }

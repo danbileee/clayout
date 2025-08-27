@@ -43,19 +43,17 @@ app.use("*", async (ctx, next) => {
   // Reserved subdomain passthrough
   if (hostname.endsWith(DEFAULT_DOMAIN)) {
     const subdomain = hostname.replace(DEFAULT_DOMAIN, "");
-    const reservedListRaw = await ctx.env.SITE_ROUTING_KV.get(
+    // Read as text to avoid runtime JSON parse errors from malformed KV values
+    const reservedListText = await ctx.env.SITE_ROUTING_KV.get(
       "reserved_subdomains",
-      { type: "json" }
+      { type: "text" }
     );
-    const reservedList =
-      Array.isArray(reservedListRaw) &&
-      reservedListRaw.every((v) => typeof v === "string")
-        ? (reservedListRaw as string[])
-        : [];
+    const reservedList = safeParseStringArray(reservedListText);
 
     if (
       reservedList.map((s) => s.toLowerCase()).includes(subdomain.toLowerCase())
     ) {
+      console.log("Reserved Subdomain: Proceed the original request.");
       // Forward original request unchanged
       return fetch(ctx.req.raw);
     }
@@ -68,6 +66,10 @@ app.use("*", async (ctx, next) => {
   }
 
   const [siteId, releaseVersion] = kvValue.split(":");
+
+  console.log(
+    `context >>> siteId: ${siteId} | releaseVersion: ${releaseVersion}`
+  );
 
   if (!siteId) {
     return ctx.text("Site id not found", 404);
@@ -100,21 +102,27 @@ app.get("*", async (ctx) => {
   const siteId = ctx.get("siteId") as string;
   const releaseVersion = ctx.get("releaseVersion") as string;
   const url = new URL(ctx.req.url);
-  let path = url.pathname;
+  const requestPath = url.pathname;
 
-  if (path === "/") path = "/index.html";
-
-  const objectKey = `sites/${siteId}/${releaseVersion}${path}`;
-  const object = await ctx.env.CLAYOUT_BUNDLES_R2.get(objectKey);
+  const { object, resolvedPath, objectKey } = await resolveR2Object(
+    ctx,
+    siteId,
+    releaseVersion,
+    requestPath
+  );
 
   if (!object) {
     return ctx.text("Not found", 404);
   }
 
+  console.log(`R2 >>> objectKey: ${objectKey}`);
+
   return new Response(object.body, {
     headers: {
-      "Content-Type": getContentType(path),
-      "Cache-Control": "public, max-age=3600",
+      "Content-Type":
+        object.httpMetadata?.contentType ?? getContentType(resolvedPath),
+      "Cache-Control":
+        object.httpMetadata?.cacheControl ?? "public, max-age=3600",
     },
   });
 });
@@ -130,4 +138,82 @@ function getContentType(path: string) {
   if (path.endsWith(".svg")) return "image/svg";
   if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
   return "application/octet-stream";
+}
+
+function safeParseStringArray(input: string | null): string[] {
+  if (!input) return [];
+  try {
+    const parsed = JSON.parse(input);
+    if (Array.isArray(parsed) && parsed.every((v) => typeof v === "string")) {
+      return parsed as string[];
+    }
+  } catch (_) {
+    // Try to be lenient with trailing commas like ["a",]
+    try {
+      const withoutTrailingCommas = input.replace(/,\s*\]/g, "]");
+      const parsed = JSON.parse(withoutTrailingCommas);
+      if (Array.isArray(parsed) && parsed.every((v) => typeof v === "string")) {
+        return parsed as string[];
+      }
+    } catch (_) {
+      // fallthrough
+    }
+  }
+  return [];
+}
+
+async function resolveR2Object(
+  ctx: any,
+  siteId: string,
+  releaseVersion: string,
+  path: string
+): Promise<{
+  object: R2ObjectBody | null;
+  resolvedPath: string;
+  objectKey: string;
+}> {
+  const normalizedPath = normalizePath(path);
+  const candidates = buildCandidatePaths(normalizedPath);
+
+  for (const candidate of candidates) {
+    const key = `sites/${siteId}/${releaseVersion}${candidate}`;
+    const obj = await ctx.env.CLAYOUT_BUNDLES_R2.get(key);
+    if (obj) {
+      return { object: obj, resolvedPath: candidate, objectKey: key };
+    }
+  }
+
+  return {
+    object: null,
+    resolvedPath: normalizedPath,
+    objectKey: `sites/${siteId}/${releaseVersion}${normalizedPath}`,
+  };
+}
+
+function normalizePath(path: string): string {
+  if (!path || path === "/") return "/";
+  try {
+    return path.replace(/\/+/, "/");
+  } catch (_) {
+    return path;
+  }
+}
+
+function buildCandidatePaths(path: string): string[] {
+  if (path === "/") return ["/index.html"];
+
+  const hasExtension = /\.[a-zA-Z0-9]+$/.test(path);
+  const candidates: string[] = [];
+
+  // Exact
+  candidates.push(path);
+  // .html variant
+  if (!hasExtension) candidates.push(`${path}.html`);
+  // Directory index
+  if (path.endsWith("/")) candidates.push(`${path}index.html`);
+  else if (!hasExtension) candidates.push(`${path}/index.html`);
+  // Root index as SPA fallback
+  candidates.push("/index.html");
+
+  return Array.from(new Set(candidates));
 }

@@ -10,6 +10,7 @@
   "observability": {
     "enabled": true
   },
+  "routes": [{ "pattern": "*.clayout.app/*", "zone_name": "clayout.app" }],
   "kv_namespaces": [
     {
       "binding": "SITE_ROUTING_KV",

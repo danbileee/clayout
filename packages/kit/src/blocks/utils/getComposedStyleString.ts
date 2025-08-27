@@ -6,6 +6,11 @@ export function getComposedStyleString(style: CSSProperties) {
       const newKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
       return `${newKey}: ${value};`;
     })
-    .filter((newKey, value) => !newKey.startsWith("align:") && Boolean(value))
+    .filter((newStyle) => {
+      const [newKey, value] = newStyle.split(":");
+      return (
+        !newKey.startsWith("align:") && Boolean(value.trim().replace(";", ""))
+      );
+    })
     .join(" ");
 }
