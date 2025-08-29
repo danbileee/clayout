@@ -1,0 +1,52 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { SitesController } from './sites.controller';
+import { SitesService } from './sites.service';
+import { createMockRepositoryProvider } from '../../test/test-utils';
+import { SiteEntity } from './entities/site.entity';
+import { SitePageEntity } from './entities/site-page.entity';
+import { SiteBlockEntity } from './entities/site-block.entity';
+import { SiteReleaseEntity } from './entities/site-release.entity';
+import { PaginationService } from '../shared/services/pagination.service';
+import { UploaderService } from '../shared/services/uploader.service';
+import { ConfigService } from '@nestjs/config';
+
+describe('SitesController', () => {
+  let controller: SitesController;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [SitesController],
+      providers: [
+        SitesService,
+        createMockRepositoryProvider(SiteEntity),
+        createMockRepositoryProvider(SitePageEntity),
+        createMockRepositoryProvider(SiteBlockEntity),
+        createMockRepositoryProvider(SiteReleaseEntity),
+        {
+          provide: PaginationService,
+          useValue: {
+            paginate: jest.fn(),
+          },
+        },
+        {
+          provide: UploaderService,
+          useValue: {
+            getSignedUrl: jest.fn(),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    controller = module.get<SitesController>(SitesController);
+  });
+
+  it('should be defined', () => {
+    expect(controller).toBeDefined();
+  });
+});

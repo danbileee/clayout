@@ -12,6 +12,8 @@ import { UsersModule } from './users/users.module';
 import { RoleGuard } from './users/guards/role.guard';
 import { AccessTokenGuard, CsrfTokenGuard } from './auth/guards/token.guard';
 import { EmailsModule } from './emails/emails.module';
+import { SitesModule } from './sites/sites.module';
+import { AssetsModule } from './assets/assets.module';
 
 @Module({
   imports: [
@@ -39,6 +41,8 @@ import { EmailsModule } from './emails/emails.module';
     AuthModule,
     UsersModule,
     EmailsModule,
+    SitesModule,
+    AssetsModule,
   ],
   controllers: [AppController],
   providers: [

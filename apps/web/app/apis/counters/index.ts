@@ -1,7 +1,7 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
 import { getQueryKey } from "@/lib/react-query/getQueryKey";
-import type { Tables } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
+import type { Tables, TablesInsert } from "@clayout/interface";
 
 /**
  * GET
@@ -45,7 +45,7 @@ interface PostEndpointParams {}
 
 interface PostQueryParams {}
 
-interface PostBody extends Pick<Tables<"counters">, "value"> {}
+interface PostBody extends Pick<TablesInsert<"counters">, "value"> {}
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
@@ -74,7 +74,7 @@ interface PatchEndpointParams extends Pick<Tables<"counters">, "id"> {}
 
 interface PatchQueryParams {}
 
-interface PatchBody extends Pick<Tables<"counters">, "value"> {}
+interface PatchBody extends Pick<TablesInsert<"counters">, "value"> {}
 
 interface PatchParams
   extends PatchEndpointParams,

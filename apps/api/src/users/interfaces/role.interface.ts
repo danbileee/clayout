@@ -1,4 +1,4 @@
-import { UserRole } from '../constants/role.const';
+import { UserRole } from '@clayout/interface';
 
 export interface RolesDecoratorOptions {
   requiredRole?: UserRole;

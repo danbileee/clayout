@@ -62,8 +62,8 @@ export const createMockCounter = (
   id: overrides.id ?? faker.number.int({ min: 1, max: 10000 }),
   value: overrides.value ?? faker.word.words(2),
   count: overrides.count ?? faker.number.int({ min: 0, max: 100 }),
-  created_at: overrides.created_at ?? faker.date.past(),
-  updated_at: overrides.updated_at ?? faker.date.recent(),
+  createdAt: overrides.createdAt ?? faker.date.past(),
+  updatedAt: overrides.updatedAt ?? faker.date.recent(),
   ...overrides,
 });
 

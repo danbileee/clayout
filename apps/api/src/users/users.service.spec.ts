@@ -5,7 +5,7 @@ import { UserEntity } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
 import { BadRequestException } from '@nestjs/common';
-import { UserRoles } from './constants/role.const';
+import { UserRoles } from '@clayout/interface';
 
 describe('UsersService', () => {
   let service: UsersService;

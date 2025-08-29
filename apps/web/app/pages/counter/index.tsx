@@ -4,7 +4,7 @@ import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import { isAuthenticated } from "@/lib/axios/isAuthenticated";
 import { useMemo } from "react";
 import { useLoaderData } from "react-router";
-import { CountersForm } from "./CountersForm";
+import { CountersForm } from "./form";
 import { useAuthMeta } from "@/hooks/useAuthMeta";
 
 export async function clientLoader() {

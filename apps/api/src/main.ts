@@ -10,7 +10,7 @@ const allowedOrigins = [
   process.env[EnvKeys.CORS_ENABLE_ORIGIN_LOCAL],
   process.env[EnvKeys.CORS_ENABLE_ORIGIN_ROOT],
   process.env[EnvKeys.CORS_ENABLE_ORIGIN_APP],
-];
+].filter(Boolean);
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,17 +19,12 @@ async function bootstrap() {
    * CORS
    */
   app.enableCors({
-    origin: (origin, callback) => {
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.warn('Blocked by CORS:', origin);
-        callback(new Error('Not allowed by CORS'));
-      }
-    },
+    origin: allowedOrigins,
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'x-csrf-token'],
+    preflightContinue: false,
+    optionsSuccessStatus: 204,
   });
 
   /**

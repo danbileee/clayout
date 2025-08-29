@@ -1,0 +1,70 @@
+{
+  "web-try-catch-in-mutation": {
+    "prefix": "web-try-catch-in-mutation",
+    "body": [
+      "const fn = async () => {",
+      "};",
+      "",
+      "try {",
+      "  await fn();",
+      "} catch (e) {",
+      "  const { error } = await handleError(e, {",
+      "    onRetry: fn,",
+      "  });",
+      "",
+      "  if (error) {",
+      "    throw error;",
+      "  }",
+      "}"
+    ],
+    "description": "web-try-catch-in-mutation"
+  },
+  "web-try-catch-in-query": {
+    "prefix": "web-try-catch-in-query",
+    "body": [
+      "const fn = async () => await get_({ params: { id } });",
+      "const redirect = async () => navigate(joinPath([Paths.login]));",
+      "",
+      "try {",
+      "  return await fn();",
+      "} catch (e) {",
+      "  const { error, data } = await handleError(e, {",
+      "    onRetry: fn,",
+      "    onRedirect: redirect,",
+      "  });",
+      "",
+      "  if (error) {",
+      "    throw error;",
+      "  }",
+      "",
+      "  return data;",
+      "}"
+    ],
+    "description": "web-try-catch-in-query"
+  },
+  "web-client-loader-auth": {
+    "prefix": "web-client-loader-auth",
+    "body": [
+      "export async function clientLoader() {",
+      "  const { meta, error } = await isAuthenticated();",
+      "",
+      "  if (error) {",
+      "    throw error;",
+      "  }",
+      "",
+      "  return {",
+      "    meta,",
+      "  }",
+      "}"
+    ],
+    "description": "web-client-loader-auth"
+  },
+  "web-use-auth-meta": {
+    "prefix": "web-use-auth-meta",
+    "body": [
+      "const { meta } = useLoaderData<typeof clientLoader>();",
+      "useAuthMeta(meta);"
+    ],
+    "description": "web-use-auth-meta"
+  }
+}

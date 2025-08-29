@@ -4,8 +4,9 @@ import { Exclude } from 'class-transformer';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { lengthMessage } from 'src/shared/messages/length.message';
 import { emailMessage } from 'src/shared/messages/email.message';
-import { UserRole, UserRoles } from '../constants/role.const';
 import { EmailEntity } from 'src/emails/entities/email.entity';
+import { SiteEntity } from 'src/sites/entities/site.entity';
+import { UserRole, UserRoles } from '@clayout/interface';
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
@@ -48,4 +49,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => EmailEntity, (email) => email.user)
   emails: EmailEntity[];
+
+  @OneToMany(() => SiteEntity, (site) => site.author)
+  sites: SiteEntity[];
 }

@@ -1,8 +1,8 @@
 {
-  "files": [],
   "references": [
     { "path": "apps/api" },
     { "path": "apps/web" },
-    { "path": "packages/interface" }
+    { "path": "packages/interface" },
+    { "path": "packages/kit" }
   ]
 }

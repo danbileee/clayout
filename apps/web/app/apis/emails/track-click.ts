@@ -1,5 +1,5 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
-import type { Tables } from "@clayout/interface";
+import type { RecordEmailClickDto } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
 
 /**
@@ -12,17 +12,18 @@ interface PostEndpointParams {
 
 interface PostQueryParams {}
 
-interface PostBody
-  extends Pick<Tables<"email_click_events">, "link" | "button_text"> {}
+interface PostBody extends RecordEmailClickDto {}
+
+interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
 interface PostResponse {}
 
 export async function postEmailsTrackClick(args: {
-  params: PostEndpointParams & PostQueryParams & PostBody;
+  params: PostParams;
   request?: Request;
 }) {
   const {
-    params: { id, link, button_text },
+    params: { id, link, buttonText },
     request,
   } = args;
   const axios = createAxiosInstance(request);
@@ -30,5 +31,5 @@ export async function postEmailsTrackClick(args: {
     PostResponse,
     AxiosResponse<PostResponse, PostBody>,
     PostBody
-  >(`/emails/${id}/track-click`, { link, button_text });
+  >(`/emails/${id}/track-click`, { link, buttonText });
 }

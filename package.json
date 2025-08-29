@@ -9,12 +9,17 @@
     "prepare": "husky",
     "build:api": "pnpm --filter @clayout/api build",
     "build:web": "pnpm --filter @clayout/web build",
+    "build:interface": "pnpm --filter @clayout/interface build",
+    "build:kit": "pnpm --filter @clayout/kit build",
+    "gen-supabase-types": "pnpm --filter @clayout/api gen-supabase-types",
+    "improve-supabase-types": "pnpm --filter @clayout/api improve-supabase-types",
+    "deploy:router": "pnpm --filter @clayout/router run deploy",
     "test:all": "pnpm run --recursive test",
     "lint:all": "pnpm run --recursive lint"
   },
   "keywords": [],
   "license": "ISC",
-  "packageManager": "pnpm@10.13.1+sha512.37ebf1a5c7a30d5fabe0c5df44ee8da4c965ca0c5af3dbab28c3a1681b70a256218d05c81c9c0dcf767ef6b8551eb5b960042b9ed4300c59242336377e01cfad",
+  "packageManager": "pnpm@10.13.1",
   "devDependencies": {
     "husky": "^9.1.7"
   }

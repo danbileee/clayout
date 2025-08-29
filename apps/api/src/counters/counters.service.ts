@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CounterEntity } from './entities/counter.entity';
 import { Repository } from 'typeorm';
 import type { Tables } from '@clayout/interface';
@@ -32,7 +32,7 @@ export class CountersService {
     });
 
     if (!counter) {
-      throw new BadRequestException('Counter not found');
+      throw new NotFoundException('Counter not found');
     }
 
     if (dto.value) {

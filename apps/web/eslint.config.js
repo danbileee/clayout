@@ -5,9 +5,13 @@ import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
 import { globalIgnores } from "eslint/config";
 import sonarjs from "eslint-plugin-sonarjs";
+import { fileURLToPath } from "url";
+import path from "path";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default tseslint.config([
-  globalIgnores(["dist"]),
+  globalIgnores(["dist", "build", ".react-router"]),
   {
     files: ["**/*.{ts,tsx}"],
     extends: [
@@ -20,6 +24,10 @@ export default tseslint.config([
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
+      parserOptions: {
+        tsconfigRootDir: __dirname,
+        project: "./tsconfig.eslint.json",
+      },
     },
     rules: {
       ...reactHooks.configs.recommended.rules,
@@ -56,6 +64,8 @@ export default tseslint.config([
       "sonarjs/no-unused-vars": "off",
       "sonarjs/no-dead-store": "off",
       "sonarjs/todo-tag": "warn",
+      "sonarjs/prefer-read-only-props": "off",
+      "sonarjs/no-useless-intersection": "warn",
     },
   },
 ]);

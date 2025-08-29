@@ -3,7 +3,14 @@
   "compilerOptions": {
     "composite": true,
     "outDir": "dist",
-    "declaration": true
+    "declaration": true,
+    "declarationDir": "dist",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "target": "ES2020",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
-  "include": ["./**/*.ts"]
+  "include": ["src/index.ts", "src/**/*.ts"]
 }

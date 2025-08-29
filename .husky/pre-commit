@@ -1,4 +1,2 @@
 pnpm lint:all
 pnpm test:all
-pnpm build:api
-pnpm build:web

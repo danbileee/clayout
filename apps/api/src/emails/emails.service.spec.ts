@@ -6,10 +6,10 @@ import { EmailEntity } from './entities/email.entity';
 import { EmailClickEventEntity } from './entities/email-click-event.entity';
 import { EmailOpenEventEntity } from './entities/email-open-event.entity';
 import { UserEntity } from '../users/entities/user.entity';
-import { InternalServerErrorException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Repository } from 'typeorm';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { RecordEmailClickDto } from './dtos/email.dto';
+import { RecordEmailClickDto } from '@clayout/interface';
 
 describe('EmailsService', () => {
   let service: EmailsService;
@@ -105,9 +105,9 @@ describe('EmailsService', () => {
       });
       expect(emailsRepository.save).toHaveBeenCalledWith({
         ...mockEmail,
-        sent_at: expect.any(Date),
+        sentAt: expect.any(Date),
       });
-      expect(result.sent_at).toBeDefined();
+      expect(result.sentAt).toBeDefined();
     });
 
     it('should retry without headers if first attempt fails', async () => {
@@ -121,9 +121,9 @@ describe('EmailsService', () => {
       expect(mailerService.sendMail).toHaveBeenCalledTimes(2);
       expect(emailsRepository.save).toHaveBeenCalledWith({
         ...mockEmail,
-        sent_at: expect.any(Date),
+        sentAt: expect.any(Date),
       });
-      expect(result.sent_at).toBeDefined();
+      expect(result.sentAt).toBeDefined();
     });
 
     it('should mark email as failed if both attempts fail', async () => {
@@ -136,11 +136,11 @@ describe('EmailsService', () => {
       expect(mailerService.sendMail).toHaveBeenCalledTimes(2);
       expect(emailsRepository.save).toHaveBeenCalledWith({
         ...mockEmail,
-        failed_at: expect.any(Date),
-        error_log: expect.stringContaining('Send failed'),
+        failedAt: expect.any(Date),
+        errorLog: expect.stringContaining('Send failed'),
       });
-      expect(result.failed_at).toBeDefined();
-      expect(result.error_log).toBeDefined();
+      expect(result.failedAt).toBeDefined();
+      expect(result.errorLog).toBeDefined();
     });
   });
 
@@ -151,7 +151,7 @@ describe('EmailsService', () => {
       const mockOpenEvent = {
         id: emailId,
         email: mockEmail,
-        opened_at: new Date(),
+        openedAt: new Date(),
       } as EmailOpenEventEntity;
 
       emailsRepository.findOne.mockResolvedValue(mockEmail);
@@ -166,7 +166,7 @@ describe('EmailsService', () => {
       expect(emailOpenEventsRepository.create).toHaveBeenCalledWith({
         id: emailId,
         email: mockEmail,
-        opened_at: expect.any(Date),
+        openedAt: expect.any(Date),
       });
       expect(emailOpenEventsRepository.save).toHaveBeenCalledWith(
         mockOpenEvent,
@@ -179,7 +179,7 @@ describe('EmailsService', () => {
       emailsRepository.findOne.mockResolvedValue(null);
 
       await expect(service.recordOpen(emailId)).rejects.toThrow(
-        InternalServerErrorException,
+        NotFoundException,
       );
       await expect(service.recordOpen(emailId)).rejects.toThrow(
         'Email not found.',
@@ -196,13 +196,13 @@ describe('EmailsService', () => {
       } as unknown as EmailEntity;
       const clickData: RecordEmailClickDto = {
         link: 'https://example.com',
-        button_text: 'Click Here',
+        buttonText: 'Click Here',
       };
       const mockClickEvent = {
         ...clickData,
         email: mockEmail,
-        clicked_at: new Date(),
-      } as unknown as EmailClickEventEntity;
+        clickedAt: new Date(),
+      } as EmailClickEventEntity;
 
       emailsRepository.findOne.mockResolvedValue(mockEmail);
       emailClickEventsRepository.create.mockReturnValue(mockClickEvent);
@@ -216,7 +216,7 @@ describe('EmailsService', () => {
       expect(emailClickEventsRepository.create).toHaveBeenCalledWith({
         ...clickData,
         email: mockEmail,
-        clicked_at: expect.any(Date),
+        clickedAt: expect.any(Date),
       });
       expect(emailClickEventsRepository.save).toHaveBeenCalledWith(
         mockClickEvent,
@@ -228,12 +228,12 @@ describe('EmailsService', () => {
       const emailId = 999;
       const clickData: RecordEmailClickDto = {
         link: 'https://example.com',
-        button_text: 'Click Here',
+        buttonText: 'Click Here',
       };
       emailsRepository.findOne.mockResolvedValue(null);
 
       await expect(service.recordClick(clickData, emailId)).rejects.toThrow(
-        InternalServerErrorException,
+        NotFoundException,
       );
       await expect(service.recordClick(clickData, emailId)).rejects.toThrow(
         'Email not found.',

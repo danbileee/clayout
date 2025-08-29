@@ -1,4 +1,4 @@
-name: Add the render preview label for API server
+name: Render Preview Label (w/ Render.com)
 
 on:
   pull_request:

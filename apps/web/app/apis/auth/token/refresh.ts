@@ -25,7 +25,7 @@ export async function postAuthTokenRefresh(args?: {
   const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,
-    AxiosResponse<PostResponse, PostParams>,
-    PostParams
+    AxiosResponse<PostResponse, PostBody>,
+    PostBody
   >(`/auth/token/refresh`);
 }

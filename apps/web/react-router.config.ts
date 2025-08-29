@@ -1,9 +1,11 @@
-import type { Config } from "@react-router/dev/config";
+import type { Config } from "@react-router/dev/dist/config";
 import { sentryOnBuildEnd } from "@sentry/react-router";
 
-export default {
+const config: Config = {
   ssr: true,
   buildEnd: async ({ viteConfig, reactRouterConfig, buildManifest }) => {
     await sentryOnBuildEnd({ viteConfig, reactRouterConfig, buildManifest });
   },
-} satisfies Config;
+};
+
+export default config;

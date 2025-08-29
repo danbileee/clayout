@@ -10,8 +10,12 @@ import {
 import { EmailsService } from './emails.service';
 import { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
-import { RecordEmailClickDto } from './dtos/email.dto';
 import { PublicRoute } from 'src/shared/decorators/public-route.decorator';
+import {
+  RecordEmailClickDto,
+  RecordEmailClickSchema,
+} from '@clayout/interface';
+import { ZodValidationPipe } from 'src/shared/pipes/zod.pipe';
 
 @Controller('emails')
 export class EmailsController {
@@ -39,7 +43,8 @@ export class EmailsController {
   @PublicRoute()
   async trackClick(
     @Param('id', ParseIntPipe) id: number,
-    @Body() recordEmailClickDto: RecordEmailClickDto,
+    @Body(new ZodValidationPipe(RecordEmailClickSchema))
+    recordEmailClickDto: RecordEmailClickDto,
   ) {
     await this.emailsService.recordClick(recordEmailClickDto, id);
 

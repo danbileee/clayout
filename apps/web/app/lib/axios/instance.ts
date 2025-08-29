@@ -11,6 +11,7 @@ const baseConfig: CreateAxiosDefaults = {
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    Accept: "application/json",
   },
   timeout: 15000,
 };

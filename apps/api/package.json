@@ -6,8 +6,9 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "build": "nest build",
-    "build:prod": "nest build && pnpm sentry:sourcemaps",
+    "prebuild": "pnpm -w --filter @clayout/interface build && pnpm -w --filter @clayout/kit build",
+    "build": "pnpm prebuild && nest build",
+    "build:prod": "pnpm prebuild && nest build && pnpm sentry:sourcemaps",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -19,11 +20,15 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "supabase:gentypes": "supabase gen types typescript --local > ../../packages/interface/src/types/supabase.ts",
+    "gen-supabase-types": "supabase gen types typescript --local > ../../packages/interface/src/types/supabase/supabase.type.ts",
+    "improve-supabase-types": "ts-node scripts/improve-supabase-types.ts",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org wev --project clayout-api ./dist && sentry-cli sourcemaps upload --org wev --project clayout-api ./dist"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.873.0",
+    "@aws-sdk/s3-request-presigner": "^3.873.0",
     "@clayout/interface": "workspace:*",
+    "@clayout/kit": "workspace:*",
     "@nestjs-modules/mailer": "^2.0.2",
     "@nestjs/cli": "^10.0.0",
     "@nestjs/common": "^10.0.0",
@@ -73,7 +78,7 @@
     "ts-loader": "^9.4.3",
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.1.3"
+    "typescript": "^5.9.2"
   },
   "jest": {
     "moduleFileExtensions": [

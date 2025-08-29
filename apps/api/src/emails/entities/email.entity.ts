@@ -1,5 +1,11 @@
 import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
-import { IsDate, IsEmail, IsJSON, IsOptional, IsString } from 'class-validator';
+import {
+  IsDate,
+  IsEmail,
+  IsObject,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { EmailClickEventEntity } from './email-click-event.entity';
@@ -29,8 +35,8 @@ export class EmailEntity extends BaseEntity {
     type: 'jsonb',
   })
   @IsOptional()
-  @IsJSON()
-  context: Record<string, any>;
+  @IsObject()
+  context: Record<string, string>;
 
   @Column({
     nullable: true,
@@ -39,7 +45,7 @@ export class EmailEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  sent_at?: Date;
+  sentAt?: Date;
 
   @Column({
     nullable: true,
@@ -48,14 +54,14 @@ export class EmailEntity extends BaseEntity {
   })
   @IsOptional()
   @IsDate()
-  failed_at?: Date;
+  failedAt?: Date;
 
   @Column({
     nullable: true,
   })
   @IsOptional()
   @IsString()
-  error_log?: string;
+  errorLog?: string;
 
   @ManyToOne(() => UserEntity, (user) => user.email)
   user: UserEntity;
@@ -64,5 +70,5 @@ export class EmailEntity extends BaseEntity {
     () => EmailClickEventEntity,
     (emailClickEvent) => emailClickEvent.email,
   )
-  email_click_events: EmailClickEventEntity[];
+  emailClickEvents: EmailClickEventEntity[];
 }

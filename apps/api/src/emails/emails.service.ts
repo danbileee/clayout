@@ -1,11 +1,11 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { EmailEntity } from './entities/email.entity';
-import { RecordEmailClickDto, SendEmailDto } from './dtos/email.dto';
 import { EmailClickEventEntity } from './entities/email-click-event.entity';
 import { EmailOpenEventEntity } from './entities/email-open-event.entity';
+import { RecordEmailClickDto, SendEmailDto } from '@clayout/interface';
 
 @Injectable()
 export class EmailsService {
@@ -58,7 +58,7 @@ export class EmailsService {
 
       const updatedEmail: EmailEntity = {
         ...email,
-        sent_at: new Date(),
+        sentAt: new Date(),
       };
 
       await this.emailsRepository.save(updatedEmail);
@@ -71,8 +71,8 @@ export class EmailsService {
       } catch (retryErr) {
         const updatedEmail: EmailEntity = {
           ...email,
-          failed_at: new Date(),
-          error_log: String(err) + ' | Retry: ' + String(retryErr),
+          failedAt: new Date(),
+          errorLog: String(err) + ' | Retry: ' + String(retryErr),
         };
 
         await this.emailsRepository.save(updatedEmail);
@@ -83,7 +83,7 @@ export class EmailsService {
       // If retry succeeds, continue with success flow
       const updatedEmail: EmailEntity = {
         ...email,
-        sent_at: new Date(),
+        sentAt: new Date(),
       };
 
       await this.emailsRepository.save(updatedEmail);
@@ -98,13 +98,13 @@ export class EmailsService {
     });
 
     if (!matchedEmail) {
-      throw new InternalServerErrorException(`Email not found.`);
+      throw new NotFoundException(`Email not found.`);
     }
 
     const createdEvent = this.emailOpenEventsRepository.create({
       id,
       email: matchedEmail,
-      opened_at: new Date(),
+      openedAt: new Date(),
     });
 
     await this.emailOpenEventsRepository.save(createdEvent);
@@ -121,13 +121,13 @@ export class EmailsService {
     });
 
     if (!matchedEmail) {
-      throw new InternalServerErrorException(`Email not found.`);
+      throw new NotFoundException(`Email not found.`);
     }
 
     const createdEvent = this.emailClickEventsRepository.create({
       ...recordEmailClickDto,
       email: matchedEmail,
-      clicked_at: new Date(),
+      clickedAt: new Date(),
     });
 
     await this.emailClickEventsRepository.save(createdEvent);
