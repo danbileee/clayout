@@ -283,15 +283,35 @@ export class SitesService implements AuthorService {
     siteId: number;
     releaseVersion: string;
   }) {
-    await this.uploaderService.upload({
-      Bucket: this.configService.get(EnvKeys.CF_R2_BUNDLES_BUCKET),
-      Key: `sites/${siteId}/${releaseVersion}/${file.name}`,
-      ContentType: file.contentType,
-      Body:
-        typeof file.content === 'string'
-          ? Buffer.from(file.content)
-          : file.content,
-    });
+    const bucket = this.configService.get(EnvKeys.CF_R2_BUNDLES_BUCKET);
+
+    if (!bucket) {
+      throw new BadRequestException(
+        'CF_R2_BUNDLES_BUCKET environment variable is required but not set',
+      );
+    }
+
+    try {
+      await this.uploaderService.upload({
+        Bucket: bucket,
+        Key: `sites/${siteId}/${releaseVersion}/${file.name}`,
+        ContentType: file.contentType,
+        Body:
+          typeof file.content === 'string'
+            ? Buffer.from(file.content)
+            : file.content,
+      });
+    } catch (error) {
+      console.error('Failed to upload site bundle:', {
+        siteId,
+        releaseVersion,
+        fileName: file.name,
+        error: error.message,
+      });
+      throw new BadRequestException(
+        `Failed to upload site bundle: ${error.message}`,
+      );
+    }
   }
 
   async updateKV({
