@@ -50,7 +50,7 @@ export type Database = {
           order?: number
           path: string
           targetId: number
-          targetType: Database["public"]["Enums"]["assets_targettype_enum"]
+          targetType?: Database["public"]["Enums"]["assets_targettype_enum"]
           updatedAt: Date
         }
         Update: {
@@ -489,7 +489,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      assets_targettype_enum: "Site" | "SitePage" | "SiteBlock"
+      assets_targettype_enum: "None" | "Site" | "SitePage" | "SiteBlock"
       site_blocks_type_enum: "None" | "Text" | "Image" | "Button"
       site_domains_status_enum: "Pending" | "Verified" | "Error"
       site_pages_category_enum: "Static" | "List" | "Article"
@@ -638,7 +638,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      assets_targettype_enum: ["Site", "SitePage", "SiteBlock"],
+      assets_targettype_enum: ["None", "Site", "SitePage", "SiteBlock"],
       site_blocks_type_enum: ["None", "Text", "Image", "Button"],
       site_domains_status_enum: ["Pending", "Verified", "Error"],
       site_pages_category_enum: ["Static", "List", "Article"],

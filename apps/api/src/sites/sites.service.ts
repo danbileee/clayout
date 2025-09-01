@@ -9,7 +9,6 @@ import {
   UpdateSiteDto,
   PaginateSiteDto,
   SiteStatuses,
-  AssetTypes,
 } from '@clayout/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -228,7 +227,7 @@ export class SitesService implements AuthorService {
         isPrimary: true,
       },
     });
-    const favicon = await this.generateFavicon(site.id, site.meta?.faviconId);
+    const favicon = await this.generateFavicon(site.id, site.meta?.faviconPath);
     const files = await generateSiteFiles(site, domain, { favicon });
     const release = await this.createRelease(site, files);
 
@@ -277,29 +276,18 @@ export class SitesService implements AuthorService {
 
   async generateFavicon(
     siteId: number,
-    faviconId?: number,
+    faviconPath?: string,
   ): Promise<Buffer | undefined> {
     try {
-      const matchedFavicon =
-        await this.assetsService.getById<SiteEntity>(faviconId);
+      const assetsBucket = this.configService.get(EnvKeys.CF_R2_ASSETS_BUCKET);
+      const object = await this.uploaderService.get({
+        Bucket: assetsBucket,
+        Key: faviconPath,
+      });
 
-      if (!matchedFavicon) return;
-
-      const { asset } = matchedFavicon;
-
-      if (asset.targetType === AssetTypes.Site && asset.target.id === siteId) {
-        const assetsBucket = this.configService.get(
-          EnvKeys.CF_R2_ASSETS_BUCKET,
-        );
-        const object = await this.uploaderService.get({
-          Bucket: assetsBucket,
-          Key: asset.path,
-        });
-
-        if (object.Body) {
-          const bytes = await object.Body.transformToByteArray();
-          return Buffer.from(bytes);
-        }
+      if (object.Body) {
+        const bytes = await object.Body.transformToByteArray();
+        return Buffer.from(bytes);
       }
     } catch (error) {
       console.error('Failed to copy favicon for site:', siteId, error);
@@ -369,7 +357,7 @@ export class SitesService implements AuthorService {
     siteId: number;
     releaseVersion: string;
   }) {
-    const url = `${this.configService.get(EnvKeys.CF_KV_URL)}/${this.configService.get(EnvKeys.CF_KV_SITE_ROUTING_ID)}/values/domain:${hostname}`;
+    const url = `${this.configService.get(EnvKeys.CF_KV_API_HOST)}/${this.configService.get(EnvKeys.CF_KV_SITE_ROUTING_ID)}/values/domain:${hostname}`;
     const body = `${siteId}:${releaseVersion}`;
     const token = this.configService.get(EnvKeys.CF_KV_TOKEN);
 

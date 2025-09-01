@@ -30,20 +30,13 @@ export default function Sites() {
   const navigate = useNavigate();
   const { meta } = useLoaderData<typeof clientLoader>();
   useAuthMeta(meta);
-  const {
-    status,
-    data,
-    error,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
+  const { data } = useInfiniteQuery({
     queryKey: getSitesQueryKey(),
-    queryFn: async (ctx) => {
+    queryFn: async ({ pageParam }) => {
       const fn = async () =>
         await getSites({
           params: {
-            from: ctx.pageParam,
+            from: pageParam,
             take: 20,
           },
         });

@@ -3,6 +3,7 @@ import { BlockRegistry } from '@clayout/kit';
 import { SitePageEntity } from '../entities/site-page.entity';
 import { SiteEntity } from '../entities/site.entity';
 import { SiteDomainEntity } from '../entities/site-domain.entity';
+import { EnvKeys } from 'src/shared/constants/env.const';
 
 interface Options {
   hasFavicon?: boolean;
@@ -24,7 +25,10 @@ export function renderSiteBlocks({
   const { hasFavicon = false } = options ?? {};
   const title = `${site.name} | ${page.name}`;
   const description = page.meta?.description ?? site.meta?.description;
-  const ogImage = page.meta?.ogImage ?? site.meta?.ogImage;
+  const ogImagePath = page.meta?.ogImagePath ?? site.meta?.ogImagePath;
+  const assetsDomain = process.env[EnvKeys.CF_R2_ASSETS_DOMAIN];
+  const ogImage =
+    ogImagePath && assetsDomain ? `${assetsDomain}/${ogImagePath}` : '';
   const path = page.isHome ? '' : `/${page.slug}`;
   const url = `https://${domain.hostname}${path}`;
 

@@ -22,7 +22,7 @@ export class UploaderService {
     const secretAccessKey = this.configService.get(
       EnvKeys.CF_R2_SECRET_ACCESS_KEY,
     );
-    const endpoint = this.configService.get(EnvKeys.CF_R2_URL);
+    const endpoint = this.configService.get(EnvKeys.CF_R2_API_HOST);
 
     // Validate required credentials
     if (!accessKeyId) {
@@ -36,7 +36,9 @@ export class UploaderService {
       );
     }
     if (!endpoint) {
-      throw new Error('CF_R2_URL environment variable is required but not set');
+      throw new Error(
+        'CF_R2_API_HOST environment variable is required but not set',
+      );
     }
 
     this.s3 = new S3Client({

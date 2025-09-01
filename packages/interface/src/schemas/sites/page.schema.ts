@@ -11,11 +11,21 @@ const sitePageShape = {
   name: z.string(),
   category: z.enum(Constants.site_pages_category_enum),
   meta: SitePageMetaSchema.optional(),
+  order: z.number(),
+  isHome: z.boolean(),
+  isVisible: z.boolean(),
   blocks: z.array(SiteBlockSchema),
 } satisfies Record<
   keyof Pick<
     Tables<"site_pages">,
-    "id" | "slug" | "name" | "category" | "meta"
+    | "id"
+    | "slug"
+    | "name"
+    | "category"
+    | "meta"
+    | "order"
+    | "isHome"
+    | "isVisible"
   >,
   ZodTypeAny
 > & { blocks: ZodTypeAny };

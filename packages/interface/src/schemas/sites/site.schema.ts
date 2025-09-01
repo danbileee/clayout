@@ -5,8 +5,8 @@ import { PaginationSchema } from "../pagination";
 
 export const siteMetaShape = {
   description: z.string().optional(),
-  ogImage: z.string().optional(),
-  faviconId: z.number().optional(),
+  ogImagePath: z.string().optional(),
+  faviconPath: z.string().optional(),
 };
 
 export const SiteMetaSchema = z.object(siteMetaShape);

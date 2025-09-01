@@ -1,6 +1,6 @@
 import { IsBoolean, IsInt, IsObject, IsString, Matches } from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
-import { Column, Entity, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, Index, ManyToOne, OneToMany } from 'typeorm';
 import {
   KebabCase,
   SitePageCategories,
@@ -11,10 +11,10 @@ import { SiteEntity } from './site.entity';
 import { SiteBlockEntity } from './site-block.entity';
 
 @Entity('site_pages')
+@Index('UQ_site_pages_slug_per_site', ['site', 'slug'], { unique: true })
 export class SitePageEntity extends BaseEntity {
   @Column({
     nullable: false,
-    unique: true,
   })
   @IsString()
   @Matches(KebabCase)
