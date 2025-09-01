@@ -3,7 +3,13 @@ import { Constants, Tables } from "../../types";
 import { SitePageSchema } from "./page.schema";
 import { PaginationSchema } from "../pagination";
 
-export const SiteMetaSchema = z.object({});
+export const siteMetaShape = {
+  description: z.string().optional(),
+  ogImage: z.string().optional(),
+  faviconId: z.number().optional(),
+};
+
+export const SiteMetaSchema = z.object(siteMetaShape);
 
 const siteShape = {
   name: z.string(),

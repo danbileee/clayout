@@ -3,6 +3,10 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
   PutObjectCommandOutput,
+  GetObjectCommand,
+  GetObjectCommandInput,
+  CopyObjectCommand,
+  CopyObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
@@ -66,6 +70,33 @@ export class UploaderService {
         bucket: input.Bucket,
         key: input.Key,
         contentType: input.ContentType,
+      });
+      throw error;
+    }
+  }
+
+  async get(input: GetObjectCommandInput) {
+    try {
+      return await this.s3.send(new GetObjectCommand(input));
+    } catch (error) {
+      console.error('S3 Get Object Error:', {
+        message: error.message,
+        bucket: input.Bucket,
+        key: input.Key,
+      });
+      throw error;
+    }
+  }
+
+  async copy(input: CopyObjectCommandInput) {
+    try {
+      return await this.s3.send(new CopyObjectCommand(input));
+    } catch (error) {
+      console.error('S3 Copy Object Error:', {
+        message: error.message,
+        bucket: input.Bucket,
+        key: input.Key,
+        copySource: input.CopySource,
       });
       throw error;
     }

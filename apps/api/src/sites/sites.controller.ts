@@ -33,6 +33,12 @@ import { SiteEntity } from './entities/site.entity';
 export class SitesController {
   constructor(private readonly sitesService: SitesService) {}
 
+  /**
+   * =======================================================================
+   * Sites
+   * =======================================================================
+   */
+
   @Post()
   create(
     @User() user: UserEntity,
@@ -49,6 +55,12 @@ export class SitesController {
   ): Promise<{ results: Pagination<SiteEntity> }> {
     return this.sitesService.paginate(userId, paginateSiteDto);
   }
+
+  /**
+   * =======================================================================
+   * Site
+   * =======================================================================
+   */
 
   @Get(':id')
   @UseGuards(AuthorGuard)
@@ -80,6 +92,12 @@ export class SitesController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.sitesService.delete(id);
   }
+
+  /**
+   * =======================================================================
+   * Site Publish
+   * =======================================================================
+   */
 
   @Patch(':id/publish')
   @UseGuards(AuthorGuard)

@@ -14,6 +14,7 @@ import { AccessTokenGuard, CsrfTokenGuard } from './auth/guards/token.guard';
 import { EmailsModule } from './emails/emails.module';
 import { SitesModule } from './sites/sites.module';
 import { AssetsModule } from './assets/assets.module';
+import { SitePagesModule } from './sites/pages/pages.module';
 
 @Module({
   imports: [
@@ -43,6 +44,7 @@ import { AssetsModule } from './assets/assets.module';
     EmailsModule,
     SitesModule,
     AssetsModule,
+    SitePagesModule,
   ],
   controllers: [AppController],
   providers: [

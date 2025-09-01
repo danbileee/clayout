@@ -160,33 +160,6 @@ function convertSnakeCaseToCamelCase(content: string): string {
   return transformed;
 }
 
-function fixAssetTargetTypeEnum(content: string): string {
-  let transformed = content;
-
-  // Fix the targetType field to use the proper enum type
-  // Replace string type with the proper enum reference for targetType
-  const targetTypePatterns = [
-    // Row type
-    /(\s*target_type:\s*)string(\s*,?)/g,
-    /(\s*targetType:\s*)string(\s*,?)/g,
-    // Insert type
-    /(\s*target_type\?:\s*)string(\s*,?)/g,
-    /(\s*targetType\?:\s*)string(\s*,?)/g,
-    // Update type
-    /(\s*target_type\?:\s*)string(\s*,?)/g,
-    /(\s*targetType\?:\s*)string(\s*,?)/g,
-  ];
-
-  targetTypePatterns.forEach((pattern) => {
-    transformed = transformed.replace(
-      pattern,
-      `$1Database["public"]["Enums"]["asset_types_enum"]$2`,
-    );
-  });
-
-  return transformed;
-}
-
 function main() {
   try {
     const filePath = path.join(
@@ -214,9 +187,6 @@ function main() {
     console.log('🔄 Making BaseEntity columns required...');
     transformed = makeRequiredColumns(transformed);
 
-    console.log('🔄 Fixing asset targetType enum...');
-    transformed = fixAssetTargetTypeEnum(transformed);
-
     console.log('💾 Writing transformed file...');
     fs.writeFileSync(filePath, transformed);
 
@@ -226,7 +196,6 @@ function main() {
     console.log(
       '📝 BaseEntity columns (id, createdAt, updatedAt) are required in Insert types, only id is required in Update types',
     );
-    console.log('📝 Asset targetType now uses proper enum type');
   } catch (error) {
     console.error('❌ Error:', error);
     process.exit(1);

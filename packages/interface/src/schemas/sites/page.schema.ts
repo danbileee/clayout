@@ -1,8 +1,9 @@
 import { z, ZodTypeAny } from "zod";
 import { Constants, Tables } from "../../types";
 import { SiteBlockSchema } from "./block.schema";
+import { siteMetaShape } from "./site.schema";
 
-export const SitePageMetaSchema = z.object({});
+export const SitePageMetaSchema = z.object(siteMetaShape);
 
 const sitePageShape = {
   id: z.number().optional(),

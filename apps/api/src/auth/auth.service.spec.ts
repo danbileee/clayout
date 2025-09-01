@@ -37,9 +37,9 @@ describe('AuthService', () => {
         {
           provide: UsersService,
           useValue: createMockService<UsersService>({
-            createUser: jest.fn(),
-            getUser: jest.fn(),
-            updateUser: jest.fn(),
+            create: jest.fn(),
+            get: jest.fn(),
+            updtae: jest.fn(),
           }),
         },
         {
@@ -266,7 +266,7 @@ describe('AuthService', () => {
         created_at: new Date(),
         updated_at: new Date(),
       } as unknown as UserEntity;
-      usersService.getUser.mockResolvedValue(mockUser);
+      usersService.get.mockResolvedValue(mockUser);
 
       // Mock bcrypt compare
       const bcrypt = require('bcrypt');
@@ -274,7 +274,7 @@ describe('AuthService', () => {
 
       const result = await service.authenticate(userCredentials);
 
-      expect(usersService.getUser).toHaveBeenCalledWith({
+      expect(usersService.get).toHaveBeenCalledWith({
         email: userCredentials.email,
       });
       expect(result).toEqual(mockUser);
@@ -295,7 +295,7 @@ describe('AuthService', () => {
         created_at: new Date(),
         updated_at: new Date(),
       } as unknown as UserEntity;
-      usersService.getUser.mockResolvedValue(mockUser);
+      usersService.get.mockResolvedValue(mockUser);
 
       // Mock bcrypt compare
       const bcrypt = require('bcrypt');
@@ -314,7 +314,7 @@ describe('AuthService', () => {
         email: 'nonexistent@example.com',
         password: 'password123',
       };
-      usersService.getUser.mockResolvedValue(null);
+      usersService.get.mockResolvedValue(null);
 
       await expect(service.authenticate(userCredentials)).rejects.toThrow(
         UnauthorizedException,
@@ -346,7 +346,7 @@ describe('AuthService', () => {
         refreshToken: 'mock.refresh.token',
       };
 
-      usersService.getUser.mockResolvedValue(mockUser);
+      usersService.get.mockResolvedValue(mockUser);
       const bcrypt = require('bcrypt');
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
 

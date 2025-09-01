@@ -36,3 +36,11 @@ export const SiteBlockTypes = {
 } as const;
 
 export type StieBlockType = keyof typeof SiteBlockTypes;
+
+export const SiteDomainStatuses = {
+  Pending: "Pending",
+  Verified: "Verified",
+  Error: "Error",
+} as const;
+
+export type SitedomainStatus = keyof typeof SiteDomainStatuses;

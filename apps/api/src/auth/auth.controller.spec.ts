@@ -32,9 +32,9 @@ describe('AuthController', () => {
         {
           provide: UsersService,
           useValue: createMockService<UsersService>({
-            createUser: jest.fn(),
-            getUser: jest.fn(),
-            updateUser: jest.fn(),
+            create: jest.fn(),
+            get: jest.fn(),
+            updtae: jest.fn(),
           }),
         },
         {

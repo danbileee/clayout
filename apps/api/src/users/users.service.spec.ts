@@ -39,7 +39,7 @@ describe('UsersService', () => {
       usersRepository.create.mockReturnValue(mockUser);
       usersRepository.save.mockResolvedValue(mockUser);
 
-      const result = await service.createUser(userData);
+      const result = await service.create(userData);
 
       expect(usersRepository.exists).toHaveBeenCalledWith({
         where: { username: userData.username },
@@ -61,7 +61,7 @@ describe('UsersService', () => {
         .mockResolvedValueOnce(false); // Email doesn't exist
 
       try {
-        await service.createUser(userData);
+        await service.create(userData);
         // If we reach here, no exception was thrown
         expect(true).toBe(false); // This should not be reached
       } catch (error) {
@@ -85,7 +85,7 @@ describe('UsersService', () => {
         .mockResolvedValueOnce(true); // Email exists
 
       try {
-        await service.createUser(userData);
+        await service.create(userData);
         // If we reach here, no exception was thrown
         expect(true).toBe(false); // This should not be reached
       } catch (error) {
@@ -115,7 +115,7 @@ describe('UsersService', () => {
 
       usersRepository.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.getUser({ email });
+      const result = await service.get({ email });
 
       expect(usersRepository.findOne).toHaveBeenCalledWith({
         where: { email },
@@ -133,7 +133,7 @@ describe('UsersService', () => {
 
       usersRepository.findOne.mockResolvedValue(mockUser);
 
-      const result = await service.getUser({ username });
+      const result = await service.get({ username });
 
       expect(usersRepository.findOne).toHaveBeenCalledWith({
         where: { username },
@@ -146,7 +146,7 @@ describe('UsersService', () => {
 
       usersRepository.findOne.mockResolvedValue(null);
 
-      const result = await service.getUser({ email });
+      const result = await service.get({ email });
 
       expect(usersRepository.findOne).toHaveBeenCalledWith({
         where: { email },
@@ -171,7 +171,7 @@ describe('UsersService', () => {
 
       usersRepository.save.mockResolvedValue(updatedUser);
 
-      const result = await service.updateUser(updatedUser);
+      const result = await service.updtae(updatedUser);
 
       expect(usersRepository.save).toHaveBeenCalledWith(updatedUser);
       expect(result).toEqual(updatedUser);

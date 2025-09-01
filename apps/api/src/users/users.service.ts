@@ -10,7 +10,7 @@ export class UsersService {
     private readonly usersRepository: Repository<UserEntity>,
   ) {}
 
-  async createUser(
+  async create(
     user: Pick<UserEntity, 'username' | 'email' | 'password' | 'role'>,
   ) {
     const matchedUsername = await this.usersRepository.exists({
@@ -37,11 +37,11 @@ export class UsersService {
     return await this.usersRepository.save(createdUser);
   }
 
-  async getUser(user: Partial<UserEntity>): Promise<UserEntity> {
+  async get(user: Partial<UserEntity>): Promise<UserEntity> {
     return this.usersRepository.findOne({ where: user });
   }
 
-  async updateUser(updatedUser: UserEntity): Promise<UserEntity> {
+  async updtae(updatedUser: UserEntity): Promise<UserEntity> {
     return this.usersRepository.save(updatedUser);
   }
 }

@@ -1,6 +1,12 @@
 import { z } from "zod";
 import { Tables } from "./supabase";
-import { PaginateSiteSchema, SiteSchema } from "../schemas";
+import {
+  PaginateSiteSchema,
+  SiteMetaSchema,
+  SitePageMetaSchema,
+  SitePageSchema,
+  SiteSchema,
+} from "../schemas";
 
 export type SiteBlock = Omit<Tables<"site_blocks">, "siteId" | "pageId">;
 
@@ -22,3 +28,11 @@ export type CreateSiteDto = z.infer<typeof SiteSchema>;
 export type UpdateSiteDto = Partial<CreateSiteDto>;
 
 export type PaginateSiteDto = z.infer<typeof PaginateSiteSchema>;
+
+export type SiteMeta = z.infer<typeof SiteMetaSchema>;
+
+export type SitePageMeta = z.infer<typeof SitePageMetaSchema>;
+
+export type CreateSitePageDto = z.infer<typeof SitePageSchema>;
+
+export type UpdateSitePageDto = Partial<CreateSitePageDto>;

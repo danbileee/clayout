@@ -12,6 +12,7 @@ import {
   KebabCase,
   SiteCategories,
   SiteCategory,
+  SiteMeta,
   SiteStatus,
   SiteStatuses,
 } from '@clayout/interface';
@@ -52,7 +53,7 @@ export class SiteEntity extends BaseEntity {
     type: 'jsonb',
   })
   @IsObject()
-  meta: Record<string, any>;
+  meta: SiteMeta;
 
   @Column({
     nullable: true,

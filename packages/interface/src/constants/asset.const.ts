@@ -1,4 +1,5 @@
 export const AssetTypes = {
+  None: "None",
   Site: "Site",
   SitePage: "SitePage",
   SiteBlock: "SiteBlock",
