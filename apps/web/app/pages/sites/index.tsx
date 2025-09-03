@@ -78,6 +78,9 @@ export default function Sites() {
               slug: `new-page-${now}`,
               name: "New Page",
               category: SitePageCategories.Static,
+              isHome: true,
+              isVisible: true,
+              order: 0,
               blocks: [
                 {
                   type: SiteBlockTypes.Image,
