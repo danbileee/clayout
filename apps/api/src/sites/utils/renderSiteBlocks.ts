@@ -41,7 +41,7 @@ export function renderSiteBlocks({
     <meta property="og:type" content=${site.category} />
     <meta property="og:url" content=${url} />
     <meta property="og:title" name="title" content=${title} />
-    <meta property="og:description" name="description" content=${description} />
+    ${description ? `<meta property="og:description" name="description" content=${description} />` : ''}
     <meta property="og:site_name" content=${site.name} />
     <meta property="og:locale" content="ko_KR" />
     ${
