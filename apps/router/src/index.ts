@@ -26,6 +26,11 @@ type Variables = {
 
 const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
 
+app.onError((err, c) => {
+  console.error("Worker error:", err);
+  return c.text("Internal Server Error", 500);
+});
+
 /**
  * Global middleware for
  * 1. host validation
@@ -33,96 +38,190 @@ const app = new Hono<{ Bindings: Bindings; Variables: Variables }>();
  * 3. setting variables
  */
 app.use("*", async (ctx, next) => {
-  const url = new URL(ctx.req.url);
-  const hostname = url.hostname;
+  try {
+    const url = new URL(ctx.req.url);
+    const hostname = url.hostname;
 
-  if (!hostname) {
-    return ctx.text("Bad Request: Invalid hostname", 404);
-  }
+    console.log(`Processing request for hostname: ${hostname}`);
 
-  // Reserved subdomain passthrough
-  if (hostname.endsWith(DEFAULT_DOMAIN)) {
-    const subdomain = hostname.replace(DEFAULT_DOMAIN, "");
-    // Read as text to avoid runtime JSON parse errors from malformed KV values
-    const reservedListText = await ctx.env.SITE_ROUTING_KV.get(
-      "reserved_subdomains",
-      { type: "text" }
-    );
-    const reservedList = safeParseStringArray(reservedListText);
-
-    if (
-      reservedList.map((s) => s.toLowerCase()).includes(subdomain.toLowerCase())
-    ) {
-      console.log("Reserved Subdomain: Proceed the original request.");
-      // Forward original request unchanged
-      return fetch(ctx.req.raw);
+    if (!hostname) {
+      console.log("Bad Request: Invalid hostname");
+      return ctx.text("Bad Request: Invalid hostname", 400);
     }
+
+    // Reserved subdomain passthrough
+    if (hostname.endsWith(DEFAULT_DOMAIN)) {
+      const subdomain = hostname.replace(DEFAULT_DOMAIN, "");
+      // Read as text to avoid runtime JSON parse errors from malformed KV values
+      const reservedListText = await ctx.env.SITE_ROUTING_KV.get(
+        "reserved_subdomains",
+        { type: "text" }
+      );
+      const reservedList = safeParseStringArray(reservedListText);
+
+      if (
+        reservedList
+          .map((s) => s.toLowerCase())
+          .includes(subdomain.toLowerCase())
+      ) {
+        console.log("Reserved Subdomain: Proceed the original request.");
+        // Forward original request unchanged
+        try {
+          const response = await fetch(ctx.req.raw);
+          return response;
+        } catch (fetchError) {
+          console.error("Fetch error for reserved subdomain:", fetchError);
+          return ctx.text("Error forwarding request", 500);
+        }
+      }
+    }
+
+    const kvValue = await ctx.env.SITE_ROUTING_KV.get(`domain:${hostname}`);
+    console.log(`KV lookup for domain:${hostname} = ${kvValue}`);
+
+    if (!kvValue) {
+      console.log(`Site not found for hostname: ${hostname}`);
+      return ctx.text("Site not found", 404);
+    }
+
+    const [siteId, releaseVersion] = kvValue.split(":");
+
+    console.log(
+      `context >>> siteId: ${siteId} | releaseVersion: ${releaseVersion}`
+    );
+
+    if (!siteId) {
+      return ctx.text("Site id not found", 404);
+    }
+
+    if (!releaseVersion) {
+      return ctx.text("Invalid release version", 404);
+    }
+
+    ctx.set("siteId", siteId);
+    ctx.set("releaseVersion", releaseVersion);
+
+    await next();
+  } catch (error) {
+    console.error("Middleware error:", error);
+    return ctx.text("Internal Server Error", 500);
   }
+});
 
-  const kvValue = await ctx.env.SITE_ROUTING_KV.get(`domain:${hostname}`);
+/**
+ * Debug endpoint to check KV and R2 status
+ */
+app.get("/.clayout-debug", async (ctx) => {
+  try {
+    const url = new URL(ctx.req.url);
+    const hostname = url.hostname;
 
-  if (!kvValue) {
-    return ctx.text("Site not found", 404);
+    const debugInfo = {
+      hostname,
+      timestamp: new Date().toISOString(),
+      kvStatus: "unknown",
+      r2Status: "unknown",
+    };
+
+    // Test KV access
+    try {
+      const testKey = `domain:${hostname}`;
+      const testValue = await ctx.env.SITE_ROUTING_KV.get(testKey);
+      debugInfo.kvStatus = testValue ? "accessible" : "not_found";
+    } catch (kvError) {
+      debugInfo.kvStatus = `error: ${(kvError as Error).message}`;
+    }
+
+    // Test R2 access
+    try {
+      const testKey = "test-key";
+      await ctx.env.CLAYOUT_BUNDLES_R2.get(testKey);
+      debugInfo.r2Status = "accessible";
+    } catch (r2Error) {
+      debugInfo.r2Status = `error: ${(r2Error as Error).message}`;
+    }
+
+    return ctx.json(debugInfo, 200);
+  } catch (error) {
+    console.error("Debug endpoint error:", error);
+    return ctx.text("Internal Server Error", 500);
   }
-
-  const [siteId, releaseVersion] = kvValue.split(":");
-
-  console.log(
-    `context >>> siteId: ${siteId} | releaseVersion: ${releaseVersion}`
-  );
-
-  if (!siteId) {
-    return ctx.text("Site id not found", 404);
-  }
-
-  if (!releaseVersion) {
-    return ctx.text("Invalid release version", 404);
-  }
-
-  ctx.set("siteId", siteId);
-  ctx.set("releaseVersion", releaseVersion);
-
-  await next();
 });
 
 /**
  * Serve domain verification token
  */
 app.get("/.clayout-verification", async (ctx) => {
-  const siteId = ctx.get("siteId") as string;
-  const token = await ctx.env.SITE_ROUTING_KV.get(`token:${siteId}`);
+  try {
+    const siteId = ctx.get("siteId") as string;
+    const token = await ctx.env.SITE_ROUTING_KV.get(`token:${siteId}`);
 
-  return ctx.text(token ?? "", 200);
+    return ctx.text(token ?? "", 200);
+  } catch (error) {
+    console.error("Verification error:", error);
+    return ctx.text("Internal Server Error", 500);
+  }
 });
 
 /**
  * Static file handler from R2
  */
 app.get("*", async (ctx) => {
-  const siteId = ctx.get("siteId") as string;
-  const releaseVersion = ctx.get("releaseVersion") as string;
-  const url = new URL(ctx.req.url);
-  const requestPath = url.pathname;
+  try {
+    const siteId = ctx.get("siteId") as string;
+    const releaseVersion = ctx.get("releaseVersion") as string;
+    const url = new URL(ctx.req.url);
+    const requestPath = url.pathname;
 
-  const { object, resolvedPath, objectKey } = await resolveR2Object(
-    ctx,
-    siteId,
-    releaseVersion,
-    requestPath
-  );
+    console.log(
+      `Serving path: ${requestPath} for site: ${siteId}, version: ${releaseVersion}`
+    );
 
-  if (!object) {
-    return ctx.text("Not found", 404);
+    const { object, resolvedPath, objectKey } = await resolveR2Object(
+      ctx,
+      siteId,
+      releaseVersion,
+      requestPath
+    );
+
+    if (!object) {
+      console.log(`R2 object not found for key: ${objectKey}`);
+      return ctx.text("Not found", 404);
+    }
+
+    console.log(`R2 >>> objectKey: ${objectKey}, size: ${object.size}`);
+
+    // Validate object body exists
+    if (!object.body) {
+      console.error(`R2 object has no body for key: ${objectKey}`);
+      return ctx.text("Invalid object", 500);
+    }
+
+    return new Response(object.body, {
+      headers: {
+        "Content-Type":
+          object.httpMetadata?.contentType ?? getContentType(resolvedPath),
+        "Cache-Control":
+          object.httpMetadata?.cacheControl ?? "public, max-age=3600",
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      },
+    });
+  } catch (error) {
+    console.error("Static file handler error:", error);
+    return ctx.text("Internal Server Error", 500);
   }
+});
 
-  console.log(`R2 >>> objectKey: ${objectKey}`);
-
-  return new Response(object.body, {
+// Add OPTIONS handler for CORS preflight
+app.options("*", (c) => {
+  return new Response(null, {
+    status: 200,
     headers: {
-      "Content-Type":
-        object.httpMetadata?.contentType ?? getContentType(resolvedPath),
-      "Cache-Control":
-        object.httpMetadata?.cacheControl ?? "public, max-age=3600",
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, HEAD, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type",
     },
   });
 });
@@ -172,22 +271,40 @@ async function resolveR2Object(
   resolvedPath: string;
   objectKey: string;
 }> {
-  const normalizedPath = normalizePath(path);
-  const candidates = buildCandidatePaths(normalizedPath);
+  try {
+    const normalizedPath = normalizePath(path);
+    const candidates = buildCandidatePaths(normalizedPath);
 
-  for (const candidate of candidates) {
-    const key = `sites/${siteId}/${releaseVersion}${candidate}`;
-    const obj = await ctx.env.CLAYOUT_BUNDLES_R2.get(key);
-    if (obj) {
-      return { object: obj, resolvedPath: candidate, objectKey: key };
+    console.log(`Resolving R2 object for path: ${path}`);
+    console.log(`Normalized path: ${normalizedPath}`);
+    console.log(`Candidate paths: ${JSON.stringify(candidates)}`);
+
+    for (const candidate of candidates) {
+      const key = `sites/${siteId}/${releaseVersion}${candidate}`;
+      console.log(`Trying R2 key: ${key}`);
+
+      try {
+        const obj = await ctx.env.CLAYOUT_BUNDLES_R2.get(key);
+        if (obj) {
+          console.log(`Found R2 object: ${key}, size: ${obj.size}`);
+          return { object: obj, resolvedPath: candidate, objectKey: key };
+        }
+      } catch (r2Error) {
+        console.error(`R2 error for key ${key}:`, r2Error);
+        // Continue to next candidate
+      }
     }
-  }
 
-  return {
-    object: null,
-    resolvedPath: normalizedPath,
-    objectKey: `sites/${siteId}/${releaseVersion}${normalizedPath}`,
-  };
+    console.log(`No R2 object found for any candidate paths`);
+    return {
+      object: null,
+      resolvedPath: normalizedPath,
+      objectKey: `sites/${siteId}/${releaseVersion}${normalizedPath}`,
+    };
+  } catch (error) {
+    console.error("Error in resolveR2Object:", error);
+    throw error;
+  }
 }
 
 function normalizePath(path: string): string {

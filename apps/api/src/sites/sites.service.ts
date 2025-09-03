@@ -287,6 +287,8 @@ export class SitesService implements AuthorService {
     siteId: number,
     faviconPath?: string,
   ): Promise<Buffer | undefined> {
+    if (!faviconPath) return;
+
     try {
       const assetsBucket = this.configService.get(EnvKeys.CF_R2_ASSETS_BUCKET);
       const object = await this.uploaderService.get({
