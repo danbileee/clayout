@@ -9,6 +9,7 @@ import {
   UpdateSiteDto,
   PaginateSiteDto,
   SiteStatuses,
+  SiteDomainStatuses,
 } from '@clayout/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -76,6 +77,14 @@ export class SitesService implements AuthorService {
         await this.sitesBlocksRepository.save(createdBlock);
       }
     }
+
+    const createdDomain = this.sitesDomainsRepository.create({
+      hostname: `${savedSite.slug}.clayout.app`,
+      status: SiteDomainStatuses.Pending,
+      isPrimary: true,
+      site: savedSite,
+    });
+    await this.sitesDomainsRepository.save(createdDomain);
 
     const finalSite = await this.sitesRepository.findOne({
       where: { id: savedSite.id },
