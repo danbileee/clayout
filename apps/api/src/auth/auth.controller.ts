@@ -21,10 +21,23 @@ import {
   RegisterDto,
   RegisterSchema,
 } from '@clayout/interface';
+import { ConfigService } from '@nestjs/config';
+import { EnvKeys } from 'src/shared/constants/env.const';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  cookieDomain: string;
+  hasCookieDomain: boolean;
+  isProduction: boolean;
+
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {
+    this.cookieDomain = this.configService.get(EnvKeys.COOKIE_DOMAIN);
+    this.hasCookieDomain = Boolean(this.cookieDomain);
+    this.isProduction = process.env.NODE_ENV === 'production';
+  }
 
   @Get('user')
   @PublicRoute()
@@ -44,21 +57,21 @@ export class AuthController {
     // Clear any previous variants to avoid duplicates (host-only and domain-scoped)
     res.clearCookie('csrfToken');
 
-    if (process.env.COOKIE_DOMAIN && process.env.NODE_ENV === 'production') {
+    if (this.hasCookieDomain && this.isProduction) {
       res.clearCookie('csrfToken', {
-        domain: process.env.COOKIE_DOMAIN,
+        domain: this.cookieDomain,
         path: '/',
       });
     }
 
     res.cookie('csrfToken', csrfToken, {
       httpOnly: false,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
       // Ensure the cookie is readable across app subdomains in production
       domain:
-        process.env.COOKIE_DOMAIN && process.env.NODE_ENV === 'production'
-          ? process.env.COOKIE_DOMAIN
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
           : undefined,
       path: '/',
     });
@@ -78,8 +91,13 @@ export class AuthController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
 
     return { message: 'Access token refreshed' };
@@ -96,13 +114,23 @@ export class AuthController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
 
     return { message: 'Login successful' };
@@ -115,9 +143,9 @@ export class AuthController {
     res.clearCookie('refreshToken');
     res.clearCookie('basicToken');
     res.clearCookie('csrfToken');
-    if (process.env.COOKIE_DOMAIN && process.env.NODE_ENV === 'production') {
+    if (this.hasCookieDomain && this.isProduction) {
       res.clearCookie('csrfToken', {
-        domain: process.env.COOKIE_DOMAIN,
+        domain: this.cookieDomain,
         path: '/',
       });
     }
@@ -135,8 +163,13 @@ export class AuthController {
 
     res.cookie('basicToken', basicToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
 
     return { message: 'Waiting for email confirmation' };
@@ -154,13 +187,23 @@ export class AuthController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
 
     return { message: 'Register confirmed' };
@@ -176,8 +219,8 @@ export class AuthController {
 
     res.cookie('basicToken', basicToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
     });
 
     return {
@@ -204,13 +247,23 @@ export class AuthController {
 
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+      domain:
+        this.hasCookieDomain && this.isProduction
+          ? this.cookieDomain
+          : undefined,
+      path: '/',
     });
 
     return {
