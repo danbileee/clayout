@@ -3,6 +3,10 @@ import {
   PutObjectCommand,
   PutObjectCommandInput,
   PutObjectCommandOutput,
+  GetObjectCommand,
+  GetObjectCommandInput,
+  CopyObjectCommand,
+  CopyObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
@@ -18,7 +22,7 @@ export class UploaderService {
     const secretAccessKey = this.configService.get(
       EnvKeys.CF_R2_SECRET_ACCESS_KEY,
     );
-    const endpoint = this.configService.get(EnvKeys.CF_R2_URL);
+    const endpoint = this.configService.get(EnvKeys.CF_R2_API_HOST);
 
     // Validate required credentials
     if (!accessKeyId) {
@@ -32,7 +36,9 @@ export class UploaderService {
       );
     }
     if (!endpoint) {
-      throw new Error('CF_R2_URL environment variable is required but not set');
+      throw new Error(
+        'CF_R2_API_HOST environment variable is required but not set',
+      );
     }
 
     this.s3 = new S3Client({
@@ -66,6 +72,33 @@ export class UploaderService {
         bucket: input.Bucket,
         key: input.Key,
         contentType: input.ContentType,
+      });
+      throw error;
+    }
+  }
+
+  async get(input: GetObjectCommandInput) {
+    try {
+      return await this.s3.send(new GetObjectCommand(input));
+    } catch (error) {
+      console.error('S3 Get Object Error:', {
+        message: error.message,
+        bucket: input.Bucket,
+        key: input.Key,
+      });
+      throw error;
+    }
+  }
+
+  async copy(input: CopyObjectCommandInput) {
+    try {
+      return await this.s3.send(new CopyObjectCommand(input));
+    } catch (error) {
+      console.error('S3 Copy Object Error:', {
+        message: error.message,
+        bucket: input.Bucket,
+        key: input.Key,
+        copySource: input.CopySource,
       });
       throw error;
     }

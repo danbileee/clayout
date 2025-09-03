@@ -19,11 +19,12 @@ When developing locally with Supabase, the workflow is:
 2. Test your changes locally to make sure everything works as expected.
 
 ```sh
-# Generate type definitions according to the table schema
-pnpm supabase:gentypes
+# Generate & improve type definitions according to the table schema
+pnpm gen-supabase-types
+pnpm improve-supabase-types
 ```
 
-3. Create migration files to track your schema changes. This is the recommended approach for production:
+1. Create migration files to track your schema changes. This is the recommended approach for production:
 
 ```sh
 # Create a new migration
@@ -91,8 +92,9 @@ supabase db diff --schema public
 ### 4. Update TypeScript Types
 
 ```sh
-# Regenerate types to match current schema
-pnpm supabase:gentypes
+# Regenerate & improve type definitions according to the table schema
+pnpm gen-supabase-types
+pnpm improve-supabase-types
 ```
 
 This workflow ensures that:

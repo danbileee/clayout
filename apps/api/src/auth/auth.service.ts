@@ -102,7 +102,7 @@ export class AuthService {
           throw new UnauthorizedException(`Invalid token type.`);
         }
 
-        const matchedUser = await this.usersService.getUser({
+        const matchedUser = await this.usersService.get({
           email: decodedToken.email,
         });
 
@@ -121,7 +121,7 @@ export class AuthService {
           throw new UnauthorizedException(`Invalid token type.`);
         }
 
-        const matchedUser = await this.usersService.getUser({
+        const matchedUser = await this.usersService.get({
           email: decodedToken.email,
         });
 
@@ -142,7 +142,7 @@ export class AuthService {
   async authenticate(
     user: Pick<UserEntity, 'email' | 'password'>,
   ): Promise<UserEntity> {
-    const matchedUser = await this.usersService.getUser({ email: user.email });
+    const matchedUser = await this.usersService.get({ email: user.email });
 
     if (!matchedUser) {
       throw new UnauthorizedException(`The user doesn't exist.`);
@@ -177,7 +177,7 @@ export class AuthService {
       parseInt(this.configService.get(EnvKeys.HASH_ROUND), 10),
     );
 
-    const createdUser = await this.usersService.createUser({
+    const createdUser = await this.usersService.create({
       ...user,
       password: hash,
       role: UserRoles.Registrant,
@@ -225,7 +225,7 @@ export class AuthService {
       );
     }
 
-    const matchedUser = await this.usersService.getUser({
+    const matchedUser = await this.usersService.get({
       email: decodedToken.email,
     });
 
@@ -238,13 +238,13 @@ export class AuthService {
       role: UserRoles.User,
     };
 
-    await this.usersService.updateUser(updatedUser);
+    await this.usersService.updtae(updatedUser);
 
     return this.generateTokens(updatedUser);
   }
 
   async forgotPassword({ email }: Pick<UserEntity, 'email'>) {
-    const matchedUser = await this.usersService.getUser({ email });
+    const matchedUser = await this.usersService.get({ email });
 
     if (!matchedUser) {
       throw new UnauthorizedException(`The user doesn't exist.`);
@@ -293,7 +293,7 @@ export class AuthService {
       );
     }
 
-    const matchedUser = await this.usersService.getUser({
+    const matchedUser = await this.usersService.get({
       email: decodedToken.email,
     });
 
@@ -306,7 +306,7 @@ export class AuthService {
       parseInt(this.configService.get(EnvKeys.HASH_ROUND), 10),
     );
 
-    const updatedUser = await this.usersService.updateUser({
+    const updatedUser = await this.usersService.updtae({
       ...user,
       password: hash,
     });

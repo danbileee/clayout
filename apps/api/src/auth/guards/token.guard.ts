@@ -32,7 +32,7 @@ export class BasicTokenGuard implements CanActivate {
       throw new UnauthorizedException('Expected basic token.');
     }
 
-    const user = await this.usersService.getUser({ email: result.email });
+    const user = await this.usersService.get({ email: result.email });
 
     req.token = basicToken;
     req.tokenType = result.type;
@@ -75,7 +75,7 @@ export class AccessTokenGuard implements CanActivate {
       throw new UnauthorizedException('Expected access token.');
     }
 
-    const user = await this.usersService.getUser({ email: result.email });
+    const user = await this.usersService.get({ email: result.email });
 
     req.token = accessToken;
     req.tokenType = result.type;
@@ -106,7 +106,7 @@ export class RefreshTokenGuard implements CanActivate {
       throw new UnauthorizedException('Expected refresh token.');
     }
 
-    const user = await this.usersService.getUser({ email: result.email });
+    const user = await this.usersService.get({ email: result.email });
 
     req.token = refreshToken;
     req.tokenType = result.type;

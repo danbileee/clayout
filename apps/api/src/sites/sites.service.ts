@@ -9,6 +9,7 @@ import {
   UpdateSiteDto,
   PaginateSiteDto,
   SiteStatuses,
+  SiteDomainStatuses,
 } from '@clayout/interface';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -25,6 +26,8 @@ import { EnvKeys } from 'src/shared/constants/env.const';
 import { SiteReleaseEntity } from './entities/site-release.entity';
 import { randomBytes } from 'crypto';
 import { SiteFile } from './interfaces/site.interface';
+import { SiteDomainEntity } from './entities/site-domain.entity';
+import { AssetsService } from 'src/assets/assets.service';
 
 @Injectable()
 export class SitesService implements AuthorService {
@@ -32,6 +35,7 @@ export class SitesService implements AuthorService {
     private readonly paginationService: PaginationService,
     private readonly uploaderService: UploaderService,
     private readonly configService: ConfigService,
+    private readonly assetsService: AssetsService,
     @InjectRepository(SiteEntity)
     private readonly sitesRepository: Repository<SiteEntity>,
     @InjectRepository(SitePageEntity)
@@ -40,6 +44,8 @@ export class SitesService implements AuthorService {
     private readonly sitesBlocksRepository: Repository<SiteBlockEntity>,
     @InjectRepository(SiteReleaseEntity)
     private readonly sitesReleasesRepository: Repository<SiteReleaseEntity>,
+    @InjectRepository(SiteDomainEntity)
+    private readonly sitesDomainsRepository: Repository<SiteDomainEntity>,
   ) {}
 
   async create(
@@ -71,6 +77,14 @@ export class SitesService implements AuthorService {
         await this.sitesBlocksRepository.save(createdBlock);
       }
     }
+
+    const createdDomain = this.sitesDomainsRepository.create({
+      hostname: `${savedSite.slug}.clayout.app`,
+      status: SiteDomainStatuses.Pending,
+      isPrimary: true,
+      site: savedSite,
+    });
+    await this.sitesDomainsRepository.save(createdDomain);
 
     const finalSite = await this.sitesRepository.findOne({
       where: { id: savedSite.id },
@@ -214,7 +228,16 @@ export class SitesService implements AuthorService {
       throw new NotFoundException(`Site not found`);
     }
 
-    const files = generateSiteFiles(site);
+    const domain = await this.sitesDomainsRepository.findOne({
+      where: {
+        site: {
+          id: site.id,
+        },
+        isPrimary: true,
+      },
+    });
+    const favicon = await this.generateFavicon(site.id, site.meta?.faviconPath);
+    const files = await generateSiteFiles(site, domain, { favicon });
     const release = await this.createRelease(site, files);
 
     for (const file of files) {
@@ -258,6 +281,28 @@ export class SitesService implements AuthorService {
     });
 
     return { site: publishedSite };
+  }
+
+  async generateFavicon(
+    siteId: number,
+    faviconPath?: string,
+  ): Promise<Buffer | undefined> {
+    if (!faviconPath) return;
+
+    try {
+      const assetsBucket = this.configService.get(EnvKeys.CF_R2_ASSETS_BUCKET);
+      const object = await this.uploaderService.get({
+        Bucket: assetsBucket,
+        Key: faviconPath,
+      });
+
+      if (object.Body) {
+        const bytes = await object.Body.transformToByteArray();
+        return Buffer.from(bytes);
+      }
+    } catch (error) {
+      console.error('Failed to copy favicon for site:', siteId, error);
+    }
   }
 
   async createRelease(
@@ -323,7 +368,7 @@ export class SitesService implements AuthorService {
     siteId: number;
     releaseVersion: string;
   }) {
-    const url = `${this.configService.get(EnvKeys.CF_KV_URL)}/${this.configService.get(EnvKeys.CF_KV_SITE_ROUTING_ID)}/values/domain:${hostname}`;
+    const url = `${this.configService.get(EnvKeys.CF_KV_API_HOST)}/${this.configService.get(EnvKeys.CF_KV_SITE_ROUTING_ID)}/values/domain:${hostname}`;
     const body = `${siteId}:${releaseVersion}`;
     const token = this.configService.get(EnvKeys.CF_KV_TOKEN);
 

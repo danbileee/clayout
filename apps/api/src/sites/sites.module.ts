@@ -9,6 +9,8 @@ import { PaginationService } from 'src/shared/services/pagination.service';
 import { SitePageEntity } from './entities/site-page.entity';
 import { SiteBlockEntity } from './entities/site-block.entity';
 import { UploaderService } from 'src/shared/services/uploader.service';
+import { AssetsService } from 'src/assets/assets.service';
+import { AssetEntity } from 'src/assets/entities/asset.entity';
 
 @Module({
   imports: [
@@ -18,9 +20,10 @@ import { UploaderService } from 'src/shared/services/uploader.service';
       SiteBlockEntity,
       SiteReleaseEntity,
       SiteDomainEntity,
+      AssetEntity,
     ]),
   ],
   controllers: [SitesController],
-  providers: [SitesService, PaginationService, UploaderService],
+  providers: [SitesService, PaginationService, UploaderService, AssetsService],
 })
 export class SitesModule {}

@@ -4,7 +4,7 @@ import { PaginationSchema } from "../pagination";
 
 const assetShape = {
   order: z.number().optional(),
-  targetType: z.enum(Constants.asset_types_enum),
+  targetType: z.enum(Constants.assets_targettype_enum),
   targetId: z.number(),
   path: z.string(),
 } satisfies Record<

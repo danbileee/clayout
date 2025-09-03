@@ -30,20 +30,13 @@ export default function Sites() {
   const navigate = useNavigate();
   const { meta } = useLoaderData<typeof clientLoader>();
   useAuthMeta(meta);
-  const {
-    status,
-    data,
-    error,
-    isFetchingNextPage,
-    fetchNextPage,
-    hasNextPage,
-  } = useInfiniteQuery({
+  const { data } = useInfiniteQuery({
     queryKey: getSitesQueryKey(),
-    queryFn: async (ctx) => {
+    queryFn: async ({ pageParam }) => {
       const fn = async () =>
         await getSites({
           params: {
-            from: ctx.pageParam,
+            from: pageParam,
             take: 20,
           },
         });
@@ -85,6 +78,9 @@ export default function Sites() {
               slug: `new-page-${now}`,
               name: "New Page",
               category: SitePageCategories.Static,
+              isHome: true,
+              isVisible: true,
+              order: 0,
               blocks: [
                 {
                   type: SiteBlockTypes.Image,

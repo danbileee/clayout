@@ -1,20 +1,38 @@
 import { SiteEntity } from '../entities/site.entity';
 import { SiteFile } from '../interfaces/site.interface';
 import { renderSiteBlocks } from './renderSiteBlocks';
+import { SiteDomainEntity } from '../entities/site-domain.entity';
 
-export function generateSiteFiles(site: SiteEntity): SiteFile[] {
+interface Options {
+  favicon?: Buffer;
+}
+
+export async function generateSiteFiles(
+  site: SiteEntity,
+  domain: SiteDomainEntity,
+  options?: Options,
+): Promise<SiteFile[]> {
+  const { favicon } = options ?? {};
   const files: SiteFile[] = [];
-
-  // TODO: page에 home 속성 추가하고 맨 앞으로 정렬
+  const hasFavicon = Boolean(favicon);
 
   for (const page of site.pages) {
-    const html = renderSiteBlocks({ site, page });
+    if (page.isVisible) {
+      const html = renderSiteBlocks({
+        site,
+        page,
+        domain,
+        options: {
+          hasFavicon,
+        },
+      });
 
-    files.push({
-      name: `${page.slug}.html`,
-      content: html,
-      contentType: 'text/html',
-    });
+      files.push({
+        name: page.isHome ? 'index.html' : `${page.slug}.html`,
+        content: html,
+        contentType: 'text/html',
+      });
+    }
   }
 
   files.push({
@@ -22,6 +40,14 @@ export function generateSiteFiles(site: SiteEntity): SiteFile[] {
     content: 'body { background-color: beige; }',
     contentType: 'text/css',
   });
+
+  if (hasFavicon) {
+    files.push({
+      name: 'favicon.ico',
+      content: favicon,
+      contentType: 'image/x-icon',
+    });
+  }
 
   return files;
 }

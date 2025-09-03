@@ -51,37 +51,43 @@ export class AssetsService {
     return { asset: savedAsset };
   }
 
-  async getById(
+  async getById<T extends SiteEntity | SitePageEntity | SiteBlockEntity>(
     id: number,
-  ): Promise<{ asset: AssetEntity & { target: unknown } }> {
+  ): Promise<{ asset: AssetEntity & { target: T } }> {
     const matchedAsset = await this.assetsRepository.findOne({ where: { id } });
 
     if (!matchedAsset) {
       throw new NotFoundException(`Asset not found`);
     }
 
-    let target: unknown;
+    let target: T;
 
     switch (matchedAsset.targetType) {
       case AssetTypes.Site:
-        target = await this.dataSource.getRepository(SiteEntity).findOne({
+        target = (await this.dataSource.getRepository(SiteEntity).findOne({
           where: { id: matchedAsset.targetId },
-        });
+        })) as T;
         break;
       case AssetTypes.SitePage:
-        target = await this.dataSource.getRepository(SitePageEntity).findOne({
+        target = (await this.dataSource.getRepository(SitePageEntity).findOne({
           where: { id: matchedAsset.targetId },
-        });
+        })) as T;
         break;
       case AssetTypes.SiteBlock:
-        target = await this.dataSource.getRepository(SiteBlockEntity).findOne({
+        target = (await this.dataSource.getRepository(SiteBlockEntity).findOne({
           where: { id: matchedAsset.targetId },
-        });
+        })) as T;
         break;
       default:
         throw new NotFoundException(
           `Unknown target type: ${matchedAsset.targetType}`,
         );
+    }
+
+    if (!target) {
+      throw new NotFoundException(
+        `Target ${matchedAsset.targetType} with id ${matchedAsset.targetId} not found`,
+      );
     }
 
     return {

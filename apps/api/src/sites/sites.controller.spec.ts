@@ -6,9 +6,11 @@ import { SiteEntity } from './entities/site.entity';
 import { SitePageEntity } from './entities/site-page.entity';
 import { SiteBlockEntity } from './entities/site-block.entity';
 import { SiteReleaseEntity } from './entities/site-release.entity';
+import { SiteDomainEntity } from './entities/site-domain.entity';
 import { PaginationService } from '../shared/services/pagination.service';
 import { UploaderService } from '../shared/services/uploader.service';
 import { ConfigService } from '@nestjs/config';
+import { AssetsService } from '../assets/assets.service';
 
 describe('SitesController', () => {
   let controller: SitesController;
@@ -22,6 +24,7 @@ describe('SitesController', () => {
         createMockRepositoryProvider(SitePageEntity),
         createMockRepositoryProvider(SiteBlockEntity),
         createMockRepositoryProvider(SiteReleaseEntity),
+        createMockRepositoryProvider(SiteDomainEntity),
         {
           provide: PaginationService,
           useValue: {
@@ -38,6 +41,12 @@ describe('SitesController', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn(),
+          },
+        },
+        {
+          provide: AssetsService,
+          useValue: {
+            getById: jest.fn(),
           },
         },
       ],

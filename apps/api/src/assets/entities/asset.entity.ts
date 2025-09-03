@@ -13,7 +13,9 @@ export class AssetEntity extends BaseEntity {
   order: number;
 
   @Column({
-    enum: AssetTypes,
+    type: 'enum',
+    enum: Object.values(AssetTypes),
+    default: AssetTypes.None,
   })
   @IsEnum(AssetTypes)
   targetType: AssetType;

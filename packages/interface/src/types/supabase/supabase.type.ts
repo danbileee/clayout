@@ -41,7 +41,7 @@ export type Database = {
           order: number
           path: string
           targetId: number
-          targetType: Database["public"]["Enums"]["asset_types_enum"]
+          targetType: Database["public"]["Enums"]["assets_targettype_enum"]
           updatedAt: Date
         }
         Insert: {
@@ -50,7 +50,7 @@ export type Database = {
           order?: number
           path: string
           targetId: number
-          targetType: Database["public"]["Enums"]["asset_types_enum"]
+          targetType?: Database["public"]["Enums"]["assets_targettype_enum"]
           updatedAt: Date
         }
         Update: {
@@ -59,7 +59,7 @@ export type Database = {
           order?: number
           path?: string
           targetId?: number
-          targetType?: Database["public"]["Enums"]["asset_types_enum"]
+          targetType?: Database["public"]["Enums"]["assets_targettype_enum"]
           updatedAt?: Date
         }
         Relationships: []
@@ -250,14 +250,14 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "FK_site_blocks_page"
+            foreignKeyName: "FK_04adc5fbb09eb32db0c746eee20"
             columns: ["pageId"]
             isOneToOne: false
             referencedRelation: "site_pages"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "FK_site_blocks_site"
+            foreignKeyName: "FK_2e9c736c4ab706d49188947ad92"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -270,29 +270,42 @@ export type Database = {
           createdAt: Date
           hostname: string
           id: number
-          isVerified: boolean
+          isPrimary: boolean
+          redirectToDomainId: number | null
           siteId: number
+          status: Database["public"]["Enums"]["site_domains_status_enum"]
           updatedAt: Date
         }
         Insert: {
           createdAt: Date
           hostname: string
           id: number
-          isVerified?: boolean
+          isPrimary?: boolean
+          redirectToDomainId?: number | null
           siteId: number
+          status?: Database["public"]["Enums"]["site_domains_status_enum"]
           updatedAt: Date
         }
         Update: {
           createdAt?: Date
           hostname?: string
           id: number
-          isVerified?: boolean
+          isPrimary?: boolean
+          redirectToDomainId?: number | null
           siteId?: number
+          status?: Database["public"]["Enums"]["site_domains_status_enum"]
           updatedAt?: Date
         }
         Relationships: [
           {
-            foreignKeyName: "FK_site_domains_site"
+            foreignKeyName: "FK_1375e0adf1ad0f43fc91b2c064b"
+            columns: ["redirectToDomainId"]
+            isOneToOne: false
+            referencedRelation: "site_domains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "FK_b64cc9e1f0a969eea87380c462d"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -305,8 +318,11 @@ export type Database = {
           category: Database["public"]["Enums"]["site_pages_category_enum"]
           createdAt: Date
           id: number
+          isHome: boolean
+          isVisible: boolean
           meta: Json | null
           name: string
+          order: number
           siteId: number
           slug: string
           updatedAt: Date
@@ -315,8 +331,11 @@ export type Database = {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
           createdAt: Date
           id: number
+          isHome?: boolean
+          isVisible?: boolean
           meta?: Json | null
           name: string
+          order?: number
           siteId: number
           slug: string
           updatedAt: Date
@@ -325,15 +344,18 @@ export type Database = {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
           createdAt?: Date
           id: number
+          isHome?: boolean
+          isVisible?: boolean
           meta?: Json | null
           name?: string
+          order?: number
           siteId?: number
           slug?: string
           updatedAt?: Date
         }
         Relationships: [
           {
-            foreignKeyName: "FK_site_pages_site"
+            foreignKeyName: "FK_4029d13e5c69a098b2076c761c3"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -371,7 +393,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "FK_site_releases_site"
+            foreignKeyName: "FK_5c72a2f81f04dd6c238771c591f"
             columns: ["siteId"]
             isOneToOne: false
             referencedRelation: "sites"
@@ -386,6 +408,7 @@ export type Database = {
           createdAt: Date
           id: number
           lastPublishedAt: Date | null
+          lastPublishedVersion: string | null
           meta: Json | null
           name: string
           slug: string
@@ -398,6 +421,7 @@ export type Database = {
           createdAt: Date
           id: number
           lastPublishedAt?: Date | null
+          lastPublishedVersion?: string | null
           meta?: Json | null
           name: string
           slug: string
@@ -410,6 +434,7 @@ export type Database = {
           createdAt?: Date
           id: number
           lastPublishedAt?: Date | null
+          lastPublishedVersion?: string | null
           meta?: Json | null
           name?: string
           slug?: string
@@ -418,7 +443,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "FK_sites_author"
+            foreignKeyName: "FK_a5c4bd58c29138cf04e170dfa67"
             columns: ["authorId"]
             isOneToOne: false
             referencedRelation: "users"
@@ -464,8 +489,9 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      asset_types_enum: "Site" | "SitePage" | "SiteBlock"
+      assets_targettype_enum: "None" | "Site" | "SitePage" | "SiteBlock"
       site_blocks_type_enum: "None" | "Text" | "Image" | "Button"
+      site_domains_status_enum: "Pending" | "Verified" | "Error"
       site_pages_category_enum: "Static" | "List" | "Article"
       sites_category_enum:
         | "None"
@@ -612,8 +638,9 @@ export const Constants = {
   },
   public: {
     Enums: {
-      asset_types_enum: ["Site", "SitePage", "SiteBlock"],
+      assets_targettype_enum: ["None", "Site", "SitePage", "SiteBlock"],
       site_blocks_type_enum: ["None", "Text", "Image", "Button"],
+      site_domains_status_enum: ["Pending", "Verified", "Error"],
       site_pages_category_enum: ["Static", "List", "Article"],
       sites_category_enum: [
         "None",
