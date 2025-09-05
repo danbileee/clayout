@@ -35,7 +35,7 @@ export const SiteBlockTypes = {
   Button: "Button",
 } as const;
 
-export type StieBlockType = keyof typeof SiteBlockTypes;
+export type SiteBlockType = keyof typeof SiteBlockTypes;
 
 export const SiteDomainStatuses = {
   Pending: "Pending",

@@ -4,11 +4,28 @@ import { handleError } from "@/lib/axios/handleError";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import { joinPath, Paths } from "@/routes";
 import type { SiteWithRelations } from "@clayout/interface";
-import { createContext, useContext, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+} from "react";
 import { useNavigate } from "react-router";
+
+export const SiteMenus = {
+  Blocks: "Blocks",
+  Pages: "Pages",
+  "Saved Blocks": "Saved Blocks",
+} as const;
+
+export type SiteMenu = keyof typeof SiteMenus;
 
 interface SiteContextValue {
   site: SiteWithRelations;
+  menu: SiteMenu;
+  setMenu: Dispatch<SetStateAction<SiteMenu>>;
 }
 
 export const SiteContext = createContext<SiteContextValue | null>(null);
@@ -20,7 +37,7 @@ interface Props {
 export function SiteContextProvider({ children }: Props) {
   const navigate = useNavigate();
   const id = useParamsId();
-
+  const [menu, setMenu] = useState<SiteMenu>(SiteMenus.Blocks);
   const { data } = useClientQuery({
     queryKey: getSiteQueryKey({ id }),
     queryFn: async (ctx) => {
@@ -51,7 +68,7 @@ export function SiteContextProvider({ children }: Props) {
   }
 
   return (
-    <SiteContext.Provider value={{ site: data.data.site }}>
+    <SiteContext.Provider value={{ site: data.data.site, menu, setMenu }}>
       {children}
     </SiteContext.Provider>
   );

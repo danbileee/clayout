@@ -7,6 +7,7 @@ import { getComposedStyleString } from "../utils/getComposedStyleString";
 export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   static readonly type = SiteBlockTypes.Text;
 
+  // FIXME: remove table layout
   renderToJsx() {
     const { margin = "0px 0px 0px 0px", ...restContainerStyles } =
       this.block.containerStyle ?? {};
@@ -41,7 +42,12 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
     );
   }
 
-  renderToString() {
+  // FIXME: remove table layout
+  renderToString(): string {
+    return ``;
+  }
+
+  renderToTable(): string {
     const { margin = "0px 0px 0px 0px", ...restContainerStyles } =
       this.block.containerStyle ?? {};
     const style = getComposedStyleString({
@@ -69,3 +75,25 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
 </tr>`;
   }
 }
+
+export const TextBlockData: z.infer<typeof TextBlockSchema> = {
+  type: SiteBlockTypes.Text,
+  name: "Text Block",
+  slug: `text-block-${Date.now()}`,
+  data: {
+    value:
+      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance. Everyone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers. Everyone has the right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay.",
+  },
+  style: {
+    color: "#1C2024",
+    fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+    fontSize: "16px",
+    lineHeight: "1.4",
+    fontWeight: "medium",
+    margin: "2px 0px 2px 0px",
+  },
+  containerStyle: {
+    padding: "16px 16px 16px 16px",
+    backgroundColor: "white",
+  },
+};

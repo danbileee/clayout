@@ -7,6 +7,7 @@ import { getComposedStyleString } from "../utils/getComposedStyleString";
 export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
   static readonly type = SiteBlockTypes.Button;
 
+  // FIXME: remove table layout
   renderToJsx() {
     const {
       margin = "0px 0px 0px 0px",
@@ -46,7 +47,12 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
     );
   }
 
-  renderToString() {
+  // FIXME: remove table layout
+  renderToString(): string {
+    return ``;
+  }
+
+  renderToTable(): string {
     const {
       margin = "0px 0px 0px 0px",
       align,
@@ -84,3 +90,31 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
 </tr>`;
   }
 }
+
+export const ButtonBlockData: z.infer<typeof ButtonBlockSchema> = {
+  type: SiteBlockTypes.Button,
+  name: "Button Block",
+  slug: `button-block-${Date.now()}`,
+  data: {
+    link: "https://www.youtube.com/@lifeisworship.studio",
+    text: "View Channel",
+  },
+  style: {
+    backgroundColor: "white",
+    padding: "8px 10px 8px 10px",
+    color: "black",
+    fontFamily: `"Libertinus Sans", sans-serif`,
+    fontSize: "24px",
+    fontWeight: "bold",
+    borderWidth: "1px",
+    borderStyle: "solid",
+    borderColor: "red",
+    borderRadius: "8px",
+    textDecoration: "underline",
+    textAlign: "right",
+  },
+  containerStyle: {
+    padding: "20px 20px 20px 20px",
+    backgroundColor: "black",
+  },
+};

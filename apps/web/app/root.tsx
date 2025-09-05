@@ -6,11 +6,13 @@ import {
   ScrollRestoration,
   useRouteError,
 } from "react-router";
+import { ThemeProvider } from "styled-components";
 import "./styles/index.css";
 import { QueryClientProvider } from "./providers/QueryClientProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 import { Toaster } from "./components/ui/toaster";
 import { getErrorInfo } from "./lib/sentry/getErrorInfo";
+import { theme } from "./themes";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -61,11 +63,13 @@ export function ErrorBoundary() {
 }
 export default function App() {
   return (
-    <QueryClientProvider>
-      <AuthProvider>
-        <Outlet />
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider theme={theme}>
+      <QueryClientProvider>
+        <AuthProvider>
+          <Outlet />
+          <Toaster />
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

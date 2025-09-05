@@ -1,7 +1,7 @@
 import { IsObject, IsOptional, IsString, Matches } from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Column, Entity, ManyToOne } from 'typeorm';
-import { KebabCase, SiteBlockTypes, StieBlockType } from '@clayout/interface';
+import { KebabCase, SiteBlockTypes, SiteBlockType } from '@clayout/interface';
 import { SitePageEntity } from './site-page.entity';
 import { SiteEntity } from './site.entity';
 
@@ -23,7 +23,7 @@ export class SiteBlockEntity extends BaseEntity {
     enum: Object.values(SiteBlockTypes),
     default: SiteBlockTypes.None,
   })
-  type: StieBlockType;
+  type: SiteBlockType;
 
   @Column({
     nullable: true,

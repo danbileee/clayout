@@ -1,12 +1,18 @@
 import type { SiteWithRelations } from "@clayout/interface";
 import { Button } from "@/components/ui/button";
+import * as Typo from "@/components/ui/typography";
 import { forwardRef } from "react";
 import { styled } from "styled-components";
-import { SIDEBAR_WIDTH } from "./constants";
+import { SIDEBAR_WIDTH } from "../shared/constants";
 import { rem } from "@/utils/rem";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePublish } from "@/apis/sites/publish";
 import { handleError } from "@/lib/axios/handleError";
+import { Icon } from "@/components/ui/icon";
+import { IconChevronLeft, IconShare } from "@tabler/icons-react";
+import { useNavigate } from "react-router";
+import { joinPath, Paths } from "@/routes";
+import { useParamsId } from "@/hooks/useParamsId";
 
 interface Props {
   site: SiteWithRelations;
@@ -16,9 +22,24 @@ export const Header = forwardRef<HTMLDivElement, Props>(function Header(
   { site },
   ref
 ) {
+  const id = useParamsId();
+  const navigate = useNavigate();
   const { mutateAsync: publish } = useClientMutation({
     mutationFn: patchSitePublish,
   });
+
+  const handleBack = () => {
+    navigate(
+      joinPath([Paths.sites, ":id"], {
+        ids: [
+          {
+            key: ":id",
+            value: id,
+          },
+        ],
+      })
+    );
+  };
 
   const handlePublish = async () => {
     const fn = async () => {
@@ -40,11 +61,24 @@ export const Header = forwardRef<HTMLDivElement, Props>(function Header(
 
   return (
     <HeaderBase ref={ref}>
-      <Title>{site.name}</Title>
-      <Buttons>
-        <Button>Preview</Button>
-        <Button onClick={handlePublish}>Publish</Button>
-      </Buttons>
+      <Left>
+        <Button isSquare variant="ghost" onClick={handleBack}>
+          <Icon>{IconChevronLeft}</Icon>
+        </Button>
+        <Typo.Large style={{ fontSize: 16 }}>{site.name}</Typo.Large>
+      </Left>
+      <Right>
+        <Button size="lg" variant="ghost">
+          Preview
+        </Button>
+        <Button
+          size="lg"
+          startIcon={<Icon>{IconShare}</Icon>}
+          onClick={handlePublish}
+        >
+          Publish
+        </Button>
+      </Right>
     </HeaderBase>
   );
 });
@@ -55,14 +89,18 @@ const HeaderBase = styled.header`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: ${rem(16)} ${rem(20)};
+  padding: ${rem(10)} ${rem(20)};
   top: 0;
   left: ${rem(SIDEBAR_WIDTH)};
 `;
 
-const Title = styled.h1``;
+const Left = styled.div`
+  display: flex;
+  align-items: center;
+  gap: ${rem(12)};
+`;
 
-const Buttons = styled.div`
+const Right = styled.div`
   display: flex;
   align-items: center;
   gap: ${rem(12)};

@@ -7,6 +7,7 @@ import { getComposedStyleString } from "../utils/getComposedStyleString";
 export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
   static readonly type = SiteBlockTypes.Image;
 
+  // FIXME: remove table layout
   renderToJsx() {
     const {
       margin = "0px 0px 0px 0px",
@@ -90,7 +91,12 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
     );
   }
 
-  renderToString() {
+  // FIXME: remove table layout
+  renderToString(): string {
+    return ``;
+  }
+
+  renderToTable(): string {
     const {
       margin = "0px 0px 0px 0px",
       padding = "0px 0px 0px 0px",
@@ -137,3 +143,21 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
 </tr>`;
   }
 }
+
+export const ImageBlockData: z.infer<typeof ImageBlockSchema> = {
+  type: SiteBlockTypes.Image,
+  name: "Image Block",
+  slug: `image-block-${Date.now()}`,
+  data: {
+    url: "https://i.ytimg.com/vi/fK9CNdJK9lo/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA2y_V7p3K3rc1MT0byoni-LpQoVA",
+    link: "https://youtu.be/CGC0BhQwnik?si=XGgxXwxqDl2dsJAy",
+    alt: "Blackberry Creme Brulee",
+  },
+  style: {
+    width: "100%",
+  },
+  containerStyle: {
+    padding: "20px 20px 20px 20px",
+    backgroundColor: "black",
+  },
+};

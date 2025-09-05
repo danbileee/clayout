@@ -13,4 +13,6 @@ export abstract class Block<T extends z.infer<typeof SiteBlockSchema>> {
   abstract renderToJsx(props: unknown): JSX.Element;
 
   abstract renderToString(): string;
+
+  abstract renderToTable(): string;
 }

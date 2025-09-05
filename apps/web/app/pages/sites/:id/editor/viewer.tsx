@@ -1,6 +1,6 @@
 import { css, styled } from "styled-components";
 import useMeasure from "react-use-measure";
-import { SIDEBAR_WIDTH } from "./constants";
+import { SIDEBAR_WIDTH } from "../shared/constants";
 import { Page } from "./page";
 import { Header } from "./header";
 import { rem } from "@/utils/rem";

@@ -6,26 +6,15 @@ import { ButtonBlock } from "./modules/Button";
 
 const SiteBlocks = [TextBlock, ImageBlock, ButtonBlock];
 
-interface Options {
-  renderType: "site" | "email" | "form";
-}
-
 export class BlockRegistry {
-  find(block: z.infer<typeof SiteBlockSchema>, options?: Options) {
-    const blocksMap: Record<Options["renderType"], typeof SiteBlocks> = {
-      site: SiteBlocks,
-      email: [],
-      form: [],
-    };
-
+  find(block: z.infer<typeof SiteBlockSchema>) {
     const { type, ...data } = block;
-    const { renderType = "site" } = options ?? {};
 
     if (!type) {
       throw new Error("Block type is wrong!");
     }
 
-    const Block = blocksMap[renderType].find(
+    const Block = SiteBlocks.find(
       (BlockConstructor) => BlockConstructor.type === type
     );
 
