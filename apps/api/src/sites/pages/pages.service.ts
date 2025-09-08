@@ -202,16 +202,24 @@ export class SitePagesService {
     }
   }
 
-  async changeHome(prevId: number, newId: number): Promise<boolean> {
+  async changeHome({
+    siteId,
+    prevPageId,
+    newPageId,
+  }: {
+    siteId: number;
+    prevPageId: number;
+    newPageId: number;
+  }): Promise<boolean> {
     const matchedPrevSitePage = await this.sitesPagesRepository.findOne({
       where: {
-        id: prevId,
+        id: prevPageId,
       },
       relations: { site: true },
     });
     const matchedNewSitePage = await this.sitesPagesRepository.findOne({
       where: {
-        id: newId,
+        id: newPageId,
       },
       relations: { site: true },
     });
@@ -222,8 +230,6 @@ export class SitePagesService {
     if (matchedPrevSitePage.site.id !== matchedNewSitePage.site.id) {
       throw new BadRequestException(`Pages must belong to the same site`);
     }
-
-    const siteId = matchedNewSitePage.site.id;
 
     await this.sitesPagesRepository.manager.transaction(async (manager) => {
       const pagesInSite = await manager.find(SitePageEntity, {
@@ -242,7 +248,7 @@ export class SitePagesService {
 
       await manager.update(
         SitePageEntity,
-        { id: newId },
+        { id: newPageId },
         { isHome: true, isVisible: true },
       );
     });

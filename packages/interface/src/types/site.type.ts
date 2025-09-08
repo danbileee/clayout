@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Tables } from "./supabase";
 import {
   PaginateSiteSchema,
+  SiteBlockSchema,
   SiteMetaSchema,
   SitePageMetaSchema,
   SitePageSchema,
@@ -47,5 +48,9 @@ export type CreateSitePageDto = z.infer<typeof SitePageSchema>;
 export type UpdateSitePageDto = Partial<CreateSitePageDto>;
 
 export type ChangeSiteHomePageDto = {
-  newId: number;
+  newPageId: number;
 };
+
+export type CreateSiteBlockDto = z.infer<typeof SiteBlockSchema>;
+
+export type UpdateSiteBlockDto = Partial<CreateSiteBlockDto>;

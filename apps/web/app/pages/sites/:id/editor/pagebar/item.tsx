@@ -50,11 +50,15 @@ export function PagebarItem({ page }: Props) {
     mutationFn: patchSitePagesHome,
   });
 
-  const handleClick = () => {
+  const handleClick = (e: MouseEvent<HTMLLIElement>) => {
+    if (e.detail > 1) return;
+
     setPage(page);
   };
 
-  const handleDoubleClick = () => {
+  const handleDoubleClick = (e: MouseEvent<HTMLLIElement>) => {
+    e.stopPropagation();
+
     if (!editing) {
       setEditing(true);
     }
@@ -121,8 +125,8 @@ export function PagebarItem({ page }: Props) {
         await updateHomePage({
           params: {
             siteId: site.id,
-            pageId: newId,
-            newId,
+            pageId: page.id,
+            newPageId: newId,
           },
         });
         await refetchSite();

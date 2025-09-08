@@ -1,9 +1,9 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
 import { getQueryKey } from "@/lib/react-query/getQueryKey";
 import type {
-  SitePageWithRelations,
-  CreateSitePageDto,
-  UpdateSitePageDto,
+  CreateSiteBlockDto,
+  UpdateSiteBlockDto,
+  SiteBlock,
 } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
 
@@ -14,6 +14,7 @@ import { type AxiosResponse } from "axios";
 interface GetOneEndpointParams {
   siteId: number;
   pageId: number;
+  blockId: number;
 }
 
 interface GetOneQueryParams {}
@@ -21,23 +22,27 @@ interface GetOneQueryParams {}
 interface GetOneParams extends GetOneEndpointParams, GetOneQueryParams {}
 
 interface GetOneResponse {
-  page: SitePageWithRelations;
+  block: SiteBlock;
 }
 
-export function getSitePageQueryKey({
+export function getSiteBlockQueryKey({
   siteId,
   pageId,
+  blockId,
   ...params
 }: Partial<GetOneParams>) {
-  return getQueryKey(`/sites/${siteId}/pages/${pageId}`, params);
+  return getQueryKey(
+    `/sites/${siteId}/pages/${pageId}/blocks/${blockId}`,
+    params
+  );
 }
 
-export async function getSitePage(args: {
+export async function getSiteBlock(args: {
   params: GetOneParams;
   request?: Request;
 }) {
   const {
-    params: { siteId, pageId },
+    params: { siteId, pageId, blockId },
     request,
   } = args;
   const axios = createAxiosInstance(request);
@@ -45,7 +50,7 @@ export async function getSitePage(args: {
     GetOneResponse,
     AxiosResponse<GetOneResponse, GetOneParams>,
     GetOneParams
-  >(`/sites/${siteId}/pages/${pageId}`);
+  >(`/sites/${siteId}/pages/${pageId}/blocks/${blockId}`);
 }
 
 /**
@@ -54,32 +59,35 @@ export async function getSitePage(args: {
 
 interface PostEndpointParams {
   siteId: number;
+  pageId: number;
 }
 
 interface PostQueryParams {}
 
-interface PostBody extends CreateSitePageDto {}
+interface PostBody {
+  block: CreateSiteBlockDto;
+}
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
 interface PostResponse {
-  page: SitePageWithRelations;
+  block: SiteBlock;
 }
 
-export async function postSitePages(args: {
+export async function postSiteBlocks(args: {
   params: PostParams;
   request?: Request;
 }) {
   const {
-    params: { siteId, ...params },
+    params: { siteId, pageId, block },
     request,
   } = args;
   const axios = createAxiosInstance(request);
   return await axios.post<
     PostResponse,
-    AxiosResponse<PostResponse, PostBody>,
-    PostBody
-  >(`/sites/${siteId}/pages`, params);
+    AxiosResponse<PostResponse, CreateSiteBlockDto>,
+    CreateSiteBlockDto
+  >(`/sites/${siteId}/pages/${pageId}/blocks`, block);
 }
 
 /**
@@ -89,11 +97,14 @@ export async function postSitePages(args: {
 interface PatchEndpointParams {
   siteId: number;
   pageId: number;
+  blockId: number;
 }
 
 interface PatchQueryParams {}
 
-interface PatchBody extends UpdateSitePageDto {}
+interface PatchBody {
+  block: UpdateSiteBlockDto;
+}
 
 interface PatchParams
   extends PatchEndpointParams,
@@ -101,23 +112,23 @@ interface PatchParams
     PatchBody {}
 
 interface PatchResponse {
-  page: SitePageWithRelations;
+  block: SiteBlock;
 }
 
-export async function patchSitePages(args: {
+export async function patchSiteBlocks(args: {
   params: PatchParams;
   request?: Request;
 }) {
   const {
-    params: { siteId, pageId, ...params },
+    params: { siteId, pageId, blockId, block },
     request,
   } = args;
   const axios = createAxiosInstance(request);
   return await axios.patch<
     PatchResponse,
-    AxiosResponse<PatchResponse, PatchBody>,
-    PatchBody
-  >(`/sites/${siteId}/pages/${pageId}`, params);
+    AxiosResponse<PatchResponse, UpdateSiteBlockDto>,
+    UpdateSiteBlockDto
+  >(`/sites/${siteId}/pages/${pageId}/blocks/${blockId}`, block);
 }
 
 /**
@@ -127,6 +138,7 @@ export async function patchSitePages(args: {
 interface DeleteEndpointParams {
   siteId: number;
   pageId: number;
+  blockId: number;
 }
 
 interface DeleteQueryParams {}
@@ -147,7 +159,7 @@ export async function deleteSitePages(args: {
   request?: Request;
 }) {
   const {
-    params: { siteId, pageId },
+    params: { siteId, pageId, blockId },
     request,
   } = args;
   const axios = createAxiosInstance(request);
@@ -155,5 +167,5 @@ export async function deleteSitePages(args: {
     DeleteResponse,
     AxiosResponse<DeleteResponse, DeleteBody>,
     DeleteBody
-  >(`/sites/${siteId}/pages/${pageId}`);
+  >(`/sites/${siteId}/pages/${pageId}/blocks/${blockId}`);
 }

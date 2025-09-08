@@ -25,7 +25,7 @@ export const Header = forwardRef<HTMLDivElement, Props>(function Header(
 ) {
   const id = useParamsId();
   const navigate = useNavigate();
-  const { mutateAsync: publish } = useClientMutation({
+  const { mutateAsync: publish, isPending: isPublishing } = useClientMutation({
     mutationFn: patchSitePublish,
   });
 
@@ -76,6 +76,7 @@ export const Header = forwardRef<HTMLDivElement, Props>(function Header(
           size="lg"
           startIcon={<Icon>{IconShare}</Icon>}
           onClick={handlePublish}
+          isLoading={isPublishing}
         >
           Publish
         </Button>

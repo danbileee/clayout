@@ -15,6 +15,7 @@ import { EmailsModule } from './emails/emails.module';
 import { SitesModule } from './sites/sites.module';
 import { AssetsModule } from './assets/assets.module';
 import { SitePagesModule } from './sites/pages/pages.module';
+import { SiteBlocksModule } from './sites/blocks/blocks.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { SitePagesModule } from './sites/pages/pages.module';
     SitesModule,
     AssetsModule,
     SitePagesModule,
+    SiteBlocksModule,
   ],
   controllers: [AppController],
   providers: [

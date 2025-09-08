@@ -16,3 +16,14 @@ export const SitePageErrorMessages: Record<SitePageError, string> = {
   "site-page.duplicate-slug":
     "A page with this slug already exists. Please choose a different slug.",
 };
+
+export const SiteBlockErrors = {
+  "site-block.duplicate-slug": "site-block.duplicate-slug",
+} as const;
+
+export type SiteBlockError = keyof typeof SiteBlockErrors;
+
+export const SiteBlockErrorMessages: Record<SiteBlockError, string> = {
+  "site-block.duplicate-slug":
+    "A block with this slug already exists. Please choose a different slug.",
+};

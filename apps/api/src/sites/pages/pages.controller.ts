@@ -51,9 +51,14 @@ export class SitePagesController {
 
   @Patch(':id/home')
   changeHome(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() { newId }: ChangeSiteHomePageDto,
+    @Param('siteId', ParseIntPipe) siteId: number,
+    @Param('id', ParseIntPipe) prevPageId: number,
+    @Body() { newPageId }: ChangeSiteHomePageDto,
   ) {
-    return this.sitePagesService.changeHome(id, newId);
+    return this.sitePagesService.changeHome({
+      siteId,
+      prevPageId,
+      newPageId,
+    });
   }
 }

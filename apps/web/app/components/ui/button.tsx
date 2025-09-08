@@ -5,8 +5,8 @@ import {
   type DefaultTheme,
   type RuleSet,
 } from "styled-components";
-import LoadingIcon from "@/icons/loading_20.svg";
 import { rem } from "@/utils/rem";
+import { SpinnerIcon } from "@/icons/spinner";
 
 const ButtonVariants = {
   filled: "filled",
@@ -103,7 +103,11 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       {startIcon}
       <span>{props.children}</span>
       {endIcon}
-      {isLoading && <StyledLoadingIcon variant={variant} level={level} />}
+      {isLoading && (
+        <SpinnerWrapper>
+          <StyledSpinnerIcon variant={variant} level={level} />
+        </SpinnerWrapper>
+      )}
     </ButtonBase>
   );
 });
@@ -145,14 +149,6 @@ const ButtonBase = styled.button.withConfig({
   align-items: center;
   transition: all ease-in-out 150ms;
 
-  > span {
-    white-space: nowrap;
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
   ${({
     variant,
     level,
@@ -193,30 +189,45 @@ const ButtonBase = styled.button.withConfig({
       theme,
     });
     return css`
-      ${isLoading &&
-      css`
-        color: transparent;
-        pointer-events: none;
-        overflow: hidden;
-        &:after {
-          content: "";
-          position: absolute;
-          inset: 0;
-          background-color: ${enabled.backgroundColor};
-        }
-      `}
+      ${isLoading
+        ? css`
+            color: transparent;
+            pointer-events: none;
+            overflow: hidden;
+            &:after {
+              content: "";
+              position: absolute;
+              inset: 0;
+              background-color: ${enabled.backgroundColor};
+            }
+          `
+        : css`
+            > span {
+              white-space: nowrap;
+              max-width: 100%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          `}
     `;
   }};
 `;
 
-type LoadingProps = Required<Pick<Props, "variant" | "level">>;
-
-const StyledLoadingIcon = styled(LoadingIcon)<LoadingProps>`
+const SpinnerWrapper = styled.span`
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 5;
+`;
+
+type SpinnerProps = Required<Pick<Props, "variant" | "level">>;
+
+const StyledSpinnerIcon = styled(SpinnerIcon)<SpinnerProps>`
   ${({ variant, level, theme }) => {
     const { enabled } = generateCSSProperty({
       variant,

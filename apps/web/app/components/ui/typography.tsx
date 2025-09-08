@@ -4,11 +4,11 @@ interface Props extends HTMLAttributes<HTMLElement> {
   children: string;
 }
 
-export function H1({ children, color, ...props }: Props) {
+export function H1({ children, color, style, ...props }: Props) {
   return (
     <h1
       {...props}
-      style={{ color }}
+      style={{ color, ...style }}
       className="scroll-m-20 text-center text-4xl font-extrabold tracking-tight text-balance"
     >
       {children}
@@ -16,11 +16,11 @@ export function H1({ children, color, ...props }: Props) {
   );
 }
 
-export function H2({ children, color, ...props }: Props) {
+export function H2({ children, color, style, ...props }: Props) {
   return (
     <h2
       {...props}
-      style={{ color }}
+      style={{ color, ...style }}
       className="scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0"
     >
       {children}
@@ -28,11 +28,11 @@ export function H2({ children, color, ...props }: Props) {
   );
 }
 
-export function H3({ children, color, ...props }: Props) {
+export function H3({ children, color, style, ...props }: Props) {
   return (
     <h3
       {...props}
-      style={{ color }}
+      style={{ color, ...style }}
       className="scroll-m-20 text-2xl font-semibold tracking-tight"
     >
       {children}
@@ -40,11 +40,11 @@ export function H3({ children, color, ...props }: Props) {
   );
 }
 
-export function H4({ children, color, ...props }: Props) {
+export function H4({ children, color, style, ...props }: Props) {
   return (
     <h4
       {...props}
-      style={{ color }}
+      style={{ color, ...style }}
       className="scroll-m-20 text-xl font-semibold tracking-tight"
     >
       {children}
@@ -57,6 +57,7 @@ export function P({
   color,
   size = "base",
   weight = "normal",
+  style,
   ...props
 }: Props & {
   size?: "base" | "lg" | "sm" | "xs";
@@ -65,7 +66,7 @@ export function P({
   return (
     <p
       {...props}
-      style={{ color }}
+      style={{ color, ...style }}
       className={`leading-5 text-${size} font-${weight} [&:not(:first-child)]:mt-6`}
     >
       {children}
@@ -73,11 +74,11 @@ export function P({
   );
 }
 
-export function Small({ children, color, ...props }: Props) {
+export function Small({ children, color, style, ...props }: Props) {
   return (
     <small
       {...props}
-      style={{ color }}
+      style={{ color, ...style }}
       className="text-sm leading-none font-medium"
     >
       {children}
@@ -85,11 +86,11 @@ export function Small({ children, color, ...props }: Props) {
   );
 }
 
-export function Blackquote({ children, color, ...props }: Props) {
+export function Blackquote({ children, color, style, ...props }: Props) {
   return (
     <blockquote
       {...props}
-      style={{ color }}
+      style={{ color, ...style }}
       className="mt-6 border-l-2 pl-6 italic"
     >
       {children}

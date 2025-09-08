@@ -10,6 +10,7 @@ interface Props {
 }
 
 export function SelectHomeDialog({ pages, onSubmit }: Props) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selected, setSelected] = useState(pages[0]);
 
   const handleValueChange = (value: string) => {
@@ -22,7 +23,9 @@ export function SelectHomeDialog({ pages, onSubmit }: Props) {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     await onSubmit(selected.id);
+    setIsSubmitting(false);
   };
 
   return (
@@ -52,7 +55,9 @@ export function SelectHomeDialog({ pages, onSubmit }: Props) {
         </Select.Content>
       </Select.Root>
       <Dialog.Footer>
-        <Button onClick={handleSubmit}>Submit</Button>
+        <Button onClick={handleSubmit} isLoading={isSubmitting}>
+          Submit
+        </Button>
       </Dialog.Footer>
     </Dialog.Content>
   );
