@@ -5,7 +5,7 @@ import {
   type DefaultTheme,
   type RuleSet,
 } from "styled-components";
-import LoadingIcon from "public/loading_20.svg";
+import LoadingIcon from "@/icons/loading_20.svg";
 import { rem } from "@/utils/rem";
 
 const ButtonVariants = {
@@ -74,7 +74,6 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
     size = "md",
     radius = "rounded",
     alignment = "center",
-    state,
     isLoading = false,
     isFluid = false,
     isSquare = false,
@@ -94,7 +93,6 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
       radius={radius}
       size={size}
       alignment={alignment}
-      state={state}
       isLoading={isLoading}
       isFluid={isFluid}
       isSquare={isSquare}
@@ -110,25 +108,38 @@ export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   );
 });
 
-type ButtonBaseProps = Required<
-  Pick<
-    Props,
-    | "variant"
-    | "level"
-    | "size"
-    | "radius"
-    | "alignment"
-    | "isFluid"
-    | "isLoading"
-    | "isSquare"
-  >
-> &
-  Pick<Props, "state"> & {
-    hasStartIcon: boolean;
-    hasEndIcon: boolean;
-  };
+interface ButtonBaseProps {
+  variant: ButtonVariant;
+  level: ButtonLevel;
+  size: ButtonSize;
+  radius: ButtonRadius;
+  state?: ButtonState;
+  alignment: ButtonAlignment;
+  isFluid: boolean;
+  isLoading: boolean;
+  isSquare: boolean;
+  hasStartIcon: boolean;
+  hasEndIcon: boolean;
+}
 
-const commonButtonStyle = css`
+const ButtonBase = styled.button.withConfig({
+  shouldForwardProp: (prop) => {
+    const nonForwardedProps = [
+      "variant",
+      "level",
+      "size",
+      "radius",
+      "alignment",
+      "isFluid",
+      "isLoading",
+      "isSquare",
+      "hasStartIcon",
+      "hasEndIcon",
+    ];
+
+    return !nonForwardedProps.includes(prop);
+  },
+})<ButtonBaseProps>`
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -141,10 +152,6 @@ const commonButtonStyle = css`
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-`;
-
-const ButtonBase = styled.button<ButtonBaseProps>`
-  ${commonButtonStyle};
 
   ${({
     variant,
@@ -160,8 +167,19 @@ const ButtonBase = styled.button<ButtonBaseProps>`
     theme,
   }) => {
     return css`
-      ${generateVariantStyle({ variant, level, state, theme })};
-      ${generateSizeStyle({ size, hasStartIcon, hasEndIcon, theme, isSquare })};
+      ${generateVariantStyle({
+        variant,
+        level,
+        state,
+        theme,
+      })};
+      ${generateSizeStyle({
+        size,
+        hasStartIcon,
+        hasEndIcon,
+        theme,
+        isSquare,
+      })};
       ${radiusStyles[radius]};
       ${alignmentStyles[alignment]}
       ${isFluid && fluidStyle};
@@ -561,21 +579,33 @@ const getSizeStyles = (
 ): Record<ButtonSize, RuleSet<object>> => ({
   sm: css`
     gap: ${rem(4)};
-    height: ${rem(24)};
+    height: ${isSquare ? "auto" : rem(24)};
     line-height: ${rem(24)};
     padding: ${isSquare ? rem(4) : `${rem(4)} ${rem(8)}`};
+    ${isSquare &&
+    css`
+      aspect-ratio: 1;
+    `}
   `,
   md: css`
     gap: ${rem(6)};
-    height: ${rem(32)};
+    height: ${isSquare ? "auto" : rem(32)};
     line-height: ${rem(32)};
     padding: ${isSquare ? rem(6) : `${rem(6)} ${rem(16)}`};
+    ${isSquare &&
+    css`
+      aspect-ratio: 1;
+    `}
   `,
   lg: css`
     gap: ${rem(8)};
-    height: ${rem(36)};
+    height: ${isSquare ? "auto" : rem(36)};
     line-height: ${rem(36)};
     padding: ${isSquare ? rem(8) : `${rem(8)} ${rem(20)}`};
+    ${isSquare &&
+    css`
+      aspect-ratio: 1;
+    `}
   `,
 });
 
@@ -626,18 +656,20 @@ function generateSizeStyle({
   hasEndIcon: boolean;
   isSquare: boolean;
 }): RuleSet<object> {
-  const iconPaddingStyle = sizeStylesForIconPadding[size];
+  const { paddingLeft = 0, paddingRight = 0 } = sizeStylesForIconPadding[size];
 
   return css`
     ${getSizeFontStyle(theme)[size]};
     ${getSizeStyles(isSquare)[size]};
-    ${hasStartIcon &&
+    ${!isSquare &&
+    hasStartIcon &&
     css`
-      padding-left: ${iconPaddingStyle.paddingLeft}px;
+      padding-left: ${rem(paddingLeft as number)};
     `};
-    ${hasEndIcon &&
+    ${!isSquare &&
+    hasEndIcon &&
     css`
-      padding-right: ${iconPaddingStyle.paddingRight}px;
+      padding-right: ${rem(paddingRight as number)};
     `};
   `;
 }

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SitePageEntity } from '../entities/site-page.entity';
-import { Repository, Not } from 'typeorm';
+import { Repository, Not, In } from 'typeorm';
 import { CreateSitePageDto, UpdateSitePageDto } from '@clayout/interface';
 import { SitePageErrors } from '@clayout/interface';
 import {
@@ -99,7 +99,9 @@ export class SitePagesService {
         id,
       },
       relations: {
-        site: true,
+        site: {
+          author: true,
+        },
         blocks: true,
       },
     });
@@ -198,6 +200,54 @@ export class SitePagesService {
       }
       throw error;
     }
+  }
+
+  async changeHome(prevId: number, newId: number): Promise<boolean> {
+    const matchedPrevSitePage = await this.sitesPagesRepository.findOne({
+      where: {
+        id: prevId,
+      },
+      relations: { site: true },
+    });
+    const matchedNewSitePage = await this.sitesPagesRepository.findOne({
+      where: {
+        id: newId,
+      },
+      relations: { site: true },
+    });
+
+    if (!matchedPrevSitePage || !matchedNewSitePage) {
+      throw new BadRequestException(`Page not found`);
+    }
+    if (matchedPrevSitePage.site.id !== matchedNewSitePage.site.id) {
+      throw new BadRequestException(`Pages must belong to the same site`);
+    }
+
+    const siteId = matchedNewSitePage.site.id;
+
+    await this.sitesPagesRepository.manager.transaction(async (manager) => {
+      const pagesInSite = await manager.find(SitePageEntity, {
+        where: { site: { id: siteId } },
+        select: ['id'],
+      });
+      const pageIds = pagesInSite.map((p) => p.id);
+
+      if (pageIds.length > 0) {
+        await manager.update(
+          SitePageEntity,
+          { id: In(pageIds) },
+          { isHome: false },
+        );
+      }
+
+      await manager.update(
+        SitePageEntity,
+        { id: newId },
+        { isHome: true, isVisible: true },
+      );
+    });
+
+    return true;
   }
 
   async delete(id: number): Promise<{ id: number }> {

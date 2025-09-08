@@ -78,7 +78,7 @@ export class SitesController {
   })
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ZodValidationPipe(SiteSchema.optional()))
+    @Body(new ZodValidationPipe(SiteSchema.partial()))
     updateSiteDto: UpdateSiteDto,
   ) {
     return this.sitesService.update(id, updateSiteDto);

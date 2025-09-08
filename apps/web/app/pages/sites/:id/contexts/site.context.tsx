@@ -1,12 +1,18 @@
 import { getSite, getSiteQueryKey } from "@/apis/sites";
 import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
+import type { Refetcher } from "@/lib/react-query/types";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import { joinPath, Paths } from "@/routes";
-import type { SiteWithRelations } from "@clayout/interface";
+import type {
+  SitePageWithRelations,
+  SiteWithRelations,
+} from "@clayout/interface";
 import {
   createContext,
   useContext,
+  useEffect,
+  useMemo,
   useState,
   type Dispatch,
   type ReactNode,
@@ -15,8 +21,8 @@ import {
 import { useNavigate } from "react-router";
 
 export const SiteMenus = {
-  Blocks: "Blocks",
   Pages: "Pages",
+  Blocks: "Blocks",
   "Saved Blocks": "Saved Blocks",
 } as const;
 
@@ -24,8 +30,11 @@ export type SiteMenu = keyof typeof SiteMenus;
 
 interface SiteContextValue {
   site: SiteWithRelations;
+  refetchSite: Refetcher<typeof getSite>;
   menu: SiteMenu;
   setMenu: Dispatch<SetStateAction<SiteMenu>>;
+  page: SitePageWithRelations | null;
+  setPage: Dispatch<SetStateAction<SitePageWithRelations | null>>;
 }
 
 export const SiteContext = createContext<SiteContextValue | null>(null);
@@ -37,8 +46,7 @@ interface Props {
 export function SiteContextProvider({ children }: Props) {
   const navigate = useNavigate();
   const id = useParamsId();
-  const [menu, setMenu] = useState<SiteMenu>(SiteMenus.Blocks);
-  const { data } = useClientQuery({
+  const { data, refetch: refetchSite } = useClientQuery({
     queryKey: getSiteQueryKey({ id }),
     queryFn: async (ctx) => {
       const fn = async () => await getSite({ params: { id } });
@@ -60,7 +68,23 @@ export function SiteContextProvider({ children }: Props) {
       }
     },
     enabled: Boolean(id),
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
   });
+  const firstPage = useMemo(() => data?.data?.site?.pages?.[0] ?? null, [data]);
+  const [menu, setMenu] = useState<SiteMenu>(SiteMenus.Pages);
+  const [page, setPage] = useState<SitePageWithRelations | null>(firstPage);
+
+  /**
+   * @useEffect
+   * Update first page on the realod
+   */
+  useEffect(() => {
+    if (!page && firstPage) {
+      setPage(firstPage);
+    }
+  }, [firstPage, page]);
 
   if (!data) {
     // TODO: Replace with empty placeholder
@@ -68,7 +92,16 @@ export function SiteContextProvider({ children }: Props) {
   }
 
   return (
-    <SiteContext.Provider value={{ site: data.data.site, menu, setMenu }}>
+    <SiteContext.Provider
+      value={{
+        site: data.data.site,
+        refetchSite,
+        menu,
+        setMenu,
+        page,
+        setPage,
+      }}
+    >
       {children}
     </SiteContext.Provider>
   );

@@ -1,7 +1,5 @@
 import type { IconProps, Icon as IconComponent } from "@tabler/icons-react";
 
-export const DEFAULT_ICON_SIZE = 16;
-
 interface Props
   extends Omit<IconProps, "ref" | "size" | "stroke" | "color" | "children"> {
   size?: number;
@@ -11,7 +9,7 @@ interface Props
 }
 
 export function Icon({
-  size = DEFAULT_ICON_SIZE,
+  size = 16,
   color = "currentColor",
   stroke = 2,
   style,

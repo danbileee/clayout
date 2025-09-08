@@ -184,6 +184,7 @@ export default function Sites() {
           .map((item) =>
             item ? (
               <a
+                key={item.id}
                 href={joinPath([Paths.sites, ":id"], {
                   ids: [
                     {

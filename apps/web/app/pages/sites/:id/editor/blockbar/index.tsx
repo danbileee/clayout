@@ -1,7 +1,7 @@
 import { css, styled } from "styled-components";
 import * as Typo from "@/components/ui/typography";
 import { rem } from "@/utils/rem";
-import { BarBase } from "../shared/styled";
+import { BarBase } from "../../shared/styled";
 import { BlockData } from "@clayout/kit";
 import { SiteBlockTypes, type SiteBlockType } from "@clayout/interface";
 import {
@@ -20,7 +20,9 @@ export function Blockbar() {
 
   return (
     <BarBase>
-      <Typo.Large style={{ marginBottom: 16 }}>Blocks</Typo.Large>
+      <Typo.P size="lg" weight="semibold" style={{ marginBottom: 16 }}>
+        Blocks
+      </Typo.P>
       <BlockbarBase>
         {Object.entries(BlockData).map(([key, { type }]) => (
           <BlockButton

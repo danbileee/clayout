@@ -16,7 +16,7 @@ function Provider({
   );
 }
 
-function Root({
+export function Root({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
   return (
@@ -26,7 +26,7 @@ function Root({
   );
 }
 
-function Trigger({
+export function Trigger({
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
   return (
@@ -34,9 +34,9 @@ function Trigger({
   );
 }
 
-function Content({
+export function Content({
   className,
-  sideOffset = 8,
+  sideOffset = 4,
   children,
   ...props
 }: React.ComponentProps<typeof TooltipPrimitive.Content>) {
@@ -57,5 +57,3 @@ function Content({
     </TooltipPrimitive.Portal>
   );
 }
-
-export { Root, Trigger, Content, Provider };

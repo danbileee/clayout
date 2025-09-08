@@ -7,8 +7,7 @@ import { rem } from "@/utils/rem";
 import { useSiteContext } from "../contexts/site.context";
 
 export function EditorViewer() {
-  const { site } = useSiteContext();
-  const [page] = site.pages;
+  const { site, page } = useSiteContext();
   const [headerRef, { height: headerHeight }] = useMeasure();
 
   return (

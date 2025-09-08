@@ -62,7 +62,7 @@ export class AssetsController {
   @Patch(':id')
   async updatedAsset(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ZodValidationPipe(AssetSchema.optional()))
+    @Body(new ZodValidationPipe(AssetSchema.partial()))
     updatedAssetDto: UpdateAssetDto,
   ): Promise<{ asset: AssetEntity }> {
     return await this.assetsService.update(id, updatedAssetDto);

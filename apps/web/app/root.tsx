@@ -13,6 +13,7 @@ import { AuthProvider } from "./providers/AuthProvider";
 import { Toaster } from "./components/ui/toaster";
 import { getErrorInfo } from "./lib/sentry/getErrorInfo";
 import { theme } from "./themes";
+import { DialogProvider } from "./components/ui/dialog";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -66,8 +67,10 @@ export default function App() {
     <ThemeProvider theme={theme}>
       <QueryClientProvider>
         <AuthProvider>
-          <Outlet />
-          <Toaster />
+          <DialogProvider>
+            <Outlet />
+            <Toaster />
+          </DialogProvider>
         </AuthProvider>
       </QueryClientProvider>
     </ThemeProvider>

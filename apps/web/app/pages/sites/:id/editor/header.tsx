@@ -13,6 +13,7 @@ import { IconChevronLeft, IconShare } from "@tabler/icons-react";
 import { useNavigate } from "react-router";
 import { joinPath, Paths } from "@/routes";
 import { useParamsId } from "@/hooks/useParamsId";
+import { HFlexBox } from "@/components/ui/box";
 
 interface Props {
   site: SiteWithRelations;
@@ -61,13 +62,13 @@ export const Header = forwardRef<HTMLDivElement, Props>(function Header(
 
   return (
     <HeaderBase ref={ref}>
-      <Left>
+      <HFlexBox gap={12}>
         <Button isSquare variant="ghost" onClick={handleBack}>
           <Icon>{IconChevronLeft}</Icon>
         </Button>
-        <Typo.Large style={{ fontSize: 16 }}>{site.name}</Typo.Large>
-      </Left>
-      <Right>
+        <Typo.P weight="medium">{site.name}</Typo.P>
+      </HFlexBox>
+      <HFlexBox gap={12}>
         <Button size="lg" variant="ghost">
           Preview
         </Button>
@@ -78,7 +79,7 @@ export const Header = forwardRef<HTMLDivElement, Props>(function Header(
         >
           Publish
         </Button>
-      </Right>
+      </HFlexBox>
     </HeaderBase>
   );
 });
@@ -92,16 +93,4 @@ const HeaderBase = styled.header`
   padding: ${rem(10)} ${rem(20)};
   top: 0;
   left: ${rem(SIDEBAR_WIDTH)};
-`;
-
-const Left = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${rem(12)};
-`;
-
-const Right = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${rem(12)};
 `;
