@@ -7,12 +7,12 @@ import { rem } from "@/utils/rem";
 import { useSiteContext } from "../contexts/site.context";
 
 export function EditorViewer() {
-  const { site, page } = useSiteContext();
+  const { page } = useSiteContext();
   const [headerRef, { height: headerHeight }] = useMeasure();
 
   return (
     <Wrapper>
-      <Header ref={headerRef} site={site} />
+      <Header ref={headerRef} />
       <Main $headerHeight={headerHeight}>
         <Canvas>{page ? <Page page={page} /> : null}</Canvas>
       </Main>

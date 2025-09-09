@@ -193,7 +193,7 @@ export function PagebarItem({ page }: Props) {
     />
   ) : (
     <PageItem
-      $selected={page.id === selectedPage?.id}
+      selected={page.id === selectedPage?.id}
       onDoubleClick={handleDoubleClick}
       onClick={handleClick}
       onMouseEnter={handleMouseEnter}
@@ -246,11 +246,17 @@ export function PagebarItem({ page }: Props) {
 }
 
 interface PageButtonProps {
-  $selected: boolean;
+  selected: boolean;
 }
 
-const PageItem = styled.li<PageButtonProps>`
-  ${({ theme, $selected }) => css`
+const PageItem = styled.li.withConfig({
+  shouldForwardProp: (prop) => {
+    const nonForwardedProps = ["selected"];
+
+    return !nonForwardedProps.includes(prop);
+  },
+})<PageButtonProps>`
+  ${({ theme, selected }) => css`
     cursor: pointer;
     width: 100%;
     display: inline-flex;
@@ -269,7 +275,7 @@ const PageItem = styled.li<PageButtonProps>`
       background-color: ${theme.colors.white};
     }
 
-    ${$selected &&
+    ${selected &&
     css`
       background-color: ${theme.colors.indigo[100]};
 

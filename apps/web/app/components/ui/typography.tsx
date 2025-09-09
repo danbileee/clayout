@@ -1,7 +1,7 @@
-import type { HTMLAttributes } from "react";
+import type { HTMLAttributes, ReactNode } from "react";
 
 interface Props extends HTMLAttributes<HTMLElement> {
-  children: string;
+  children: ReactNode;
 }
 
 export function H1({ children, color, style, ...props }: Props) {

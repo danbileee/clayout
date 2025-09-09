@@ -159,12 +159,11 @@ export function DialogProvider({ children }: Props) {
   });
 
   const openDialog = useCallback(({ content }: { content: ReactNode }) => {
-    console.log("open dialog!", { content });
     setDialogState({ isOpen: true, content });
   }, []);
 
   const closeDialog = useCallback(() => {
-    setDialogState((prev) => ({ ...prev, isOpen: false }));
+    setDialogState({ isOpen: false, content: null });
   }, []);
 
   const contextValue = useMemo<DialogProviderContextValue>(

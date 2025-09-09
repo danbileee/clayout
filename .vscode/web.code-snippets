@@ -19,6 +19,17 @@
     "body": ["import * as Select from \"@/components/ui/select\";"],
     "description": "web-import-select"
   },
+  "web-should-forward-prop": {
+    "prefix": "web-should-forward-prop",
+    "body": [
+      "shouldForwardProp: (prop) => {",
+      "  const nonForwardedProps = [\"\"];",
+      "",
+      "  return !nonForwardedProps.includes(prop);",
+      "},"
+    ],
+    "description": "web-should-forward-prop"
+  },
   "web-try-catch-in-mutation": {
     "prefix": "web-try-catch-in-mutation",
     "body": [

@@ -3,7 +3,11 @@ import * as Typo from "@/components/ui/typography";
 import { rem } from "@/utils/rem";
 import { BarBase } from "../../shared/styled";
 import { BlockData } from "@clayout/kit";
-import { SiteBlockTypes, type SiteBlockType } from "@clayout/interface";
+import {
+  SiteBlockTypes,
+  type CreateSiteBlockDto,
+  type SiteBlockType,
+} from "@clayout/interface";
 import {
   IconHandFinger,
   IconPhoto,
@@ -12,10 +16,48 @@ import {
   type Icon as TablerIcon,
 } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
+import { useClientMutation } from "@/lib/react-query/useClientMutation";
+import { postSiteBlocks } from "@/apis/sites/pages/blocks";
+import { handleError } from "@/lib/axios/handleError";
+import { useSiteContext } from "../../contexts/site.context";
+import { toast } from "sonner";
 
 export function Blockbar() {
-  const handleClickBlockButton = (key: SiteBlockType) => {
-    // TODO: add block
+  const { site, page, refetchSite } = useSiteContext();
+  const { mutateAsync: addBlock } = useClientMutation({
+    mutationFn: postSiteBlocks,
+  });
+
+  const handleClickBlockButton = async (data: CreateSiteBlockDto) => {
+    const fn = async () => {
+      if (!page) {
+        toast.error(
+          "Page not found. A block must have a selected page as its parent."
+        );
+        return;
+      }
+
+      await addBlock({
+        params: {
+          siteId: site.id,
+          pageId: page.id,
+          block: data,
+        },
+      });
+      await refetchSite();
+    };
+
+    try {
+      await fn();
+    } catch (e) {
+      const { error } = await handleError(e, {
+        onRetry: fn,
+      });
+
+      if (error) {
+        throw error;
+      }
+    }
   };
 
   return (
@@ -24,10 +66,10 @@ export function Blockbar() {
         Blocks
       </Typo.P>
       <BlockbarBase>
-        {Object.entries(BlockData).map(([key, { type }]) => (
+        {Object.entries(BlockData).map(([key, data]) => (
           <BlockButton
-            key={type}
-            onClick={() => handleClickBlockButton(key as SiteBlockType)}
+            key={data.type}
+            onClick={() => handleClickBlockButton(data)}
           >
             <Icon size={24}>{BlockIcons[key as SiteBlockType]}</Icon>
             <Typo.P style={{ fontSize: 14 }}>
