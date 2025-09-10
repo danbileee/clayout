@@ -37,7 +37,7 @@ interface Props {
   page: SitePageWithRelations;
 }
 
-export function PagebarItem({ page }: Props) {
+export function PageBarItem({ page }: Props) {
   const theme = useTheme();
   const { site, refetchSite, page: selectedPage, setPage } = useSiteContext();
   const { openDialog, closeDialog } = useDialog();

@@ -10,3 +10,8 @@ export const BarBase = styled.div`
     padding: ${rem(20)} ${rem(16)};
   `}
 `;
+
+export const EditorBase = styled.div`
+  width: ${rem(BAR_WIDTH)};
+  padding: ${rem(14)} ${rem(16)} ${rem(24)};
+`;

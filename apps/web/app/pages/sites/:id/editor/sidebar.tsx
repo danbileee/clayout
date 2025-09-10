@@ -3,9 +3,11 @@ import { SIDEBAR_WIDTH } from "../shared/constants";
 import { rem } from "@/utils/rem";
 import { SiteMenus, useSiteContext } from "../contexts/site.context";
 import { Menu } from "./menu";
-import { Blockbar } from "./blockbar";
-import { Pagebar } from "./pagebar";
-import { SavedBlockbar } from "./saved-blockbar";
+import { BlockBar } from "./block/bar";
+import { PageBar } from "./page/bar";
+import { SavedBlockBar } from "./saved-block/bar";
+import { PageEditor } from "./page/editor";
+import { BlockEditor } from "./block/editor";
 
 export function EditorSidebar() {
   const { menu } = useSiteContext();
@@ -13,9 +15,11 @@ export function EditorSidebar() {
   return (
     <Aside>
       <Menu />
-      {menu === SiteMenus.Blocks && <Blockbar />}
-      {menu === SiteMenus.Pages && <Pagebar />}
-      {menu === SiteMenus["Saved Blocks"] && <SavedBlockbar />}
+      {menu === SiteMenus.Pages && <PageBar />}
+      {menu === SiteMenus.Page && <PageEditor />}
+      {menu === SiteMenus.Blocks && <BlockBar />}
+      {menu === SiteMenus.Block && <BlockEditor />}
+      {menu === SiteMenus["Saved Blocks"] && <SavedBlockBar />}
     </Aside>
   );
 }

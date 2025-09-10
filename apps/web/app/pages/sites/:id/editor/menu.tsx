@@ -16,9 +16,12 @@ import { Icon } from "@/components/ui/icon";
 import * as Tooltip from "@/components/ui/tooltip";
 
 const MenuIcons: Record<SiteMenu, TablerIcon> = {
-  Blocks: IconCube,
   Pages: IconClipboardText,
+  Page: IconClipboardText,
+  Blocks: IconCube,
+  Block: IconCube,
   "Saved Blocks": IconBookmark,
+  "Saved Block": IconBookmark,
 } as const;
 
 export function Menu() {
@@ -26,18 +29,31 @@ export function Menu() {
 
   return (
     <MenuBase>
-      {Object.values(SiteMenus).map((m) => (
-        <Tooltip.Root key={m}>
-          <Tooltip.Trigger>
-            <MenuButton $selected={menu === m} onClick={() => setMenu(m)}>
-              <Icon>{MenuIcons[m]}</Icon>
-            </MenuButton>
-          </Tooltip.Trigger>
-          <Tooltip.Content side="right" sideOffset={12}>
-            {m}
-          </Tooltip.Content>
-        </Tooltip.Root>
-      ))}
+      {Object.values(SiteMenus)
+        .filter((m) =>
+          (
+            [
+              SiteMenus.Pages,
+              SiteMenus.Blocks,
+              SiteMenus["Saved Blocks"],
+            ] as SiteMenu[]
+          ).includes(m)
+        )
+        .map((m) => (
+          <Tooltip.Root key={m}>
+            <Tooltip.Trigger>
+              <MenuButton
+                $selected={m === menu || m === `${menu}s`}
+                onClick={() => setMenu(m)}
+              >
+                <Icon>{MenuIcons[m]}</Icon>
+              </MenuButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content side="right" sideOffset={12}>
+              {m}
+            </Tooltip.Content>
+          </Tooltip.Root>
+        ))}
     </MenuBase>
   );
 }

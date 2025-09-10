@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button";
 import * as Typo from "@/components/ui/typography";
 import { forwardRef } from "react";
-import { css, styled } from "styled-components";
+import { css, styled, useTheme } from "styled-components";
 import { SIDEBAR_WIDTH } from "../shared/constants";
 import { rem } from "@/utils/rem";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePublish } from "@/apis/sites/publish";
 import { handleError } from "@/lib/axios/handleError";
 import { Icon } from "@/components/ui/icon";
-import { IconChevronLeft, IconShare } from "@tabler/icons-react";
+import { IconChevronLeft, IconShare, IconSlash } from "@tabler/icons-react";
 import { useNavigate } from "react-router";
 import { joinPath, Paths } from "@/routes";
 import { useParamsId } from "@/hooks/useParamsId";
@@ -20,6 +20,7 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   props,
   ref
 ) {
+  const theme = useTheme();
   const id = useParamsId();
   const navigate = useNavigate();
   const { site, page } = useSiteContext();
@@ -77,11 +78,23 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
         <Button isSquare variant="ghost" onClick={handleBack}>
           <Icon>{IconChevronLeft}</Icon>
         </Button>
-        <Typo.P weight="medium">
+        <Typo.P
+          weight="medium"
+          style={{ display: "flex", alignItems: "center" }}
+        >
           <SiteName hasPage={Boolean(page)}>{site.name}</SiteName>
           {page && (
             <>
-              <Slash>/</Slash>
+              <Icon
+                color={theme.colors.slate[500]}
+                style={{
+                  display: "inline-block",
+                  marginLeft: rem(6),
+                  marginRight: rem(6),
+                }}
+              >
+                {IconSlash}
+              </Icon>
               <span>{page.name}</span>
             </>
           )}
@@ -129,14 +142,5 @@ const SiteName = styled.span.withConfig({
   ${({ theme, hasPage }) => css`
     color: ${hasPage ? theme.colors.slate[600] : theme.colors.slate[900]};
     font-weight: ${hasPage ? "normal" : "medium"};
-  `}
-`;
-
-const Slash = styled.span`
-  ${({ theme }) => css`
-    color: ${theme.colors.slate[400]};
-    font-weight: normal;
-    padding-left: ${rem(12)};
-    padding-right: ${rem(12)};
   `}
 `;

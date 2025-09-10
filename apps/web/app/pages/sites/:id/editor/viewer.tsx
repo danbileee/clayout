@@ -5,16 +5,27 @@ import { Page } from "./page";
 import { Header } from "./header";
 import { rem } from "@/utils/rem";
 import { useSiteContext } from "../contexts/site.context";
+import { useRef } from "react";
 
 export function EditorViewer() {
-  const { page } = useSiteContext();
+  const { page, closeBlockEditor } = useSiteContext();
   const [headerRef, { height: headerHeight }] = useMeasure();
+  const mainRef = useRef<HTMLElement>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+
+  const handleMainClick = () => {
+    closeBlockEditor();
+  };
 
   return (
     <Wrapper>
       <Header ref={headerRef} />
-      <Main $headerHeight={headerHeight}>
-        <Canvas>{page ? <Page page={page} /> : null}</Canvas>
+      <Main
+        ref={mainRef}
+        $headerHeight={headerHeight}
+        onClick={handleMainClick}
+      >
+        <Canvas>{page ? <Page ref={pageRef} page={page} /> : null}</Canvas>
       </Main>
     </Wrapper>
   );

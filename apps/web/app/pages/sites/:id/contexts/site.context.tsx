@@ -15,33 +15,92 @@ import {
   useContext,
   useEffect,
   useMemo,
-  useState,
-  type Dispatch,
+  useReducer,
   type ReactNode,
-  type SetStateAction,
 } from "react";
 import { useNavigate } from "react-router";
 
 export const SiteMenus = {
   Pages: "Pages",
+  Page: "Page",
   Blocks: "Blocks",
+  Block: "Block",
   "Saved Blocks": "Saved Blocks",
+  "Saved Block": "Saved Block",
 } as const;
 
 export type SiteMenu = keyof typeof SiteMenus;
 
-interface SiteContextValue {
+export const BlockTabs = {
+  Content: "Content",
+  Design: "Design",
+} as const;
+
+export type BlockTab = keyof typeof BlockTabs;
+
+interface SiteContextState {
+  menu: SiteMenu;
+  page: SitePageWithRelations | null;
+  block: SiteBlock | null;
+  blockTab: BlockTab;
+}
+
+const OPEN_BLOCK_EDITOR = "OPEN_BLOCK_EDITOR";
+const CLOSE_BLOCK_EDITOR = "CLOSE_BLOCK_EDITOR";
+const SET_MENU = "SET_MENU";
+const SET_PAGE = "SET_PAGE";
+const SET_BLOCK_TAB = "SET_BLOCK_TAB";
+
+type SiteContextAction =
+  | { type: typeof OPEN_BLOCK_EDITOR; block: SiteBlock }
+  | { type: typeof CLOSE_BLOCK_EDITOR }
+  | { type: typeof SET_MENU; menu: SiteMenu }
+  | { type: typeof SET_PAGE; page: SitePageWithRelations | null }
+  | { type: typeof SET_BLOCK_TAB; tab: BlockTab };
+
+type SiteContextReducer = (
+  state: SiteContextState,
+  action: SiteContextAction
+) => SiteContextState;
+
+interface SiteContextValue extends SiteContextState {
   site: SiteWithRelations;
   refetchSite: Refetcher<typeof getSite>;
-  menu: SiteMenu;
-  setMenu: Dispatch<SetStateAction<SiteMenu>>;
-  page: SitePageWithRelations | null;
-  setPage: Dispatch<SetStateAction<SitePageWithRelations | null>>;
-  block: SiteBlock | null;
-  setBlock: Dispatch<SetStateAction<SiteBlock | null>>;
+  openBlockEditor: (block: SiteBlock) => void;
+  closeBlockEditor: VoidFunction;
+  setMenu: (menu: SiteMenu) => void;
+  setPage: (page: SitePageWithRelations | null) => void;
+  setBlockTab: (tab: BlockTab) => void;
 }
 
 export const SiteContext = createContext<SiteContextValue | null>(null);
+
+const reducer: SiteContextReducer = (state, action) => {
+  switch (action.type) {
+    case OPEN_BLOCK_EDITOR:
+      return {
+        ...state,
+        block: action.block,
+        blockTab: BlockTabs.Content,
+        menu: SiteMenus.Block,
+      };
+    case CLOSE_BLOCK_EDITOR:
+      return {
+        ...state,
+        block: null,
+        blockTab: BlockTabs.Content,
+        menu: SiteMenus.Blocks,
+      };
+    case SET_MENU:
+      return { ...state, menu: action.menu };
+    case SET_PAGE:
+      return { ...state, page: action.page };
+    case SET_BLOCK_TAB:
+      return { ...state, blockTab: action.tab };
+    default:
+      return state;
+  }
+};
 
 interface Props {
   children: ReactNode;
@@ -77,19 +136,22 @@ export function SiteContextProvider({ children }: Props) {
     refetchOnReconnect: true,
   });
   const firstPage = useMemo(() => data?.data?.site?.pages?.[0] ?? null, [data]);
-  const [menu, setMenu] = useState<SiteMenu>(SiteMenus.Pages);
-  const [page, setPage] = useState<SitePageWithRelations | null>(firstPage);
-  const [block, setBlock] = useState<SiteBlock | null>(null);
+  const [state, dispatch] = useReducer(reducer, {
+    menu: SiteMenus.Pages,
+    page: firstPage,
+    block: null,
+    blockTab: BlockTabs.Content,
+  });
 
   /**
    * @useEffect
    * Update first page on the realod
    */
   useEffect(() => {
-    if (!page && firstPage) {
-      setPage(firstPage);
+    if (!state.page && firstPage) {
+      dispatch({ type: SET_PAGE, page: firstPage });
     }
-  }, [firstPage, page]);
+  }, [firstPage, state.page]);
 
   if (!data) {
     return <Loading />;
@@ -100,12 +162,14 @@ export function SiteContextProvider({ children }: Props) {
       value={{
         site: data.data.site,
         refetchSite,
-        menu,
-        setMenu,
-        page,
-        setPage,
-        block,
-        setBlock,
+        ...state,
+        openBlockEditor: (block: SiteBlock) =>
+          dispatch({ type: OPEN_BLOCK_EDITOR, block }),
+        closeBlockEditor: () => dispatch({ type: CLOSE_BLOCK_EDITOR }),
+        setMenu: (menu: SiteMenu) => dispatch({ type: SET_MENU, menu }),
+        setPage: (page: SitePageWithRelations | null) =>
+          dispatch({ type: SET_PAGE, page }),
+        setBlockTab: (tab: BlockTab) => dispatch({ type: SET_BLOCK_TAB, tab }),
       }}
     >
       {children}

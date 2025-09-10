@@ -4,6 +4,11 @@
     "body": ["import * as Dialog from \"@/components/ui/dialog\";"],
     "description": "web-import-dialog"
   },
+  "web-import-tab": {
+    "prefix": "web-import-tab",
+    "body": ["import * as Tab from \"@/components/ui/tabs\";"],
+    "description": "web-import-tab"
+  },
   "web-import-typo": {
     "prefix": "web-import-typo",
     "body": ["import * as Typo from \"@/components/ui/typography\";"],

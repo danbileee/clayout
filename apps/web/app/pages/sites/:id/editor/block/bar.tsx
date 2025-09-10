@@ -4,17 +4,9 @@ import { rem } from "@/utils/rem";
 import { BarBase } from "../../shared/styled";
 import { BlockData } from "@clayout/kit";
 import {
-  SiteBlockTypes,
   type CreateSiteBlockDto,
   type SiteBlockType,
 } from "@clayout/interface";
-import {
-  IconHandFinger,
-  IconPhoto,
-  IconTextSize,
-  IconX,
-  type Icon as TablerIcon,
-} from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSiteBlocks } from "@/apis/sites/pages/blocks";
@@ -23,8 +15,9 @@ import { useSiteContext } from "../../contexts/site.context";
 import { toast } from "sonner";
 import { getSiteBlockSlugValidation } from "@/apis/sites/pages/blocks/slug-duplication";
 import { nanoid } from "nanoid";
+import { BlockIcons, BlockNames } from "../../shared/constants";
 
-export function Blockbar() {
+export function BlockBar() {
   const { site, page, refetchSite } = useSiteContext();
   const { mutateAsync: addBlock } = useClientMutation({
     mutationFn: postSiteBlocks,
@@ -124,17 +117,3 @@ const BlockButton = styled.button`
     }
   `}
 `;
-
-const BlockIcons: Record<SiteBlockType, TablerIcon> = {
-  [SiteBlockTypes.None]: IconX,
-  [SiteBlockTypes.Text]: IconTextSize,
-  [SiteBlockTypes.Image]: IconPhoto,
-  [SiteBlockTypes.Button]: IconHandFinger,
-} as const;
-
-const BlockNames: Record<SiteBlockType, string> = {
-  [SiteBlockTypes.None]: "None",
-  [SiteBlockTypes.Text]: "Text",
-  [SiteBlockTypes.Image]: "Image",
-  [SiteBlockTypes.Button]: "Button",
-} as const;
