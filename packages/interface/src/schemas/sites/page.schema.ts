@@ -1,9 +1,13 @@
 import { z, ZodTypeAny } from "zod";
-import { Constants, Tables } from "../../types";
 import { SiteBlockSchema } from "./block.schema";
 import { siteMetaShape } from "./site.schema";
+import { Constants, Tables } from "../../types";
+import { SitePageFits } from "../../constants";
 
-export const SitePageMetaSchema = z.object(siteMetaShape);
+export const SitePageMetaSchema = z.object({
+  ...siteMetaShape,
+  pageFit: z.nativeEnum(SitePageFits).optional(),
+});
 
 const sitePageShape = {
   id: z.number().optional(),

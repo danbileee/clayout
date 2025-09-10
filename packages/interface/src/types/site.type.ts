@@ -19,7 +19,7 @@ export type SitePageWithRelations = Omit<
     author: Tables<"users">;
     meta: SiteMeta;
   };
-  meta: SiteMeta;
+  meta: SitePageMeta;
   blocks: SiteBlock[];
 };
 

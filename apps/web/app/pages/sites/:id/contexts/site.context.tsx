@@ -1,10 +1,12 @@
 import { getSite, getSiteQueryKey } from "@/apis/sites";
+import { Loading } from "@/components/placeholder/loading";
 import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
 import { joinPath, Paths } from "@/routes";
 import type {
+  SiteBlock,
   SitePageWithRelations,
   SiteWithRelations,
 } from "@clayout/interface";
@@ -35,6 +37,8 @@ interface SiteContextValue {
   setMenu: Dispatch<SetStateAction<SiteMenu>>;
   page: SitePageWithRelations | null;
   setPage: Dispatch<SetStateAction<SitePageWithRelations | null>>;
+  block: SiteBlock | null;
+  setBlock: Dispatch<SetStateAction<SiteBlock | null>>;
 }
 
 export const SiteContext = createContext<SiteContextValue | null>(null);
@@ -75,6 +79,7 @@ export function SiteContextProvider({ children }: Props) {
   const firstPage = useMemo(() => data?.data?.site?.pages?.[0] ?? null, [data]);
   const [menu, setMenu] = useState<SiteMenu>(SiteMenus.Pages);
   const [page, setPage] = useState<SitePageWithRelations | null>(firstPage);
+  const [block, setBlock] = useState<SiteBlock | null>(null);
 
   /**
    * @useEffect
@@ -87,8 +92,7 @@ export function SiteContextProvider({ children }: Props) {
   }, [firstPage, page]);
 
   if (!data) {
-    // TODO: Replace with empty placeholder
-    return null;
+    return <Loading />;
   }
 
   return (
@@ -100,6 +104,8 @@ export function SiteContextProvider({ children }: Props) {
         setMenu,
         page,
         setPage,
+        block,
+        setBlock,
       }}
     >
       {children}

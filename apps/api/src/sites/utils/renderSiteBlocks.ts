@@ -1,4 +1,4 @@
-import { SiteBlockSchema } from '@clayout/interface';
+import { SiteBlockSchema, SitePageFitWidth } from '@clayout/interface';
 import { BlockRegistry } from '@clayout/kit';
 import { SitePageEntity } from '../entities/site-page.entity';
 import { SiteEntity } from '../entities/site.entity';
@@ -31,6 +31,7 @@ export function renderSiteBlocks({
     ogImagePath && assetsDomain ? `${assetsDomain}/${ogImagePath}` : '';
   const path = page.isHome ? '' : `/${page.slug}`;
   const url = `https://${domain.hostname}${path}`;
+  const maxWidth = SitePageFitWidth[page.meta?.pageFit ?? 'md'];
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -57,18 +58,16 @@ export function renderSiteBlocks({
     <link rel="stylesheet" href="./styles.css" type="text/css" />
   </head>
   <body>
-    <table cellPadding="0" cellSpacing="0" style="width: 768px;">
-      <tbody>
-        ${page.blocks
-          .map((block) => {
-            const parsedBlock = SiteBlockSchema.parse(block);
-            const matchedBlock = new BlockRegistry().find(parsedBlock);
+    <main style="width: 100%; max-width: ${maxWidth}">
+      ${page.blocks
+        .map((block) => {
+          const parsedBlock = SiteBlockSchema.parse(block);
+          const matchedBlock = new BlockRegistry().find(parsedBlock);
 
-            return matchedBlock.renderToString();
-          })
-          .join(`\n`)}
-      </tbody>
-    </table>
+          return matchedBlock.renderToString();
+        })
+        .join(`\n`)}
+    </main>
   </body>
 </html>`;
 }

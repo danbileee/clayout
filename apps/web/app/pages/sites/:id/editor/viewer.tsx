@@ -31,7 +31,7 @@ const Main = styled.main<{ $headerHeight: number }>`
   ${({ $headerHeight }) => css`
     width: 100%;
     max-height: calc(100svh - ${rem($headerHeight)});
-    padding: ${rem(40)};
+    padding: ${rem(40)} 0;
     margin-top: ${rem($headerHeight)};
     overflow-y: auto;
   `}

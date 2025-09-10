@@ -1,4 +1,7 @@
-import type { SitePageWithRelations } from "@clayout/interface";
+import {
+  SitePageFitWidth,
+  type SitePageWithRelations,
+} from "@clayout/interface";
 import { Block } from "./block";
 
 interface Props {
@@ -6,13 +9,13 @@ interface Props {
 }
 
 export function Page({ page }: Props) {
+  const { pageFit = "md" } = page.meta ?? {};
+
   return (
-    <table cellPadding="0" cellSpacing="0" style={{ width: "768px" }}>
-      <tbody>
-        {page.blocks.map((block) => (
-          <Block key={block.id} block={block} />
-        ))}
-      </tbody>
-    </table>
+    <div style={{ width: "100%", maxWidth: SitePageFitWidth[pageFit] }}>
+      {page.blocks.map((block) => (
+        <Block key={block.id} block={block} />
+      ))}
+    </div>
   );
 }
