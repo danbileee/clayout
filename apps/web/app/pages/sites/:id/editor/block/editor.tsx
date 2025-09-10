@@ -35,7 +35,7 @@ export function BlockEditor() {
           {`${BlockNames[block.type]} properties`}
         </Typo.P>
       </HFlexBox>
-      <Tab.Root>
+      <Tab.Root defaultValue={BlockTabs.Content}>
         <Tab.List>
           <Tab.Trigger value={BlockTabs.Content}>
             {BlockTabs.Content}

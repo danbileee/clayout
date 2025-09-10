@@ -92,9 +92,9 @@ const reducer: SiteContextReducer = (state, action) => {
         menu: SiteMenus.Blocks,
       };
     case SET_MENU:
-      return { ...state, menu: action.menu };
+      return { ...state, menu: action.menu, block: null };
     case SET_PAGE:
-      return { ...state, page: action.page };
+      return { ...state, page: action.page, block: null };
     case SET_BLOCK_TAB:
       return { ...state, blockTab: action.tab };
     default:

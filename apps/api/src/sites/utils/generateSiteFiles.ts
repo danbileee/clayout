@@ -88,10 +88,6 @@ const cssBase = `
 
   button {
     cursor: pointer;
-    background: none;
-    padding: 0;
-    border: none;
-    outline: none;
   }
 
   ol,
@@ -108,7 +104,6 @@ const cssBase = `
   select,
   textarea {
     font-family: inherit;
-    font-size: 100%;
     margin: 0;
   }
 
