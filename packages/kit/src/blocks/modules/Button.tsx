@@ -3,53 +3,93 @@ import { Block } from "../block";
 import { SiteBlockTypes, ButtonBlockSchema } from "@clayout/interface";
 import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
+import { getAlignStyle } from "../utils/getAlignStyle";
 
 export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
   static readonly type = SiteBlockTypes.Button;
 
-  // FIXME: remove table layout
   renderToJsx() {
     const {
       margin = "0px 0px 0px 0px",
+      padding = "0px 0px 0px 0px",
       align,
-      ...restContainerStyles
+      ...containerStyle
     } = this.block.containerStyle ?? {};
+    const { ...style } = this.block.style ?? {};
     const { link, text } = this.block.data ?? {};
+    const containerWidth = getMaxWidth("100%", margin);
+    const alignStyle = getAlignStyle({ align });
 
     return (
-      <tr>
-        <td align="center" valign="top" style={{ width: "100%" }}>
-          <table
-            cellPadding="0"
-            cellSpacing="0"
-            style={{ width: getMaxWidth("100%", margin), margin }}
+      <div
+        style={{
+          width: containerWidth,
+          margin,
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            padding,
+            ...containerStyle,
+            ...alignStyle,
+          }}
+        >
+          <a
+            style={{
+              ...style,
+              display: "inline-flex",
+            }}
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
           >
-            <tbody>
-              <tr>
-                <td align={align} valign="top" style={restContainerStyles}>
-                  <a
-                    style={{
-                      ...this.block.style,
-                      display: "inline-block",
-                    }}
-                    href={link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
-                    {text}
-                  </a>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
+            {text}
+          </a>
+        </div>
+      </div>
     );
   }
 
-  // FIXME: remove table layout
   renderToString(): string {
-    return ``;
+    const {
+      margin = "0px 0px 0px 0px",
+      padding = "0px 0px 0px 0px",
+      align,
+      ...containerStyle
+    } = this.block.containerStyle ?? {};
+    const { ...style } = this.block.style ?? {};
+    const { link, text } = this.block.data ?? {};
+    const containerWidth = getMaxWidth("100%", margin);
+    const alignStyle = getAlignStyle({ align });
+
+    const outerContainerStyle = getComposedStyleString({
+      width: containerWidth,
+      margin,
+    });
+    const innerContainerStyle = getComposedStyleString({
+      width: "100%",
+      padding,
+      ...containerStyle,
+      ...alignStyle,
+    });
+    const buttonStyle = getComposedStyleString({
+      display: "inline-flex",
+      ...style,
+    });
+
+    return `<div style="${outerContainerStyle}">
+  <div style="${innerContainerStyle}">
+    <a
+      style="${buttonStyle}"
+      href="${link}"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      ${text}
+    </a>
+  </div>
+</div>`;
   }
 
   renderToTable(): string {

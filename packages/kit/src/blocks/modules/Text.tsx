@@ -7,63 +7,69 @@ import { getComposedStyleString } from "../utils/getComposedStyleString";
 export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   static readonly type = SiteBlockTypes.Text;
 
-  // FIXME: remove table layout
   renderToJsx() {
-    const { margin = "0px 0px 0px 0px", ...restContainerStyles } =
+    const { margin = "0px 0px 0px 0px", ...containerStyle } =
       this.block.containerStyle ?? {};
+    const containerWidth = getMaxWidth("100%", margin);
 
     return (
-      <tr>
-        <td align="center" valign="top" style={{ width: "100%" }}>
-          <table
-            cellPadding="0"
-            cellSpacing="0"
-            style={{ width: getMaxWidth("100%", margin), margin }}
-          >
-            <tbody>
-              <tr>
-                <td
-                  align="left"
-                  valign="top"
-                  style={{
-                    ...restContainerStyles,
-                    ...this.block.style,
-                  }}
-                >
-                  <p style={{ wordBreak: "break-word" }}>
-                    {this.block.data?.value}
-                  </p>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
+      <div
+        style={{
+          width: containerWidth,
+          margin,
+        }}
+      >
+        <div
+          style={{
+            ...containerStyle,
+          }}
+        >
+          <p style={{ wordBreak: "break-word", ...this.block.style }}>
+            {this.block.data?.value}
+          </p>
+        </div>
+      </div>
     );
   }
 
-  // FIXME: remove table layout
   renderToString(): string {
-    return ``;
+    const { margin = "0px 0px 0px 0px", ...restContainerStyle } =
+      this.block.containerStyle ?? {};
+    const containerStyle = getComposedStyleString({
+      ...restContainerStyle,
+    });
+    const textStyle = getComposedStyleString({
+      ...this.block.style,
+    });
+    const containerWidth = getMaxWidth("100%", margin);
+
+    return `<div style="width: ${containerWidth}; margin: ${margin}; ">
+  <div style="${containerStyle}">
+    <p style="word-break: break-word; ${textStyle}">${this.block.data?.value}</p>
+  </div>    
+</div>`;
   }
 
   renderToTable(): string {
-    const { margin = "0px 0px 0px 0px", ...restContainerStyles } =
+    const { margin = "0px 0px 0px 0px", ...restContainerStyle } =
       this.block.containerStyle ?? {};
-    const style = getComposedStyleString({
-      ...restContainerStyles,
+    const containerWidth = getMaxWidth("100%", margin);
+
+    const containerStyle = getComposedStyleString({
+      width: containerWidth,
+      margin,
+    });
+    const textStyle = getComposedStyleString({
+      ...restContainerStyle,
       ...this.block.style,
     });
 
     return `<tr>
   <td align="center" valign="top" style="width: 100%;">
-    <table border="0" cellpadding="0" cellspacing="0" style="width: ${getMaxWidth(
-      "100%",
-      margin
-    )}; margin: ${margin};">
+    <table border="0" cellpadding="0" cellspacing="0" style="${containerStyle}">
       <tbody>
         <tr>
-          <td align="left" valign="top" style="${style}" class="text">
+          <td align="left" valign="top" style="${textStyle}" class="text">
             <p>
               ${this.block.data?.value}
             </p>

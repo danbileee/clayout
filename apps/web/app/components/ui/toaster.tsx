@@ -8,11 +8,7 @@ const Toaster = ({ ...props }: ToasterProps) => {
       theme={"system"}
       className="toaster group"
       icons={{
-        error: (
-          <Icon color="var(--destructive)" size={16} stroke={2}>
-            {IconExclamationCircle}
-          </Icon>
-        ),
+        error: <Icon color="var(--destructive)">{IconExclamationCircle}</Icon>,
       }}
       style={
         {

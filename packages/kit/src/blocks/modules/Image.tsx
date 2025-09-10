@@ -3,97 +3,126 @@ import { Block } from "../block";
 import { ImageBlockSchema, SiteBlockTypes } from "@clayout/interface";
 import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
+import { getAlignStyle } from "../utils/getAlignStyle";
 
 export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
   static readonly type = SiteBlockTypes.Image;
 
-  // FIXME: remove table layout
   renderToJsx() {
     const {
       margin = "0px 0px 0px 0px",
       padding = "0px 0px 0px 0px",
       align,
-      ...restContainerStyles
+      ...containerStyle
     } = this.block.containerStyle ?? {};
-    const { width } = this.block.style ?? {};
+    const { width, ...style } = this.block.style ?? {};
     const { url, link, alt } = this.block.data ?? {};
+    const containerWidth = getMaxWidth("100%", margin);
+    const alignStyle = getAlignStyle({ align });
 
     return (
-      <tr>
-        <td align="center" valign="top" style={{ width: "100%" }}>
-          <table
-            cellPadding="0"
-            cellSpacing="0"
-            style={{
-              width: getMaxWidth("100%", margin),
-              margin,
-            }}
-          >
-            <tbody>
-              <tr>
-                <td
-                  align={align}
-                  valign="top"
-                  style={{ ...restContainerStyles, padding }}
-                >
-                  <table
-                    cellPadding="0"
-                    cellSpacing="0"
-                    style={{
-                      width,
-                      maxWidth: getMaxWidth("100vw", padding),
-                    }}
-                  >
-                    <tbody>
-                      <tr>
-                        <td align="center" valign="top">
-                          {link ? (
-                            <a
-                              href={link}
-                              style={{
-                                display: "table",
-                                width: "100%",
-                              }}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <img
-                                style={{
-                                  display: "table-cell",
-                                  width: "100%",
-                                  objectFit: "contain",
-                                }}
-                                src={url}
-                                alt={alt}
-                              />
-                            </a>
-                          ) : (
-                            <img
-                              style={{
-                                display: "table-cell",
-                                width: "100%",
-                                objectFit: "contain",
-                              }}
-                              src={url}
-                              alt={alt}
-                            />
-                          )}
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </td>
-      </tr>
+      <div
+        style={{
+          width: containerWidth,
+          margin,
+        }}
+      >
+        <div
+          style={{
+            width: "100%",
+            padding,
+            ...containerStyle,
+            ...alignStyle,
+          }}
+        >
+          {link ? (
+            <a
+              href={link}
+              style={{
+                display: "inline-flex",
+                width,
+              }}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img
+                style={{
+                  width: "100%",
+                  objectFit: "contain",
+                  ...style,
+                }}
+                src={url}
+                alt={alt}
+              />
+            </a>
+          ) : (
+            <img
+              style={{
+                width,
+                objectFit: "contain",
+                ...style,
+              }}
+              src={url}
+              alt={alt}
+            />
+          )}
+        </div>
+      </div>
     );
   }
 
-  // FIXME: remove table layout
   renderToString(): string {
-    return ``;
+    const {
+      margin = "0px 0px 0px 0px",
+      padding = "0px 0px 0px 0px",
+      align,
+      ...containerStyle
+    } = this.block.containerStyle ?? {};
+    const { width, ...style } = this.block.style ?? {};
+    const { url, link, alt } = this.block.data ?? {};
+    const containerWidth = getMaxWidth("100%", margin);
+    const alignStyle = getAlignStyle({ align });
+
+    const outerContainerStyle = getComposedStyleString({
+      width: containerWidth,
+      margin,
+    });
+    const innerContainerStyle = getComposedStyleString({
+      width: "100%",
+      padding,
+      ...containerStyle,
+      ...alignStyle,
+    });
+    const imageStyle = getComposedStyleString({
+      width: link ? "100%" : width,
+      objectFit: "contain",
+      ...style,
+    });
+
+    return `<div style="${outerContainerStyle}">
+  <div style="${innerContainerStyle}">
+    ${
+      link
+        ? `   <a
+      href="${link}"
+      style="display: inline-flex; width: ${width};"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      <img
+        style="${imageStyle}"
+        src="${url}"
+        alt="${alt}"
+      />
+    </a>`
+        : `   <img
+      style="${imageStyle}"
+      src="${url}"
+      alt="${alt}"
+    />`
+    }
+  </div>
+</div>`;
   }
 
   renderToTable(): string {
@@ -105,22 +134,28 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
     } = this.block.containerStyle ?? {};
     const { width } = this.block.style ?? {};
     const { url, link, alt } = this.block.data ?? {};
+    const containerWidth = getMaxWidth("100%", margin);
 
-    const style = getComposedStyleString({ ...restContainerStyles, padding });
+    const outerContainerStyle = getComposedStyleString({
+      width: containerWidth,
+      margin,
+    });
+    const innerContainerStyle = getComposedStyleString({
+      ...restContainerStyles,
+      padding,
+    });
+    const imageContainerStyle = getComposedStyleString({
+      width,
+      maxWidth: getMaxWidth("100vw", padding),
+    });
 
     return `<tr>
   <td align="center" valign="top" style="width: 100%;">
-    <table border="0" cellpadding="0" cellspacing="0" style="width: ${getMaxWidth(
-      "100%",
-      margin
-    )}; margin: ${margin};">
+    <table border="0" cellpadding="0" cellspacing="0" style="${outerContainerStyle}">
       <tbody>
         <tr>
-          <td align="${align}" valign="top" style="${style}" class="image">
-            <table border="0" cellpadding="0" cellspacing="0" style="width: ${width}; max-width: ${getMaxWidth(
-      "100vw",
-      padding
-    )};">
+          <td align="${align}" valign="top" style="${innerContainerStyle}" class="image">
+            <table border="0" cellpadding="0" cellspacing="0" style="${imageContainerStyle}">
               <tbody>
                 <tr>
                   <td align="center" valign="top">
