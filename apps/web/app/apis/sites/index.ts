@@ -66,13 +66,16 @@ export async function getSite(args: {
   params: GetOneParams;
   request?: Request;
 }) {
-  const { params, request } = args;
+  const {
+    params: { id },
+    request,
+  } = args;
   const axios = createAxiosInstance(request);
   return await axios.get<
     GetOneResponse,
     AxiosResponse<GetOneResponse, GetOneParams>,
     GetOneParams
-  >(`/sites/${params.id}`);
+  >(`/sites/${id}`);
 }
 
 /**

@@ -1,6 +1,12 @@
 import { postAuthTokenRefresh } from "@/apis/auth/token/refresh";
-import { isAxiosError, type AxiosResponse } from "axios";
+import { AxiosError, isAxiosError, type AxiosResponse } from "axios";
 import { getErrorMessage } from "./getErrorMessage";
+
+export interface AxiosErrorData {
+  error: string;
+  message: string;
+  statusCode: number;
+}
 
 interface Params<Data extends AxiosResponse> {
   onRetry?: () => Promise<Data | void>;
@@ -9,7 +15,7 @@ interface Params<Data extends AxiosResponse> {
 
 interface Returns<Data extends AxiosResponse> {
   message: string;
-  error?: Error;
+  error?: AxiosError<AxiosErrorData> | Error;
   data?: Data;
 }
 
@@ -57,4 +63,15 @@ function isAxiosResponse(data: unknown): data is AxiosResponse {
   if (!data) return false;
 
   return typeof data === "object" && "data" in data && "status" in data;
+}
+
+export function isAxiosErrorData(data: unknown): data is AxiosErrorData {
+  if (!data) return false;
+
+  return (
+    typeof data === "object" &&
+    "error" in data &&
+    "message" in data &&
+    "statusCode" in data
+  );
 }

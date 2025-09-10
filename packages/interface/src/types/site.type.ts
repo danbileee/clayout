@@ -2,6 +2,7 @@ import { z } from "zod";
 import { Tables } from "./supabase";
 import {
   PaginateSiteSchema,
+  SiteBlockSchema,
   SiteMetaSchema,
   SitePageMetaSchema,
   SitePageSchema,
@@ -10,12 +11,21 @@ import {
 
 export type SiteBlock = Omit<Tables<"site_blocks">, "siteId" | "pageId">;
 
-export type SitePageWithRelations = Omit<Tables<"site_pages">, "siteId"> & {
+export type SitePageWithRelations = Omit<
+  Tables<"site_pages">,
+  "siteId" | "meta"
+> & {
+  site: Omit<Tables<"sites">, "authorId" | "meta"> & {
+    author: Tables<"users">;
+    meta: SiteMeta;
+  };
+  meta: SiteMeta;
   blocks: SiteBlock[];
 };
 
-export type SiteWithRelations = Omit<Tables<"sites">, "authorId"> & {
+export type SiteWithRelations = Omit<Tables<"sites">, "authorId" | "meta"> & {
   author: Tables<"users">;
+  meta: SiteMeta;
   pages: SitePageWithRelations[];
 };
 
@@ -36,3 +46,11 @@ export type SitePageMeta = z.infer<typeof SitePageMetaSchema>;
 export type CreateSitePageDto = z.infer<typeof SitePageSchema>;
 
 export type UpdateSitePageDto = Partial<CreateSitePageDto>;
+
+export type ChangeSiteHomePageDto = {
+  newPageId: number;
+};
+
+export type CreateSiteBlockDto = z.infer<typeof SiteBlockSchema>;
+
+export type UpdateSiteBlockDto = Partial<CreateSiteBlockDto>;

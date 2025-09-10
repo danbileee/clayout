@@ -1,11 +1,12 @@
 import { IsObject, IsOptional, IsString, Matches } from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
-import { Column, Entity, ManyToOne } from 'typeorm';
-import { KebabCase, SiteBlockTypes, StieBlockType } from '@clayout/interface';
+import { Column, Entity, Index, ManyToOne } from 'typeorm';
+import { KebabCase, SiteBlockTypes, SiteBlockType } from '@clayout/interface';
 import { SitePageEntity } from './site-page.entity';
 import { SiteEntity } from './site.entity';
 
 @Entity('site_blocks')
+@Index('UQ_site_blocks_slug_per_page', ['page', 'slug'], { unique: true })
 export class SiteBlockEntity extends BaseEntity {
   @Column({
     unique: true,
@@ -23,7 +24,7 @@ export class SiteBlockEntity extends BaseEntity {
     enum: Object.values(SiteBlockTypes),
     default: SiteBlockTypes.None,
   })
-  type: StieBlockType;
+  type: SiteBlockType;
 
   @Column({
     nullable: true,

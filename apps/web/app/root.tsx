@@ -6,11 +6,14 @@ import {
   ScrollRestoration,
   useRouteError,
 } from "react-router";
+import { ThemeProvider } from "styled-components";
 import "./styles/index.css";
 import { QueryClientProvider } from "./providers/QueryClientProvider";
 import { AuthProvider } from "./providers/AuthProvider";
 import { Toaster } from "./components/ui/toaster";
 import { getErrorInfo } from "./lib/sentry/getErrorInfo";
+import { theme } from "./themes";
+import { DialogProvider } from "./components/ui/dialog";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
@@ -36,12 +39,12 @@ export function ErrorBoundary() {
 
   if (error instanceof Error && error.message.includes("useContext")) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <main className="flex items-center justify-center min-h-screen">
         <div className="text-center">
           <h1 className="text-xl font-semibold mb-2">Loading...</h1>
           <p className="text-gray-600">Please wait while we load the page.</p>
         </div>
-      </div>
+      </main>
     );
   }
 
@@ -61,11 +64,15 @@ export function ErrorBoundary() {
 }
 export default function App() {
   return (
-    <QueryClientProvider>
-      <AuthProvider>
-        <Outlet />
-        <Toaster />
-      </AuthProvider>
-    </QueryClientProvider>
+    <ThemeProvider theme={theme}>
+      <QueryClientProvider>
+        <AuthProvider>
+          <DialogProvider>
+            <Outlet />
+            <Toaster />
+          </DialogProvider>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ThemeProvider>
   );
 }

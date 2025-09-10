@@ -1,59 +1,717 @@
-import * as React from "react";
-import { Slot } from "@radix-ui/react-slot";
-import { cva, type VariantProps } from "class-variance-authority";
+import React, { forwardRef, type CSSProperties } from "react";
+import {
+  styled,
+  css,
+  type DefaultTheme,
+  type RuleSet,
+} from "styled-components";
+import { rem } from "@/utils/rem";
+import { SpinnerIcon } from "@/icons/spinner";
 
-import { cn } from "@/lib/utils";
+const ButtonVariants = {
+  filled: "filled",
+  outlined: "outlined",
+  ghost: "ghost",
+} as const;
 
-const buttonVariants = cva(
-  "cursor-pointer inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+const ButtonLevels = {
+  primary: "primary",
+  secondary: "secondary",
+  destructive: "destructive",
+} as const;
+
+const ButtonSizes = {
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+} as const;
+
+const ButtonRadiuses = {
+  rounded: "rounded",
+  full: "full",
+} as const;
+
+const ButtonStates = {
+  enabled: "enabled",
+  hovered: "hovered",
+  disabled: "disabled",
+  focused: "focused",
+  pressed: "pressed",
+} as const;
+
+const ButtonAlignments = {
+  center: "center",
+  left: "left",
+  right: "right",
+  stretch: "stretch",
+} as const;
+
+type ButtonVariant = keyof typeof ButtonVariants;
+type ButtonLevel = keyof typeof ButtonLevels;
+type ButtonSize = keyof typeof ButtonSizes;
+type ButtonRadius = keyof typeof ButtonRadiuses;
+type ButtonState = keyof typeof ButtonStates;
+type ButtonAlignment = keyof typeof ButtonAlignments;
+
+type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+  variant?: ButtonVariant;
+  level?: ButtonLevel;
+  size?: ButtonSize;
+  radius?: ButtonRadius;
+  alignment?: ButtonAlignment;
+  state?: ButtonState;
+  isLoading?: boolean;
+  isFluid?: boolean;
+  isSquare?: boolean;
+  startIcon?: React.ReactNode;
+  endIcon?: React.ReactNode;
+};
+
+export const Button = forwardRef<HTMLButtonElement, Props>(function Button(
   {
-    variants: {
-      variant: {
-        default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-        outline:
-          "border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50",
-        secondary:
-          "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
-        ghost:
-          "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
-        link: "text-primary underline-offset-4 hover:underline",
-      },
-      size: {
-        default: "h-9 px-4 py-2 has-[>svg]:px-3",
-        sm: "h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5",
-        lg: "h-10 rounded-md px-6 has-[>svg]:px-4",
-        icon: "size-9",
-      },
-    },
-    defaultVariants: {
-      variant: "default",
-      size: "default",
-    },
-  }
-);
-
-function Button({
-  className,
-  variant,
-  size,
-  asChild = false,
-  ...props
-}: React.ComponentProps<"button"> &
-  VariantProps<typeof buttonVariants> & {
-    asChild?: boolean;
-  }) {
-  const Comp = asChild ? Slot : "button";
-
+    variant = "filled",
+    level = "primary",
+    size = "md",
+    radius = "rounded",
+    alignment = "center",
+    isLoading = false,
+    isFluid = false,
+    isSquare = false,
+    startIcon,
+    endIcon,
+    ...props
+  },
+  ref
+) {
   return (
-    <Comp
-      data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+    <ButtonBase
+      ref={ref}
+      type="button"
+      tabIndex={0}
+      variant={variant}
+      level={level}
+      radius={radius}
+      size={size}
+      alignment={alignment}
+      isLoading={isLoading}
+      isFluid={isFluid}
+      isSquare={isSquare}
+      hasStartIcon={Boolean(startIcon)}
+      hasEndIcon={Boolean(endIcon)}
       {...props}
-    />
+    >
+      {startIcon}
+      <span>{props.children}</span>
+      {endIcon}
+      {isLoading && (
+        <SpinnerWrapper>
+          <StyledSpinnerIcon variant={variant} level={level} />
+        </SpinnerWrapper>
+      )}
+    </ButtonBase>
   );
+});
+
+interface ButtonBaseProps {
+  variant: ButtonVariant;
+  level: ButtonLevel;
+  size: ButtonSize;
+  radius: ButtonRadius;
+  state?: ButtonState;
+  alignment: ButtonAlignment;
+  isFluid: boolean;
+  isLoading: boolean;
+  isSquare: boolean;
+  hasStartIcon: boolean;
+  hasEndIcon: boolean;
 }
 
-export { Button, buttonVariants };
+const ButtonBase = styled.button.withConfig({
+  shouldForwardProp: (prop) => {
+    const nonForwardedProps = [
+      "variant",
+      "level",
+      "size",
+      "radius",
+      "alignment",
+      "isFluid",
+      "isLoading",
+      "isSquare",
+      "hasStartIcon",
+      "hasEndIcon",
+    ];
+
+    return !nonForwardedProps.includes(prop);
+  },
+})<ButtonBaseProps>`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  transition: all ease-in-out 150ms;
+
+  ${({
+    variant,
+    level,
+    size,
+    radius,
+    alignment,
+    state,
+    isFluid,
+    isSquare,
+    hasStartIcon,
+    hasEndIcon,
+    theme,
+  }) => {
+    return css`
+      ${generateVariantStyle({
+        variant,
+        level,
+        state,
+        theme,
+      })};
+      ${generateSizeStyle({
+        size,
+        hasStartIcon,
+        hasEndIcon,
+        theme,
+        isSquare,
+      })};
+      ${radiusStyles[radius]};
+      ${alignmentStyles[alignment]}
+      ${isFluid && fluidStyle};
+    `;
+  }}
+
+  ${({ variant, level, isLoading, theme }) => {
+    const { enabled } = generateCSSProperty({
+      variant,
+      level,
+      theme,
+    });
+    return css`
+      ${isLoading
+        ? css`
+            color: transparent;
+            pointer-events: none;
+            overflow: hidden;
+            &:after {
+              content: "";
+              position: absolute;
+              inset: 0;
+              background-color: ${enabled.backgroundColor};
+            }
+          `
+        : css`
+            > span {
+              white-space: nowrap;
+              max-width: 100%;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              white-space: nowrap;
+            }
+          `}
+    `;
+  }};
+`;
+
+const SpinnerWrapper = styled.span`
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 5;
+`;
+
+type SpinnerProps = Required<Pick<Props, "variant" | "level">>;
+
+const StyledSpinnerIcon = styled(SpinnerIcon)<SpinnerProps>`
+  ${({ variant, level, theme }) => {
+    const { enabled } = generateCSSProperty({
+      variant,
+      level,
+      theme,
+    });
+    return css`
+      color: ${enabled.color} !important;
+    `;
+  }};
+`;
+
+type ButtonCSSProperties = {
+  color: string;
+  backgroundColor: string;
+  border: string;
+  boxShadow?: string;
+};
+
+type GeneratedCSSProperties = Record<ButtonState, ButtonCSSProperties>;
+
+const FOCUSED_BOX_SHADOW = "inset 0 0 0 3px rgba(0, 0, 0, 0.10)";
+
+const getPrimaryFilled = (theme: DefaultTheme): GeneratedCSSProperties => ({
+  enabled: {
+    color: theme.colors.white,
+    backgroundColor: theme.colors.slate[950],
+    border: `1px solid ${theme.colors.slate[950]}`,
+  },
+  disabled: {
+    color: theme.colors.slate[500],
+    backgroundColor: theme.colors.slate[200],
+    border: `1px solid ${theme.colors.slate[200]}`,
+  },
+  hovered: {
+    color: theme.colors.white,
+    backgroundColor: theme.colors.slate[800],
+    border: `1px solid ${theme.colors.slate[800]}`,
+  },
+  pressed: {
+    color: theme.colors.white,
+    backgroundColor: theme.colors.neutral[700],
+    border: `1px solid ${theme.colors.neutral[700]}`,
+  },
+  focused: {
+    color: theme.colors.white,
+    backgroundColor: theme.colors.slate[800],
+    border: `1px solid ${theme.colors.slate[800]}`,
+    boxShadow: FOCUSED_BOX_SHADOW,
+  },
+});
+
+const generateVariantLevelErrorMessage = ({
+  level,
+  variant,
+}: {
+  level: ButtonLevel;
+  variant: ButtonVariant;
+}): string => {
+  return `This Button doesn't support ${variant}/${level} style.`;
+};
+
+// eslint-disable-next-line sonarjs/cognitive-complexity
+function generateCSSProperty({
+  variant,
+  level,
+  theme,
+}: {
+  variant: ButtonVariant;
+  level: ButtonLevel;
+  theme: DefaultTheme;
+}): GeneratedCSSProperties {
+  switch (variant) {
+    case "filled":
+      if (level === "primary") {
+        return getPrimaryFilled(theme);
+      }
+      if (level === "secondary") {
+        return {
+          enabled: {
+            color: theme.colors.slate[900],
+            backgroundColor: theme.colors.slate[200],
+            border: `1px solid ${theme.colors.slate[200]}`,
+          },
+          disabled: {
+            color: theme.colors.slate[500],
+            backgroundColor: theme.colors.slate[300],
+            border: `1px solid ${theme.colors.slate[300]}`,
+          },
+          hovered: {
+            color: theme.colors.slate[950],
+            backgroundColor: theme.colors.slate[300],
+            border: `1px solid ${theme.colors.slate[300]}`,
+          },
+          pressed: {
+            color: theme.colors.neutral[900],
+            backgroundColor: theme.colors.slate[400],
+            border: `1px solid ${theme.colors.slate[400]}`,
+          },
+          focused: {
+            color: theme.colors.slate[950],
+            backgroundColor: theme.colors.slate[300],
+            border: `1px solid ${theme.colors.slate[300]}`,
+            boxShadow: FOCUSED_BOX_SHADOW,
+          },
+        };
+      }
+      if (level === "destructive") {
+        return {
+          enabled: {
+            color: theme.colors.white,
+            backgroundColor: theme.colors.red[600],
+            border: `1px solid ${theme.colors.red[600]}`,
+          },
+          disabled: {
+            color: theme.colors.neutral[600],
+            backgroundColor: theme.colors.red[200],
+            border: `1px solid ${theme.colors.red[200]}`,
+          },
+          hovered: {
+            color: theme.colors.white,
+            backgroundColor: theme.colors.red[700],
+            border: `1px solid ${theme.colors.red[700]}`,
+          },
+          pressed: {
+            color: theme.colors.white,
+            backgroundColor: theme.colors.red[800],
+            border: `1px solid ${theme.colors.red[800]}`,
+          },
+          focused: {
+            color: theme.colors.white,
+            backgroundColor: theme.colors.red[700],
+            border: `1px solid ${theme.colors.red[700]}`,
+            boxShadow: FOCUSED_BOX_SHADOW,
+          },
+        };
+      }
+      return getPrimaryFilled(theme);
+    case "outlined":
+      if (level === "primary") {
+        console.error(generateVariantLevelErrorMessage({ level, variant }));
+      }
+      if (level === "secondary") {
+        return {
+          enabled: {
+            color: theme.colors.slate[800],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.slate[200]}`,
+          },
+          disabled: {
+            color: theme.colors.slate[500],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.slate[100]}`,
+          },
+          hovered: {
+            color: theme.colors.slate[900],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.slate[300]}`,
+          },
+          pressed: {
+            color: theme.colors.slate[950],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.slate[400]}`,
+          },
+          focused: {
+            color: theme.colors.slate[900],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.slate[300]}`,
+            boxShadow: FOCUSED_BOX_SHADOW,
+          },
+        };
+      }
+      if (level === "destructive") {
+        return {
+          enabled: {
+            color: theme.colors.red[600],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.red[600]}`,
+          },
+          disabled: {
+            color: theme.colors.red[400],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.red[300]}`,
+          },
+          hovered: {
+            color: theme.colors.red[700],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.red[700]}`,
+          },
+          pressed: {
+            color: theme.colors.red[800],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.red[800]}`,
+          },
+          focused: {
+            color: theme.colors.red[700],
+            backgroundColor: theme.colors.white,
+            border: `1px solid ${theme.colors.red[700]}`,
+            boxShadow: FOCUSED_BOX_SHADOW,
+          },
+        };
+      }
+      return getPrimaryFilled(theme);
+    case "ghost":
+      if (level === "primary") {
+        return {
+          enabled: {
+            color: theme.colors.slate[800],
+            backgroundColor: "transparent",
+            border: `1px solid transparent`,
+          },
+          disabled: {
+            color: theme.colors.slate[500],
+            backgroundColor: "transparent",
+            border: `1px solid transparent`,
+          },
+          hovered: {
+            color: theme.colors.slate[950],
+            backgroundColor: theme.colors.slate[100],
+            border: `1px solid ${theme.colors.slate[100]}`,
+          },
+          pressed: {
+            color: theme.colors.neutral[900],
+            backgroundColor: theme.colors.slate[200],
+            border: `1px solid ${theme.colors.slate[200]}`,
+          },
+          focused: {
+            color: theme.colors.slate[950],
+            backgroundColor: theme.colors.slate[100],
+            border: `1px solid ${theme.colors.slate[100]}`,
+            boxShadow: FOCUSED_BOX_SHADOW,
+          },
+        };
+      }
+      if (level === "secondary") {
+        console.error(generateVariantLevelErrorMessage({ level, variant }));
+      }
+      if (level === "destructive") {
+        return {
+          enabled: {
+            color: theme.colors.red[600],
+            backgroundColor: "transparent",
+            border: `1px solid transparent`,
+          },
+          disabled: {
+            color: theme.colors.red[400],
+            backgroundColor: "transparent",
+            border: `1px solid transparent`,
+          },
+          hovered: {
+            color: theme.colors.red[700],
+            backgroundColor: "transparent",
+            border: `1px solid transparent`,
+          },
+          pressed: {
+            color: theme.colors.red[800],
+            backgroundColor: "transparent",
+            border: `1px solid transparent`,
+          },
+          focused: {
+            color: theme.colors.red[600],
+            backgroundColor: "transparent",
+            border: `1px solid transparent`,
+            boxShadow: FOCUSED_BOX_SHADOW,
+          },
+        };
+      }
+      return getPrimaryFilled(theme);
+    default:
+      return getPrimaryFilled(theme);
+  }
+}
+
+function generateVariantStyle({
+  variant,
+  level,
+  state,
+  theme,
+}: {
+  variant: ButtonVariant;
+  level: ButtonLevel;
+  state?: ButtonState;
+  theme: DefaultTheme;
+}): RuleSet<object> {
+  const { enabled, disabled, hovered, focused, pressed } = generateCSSProperty({
+    variant,
+    level,
+    theme,
+  });
+
+  switch (state) {
+    case ButtonStates.enabled:
+      return css`
+        border: ${enabled.border};
+        background-color: ${enabled.backgroundColor};
+        color: ${enabled.color};
+      `;
+    case ButtonStates.hovered:
+      return css`
+        border: ${hovered.border};
+        background-color: ${hovered.backgroundColor};
+        color: ${hovered.color};
+      `;
+    case ButtonStates.disabled:
+      return css`
+        border: ${disabled.border};
+        background-color: ${disabled.backgroundColor};
+        color: ${disabled.color};
+        cursor: not-allowed;
+      `;
+    case ButtonStates.focused:
+      return css`
+        border: ${focused.border};
+        background-color: ${focused.backgroundColor};
+        color: ${focused.color};
+        box-shadow: ${focused.boxShadow};
+      `;
+    case ButtonStates.pressed:
+      return css`
+        border: ${pressed.border};
+        background-color: ${pressed.backgroundColor};
+        color: ${pressed.color};
+      `;
+    default:
+      return css`
+        border: ${enabled.border};
+        background-color: ${enabled.backgroundColor};
+        color: ${enabled.color};
+        &:hover {
+          border: ${hovered.border};
+          background-color: ${hovered.backgroundColor};
+          color: ${hovered.color};
+        }
+        &:active {
+          border: ${pressed.border};
+          background-color: ${pressed.backgroundColor};
+          color: ${pressed.color};
+        }
+        &:focus-visible {
+          border: ${focused.border};
+          background-color: ${focused.backgroundColor};
+          color: ${focused.color};
+          box-shadow: ${focused.boxShadow};
+        }
+        &:disabled,
+        &:disabled:hover,
+        &:disabled:active,
+        &:disabled:focus-visible {
+          border: ${disabled.border};
+          background-color: ${disabled.backgroundColor};
+          color: ${disabled.color};
+          cursor: not-allowed;
+        }
+      `;
+  }
+}
+
+const getSizeStyles = (
+  isSquare: boolean
+): Record<ButtonSize, RuleSet<object>> => ({
+  sm: css`
+    gap: ${rem(4)};
+    height: ${isSquare ? "auto" : rem(24)};
+    line-height: ${rem(24)};
+    padding: ${isSquare ? rem(4) : `${rem(4)} ${rem(8)}`};
+    ${isSquare &&
+    css`
+      aspect-ratio: 1;
+    `}
+  `,
+  md: css`
+    gap: ${rem(6)};
+    height: ${isSquare ? "auto" : rem(32)};
+    line-height: ${rem(32)};
+    padding: ${isSquare ? rem(6) : `${rem(6)} ${rem(16)}`};
+    ${isSquare &&
+    css`
+      aspect-ratio: 1;
+    `}
+  `,
+  lg: css`
+    gap: ${rem(8)};
+    height: ${isSquare ? "auto" : rem(36)};
+    line-height: ${rem(36)};
+    padding: ${isSquare ? rem(8) : `${rem(8)} ${rem(20)}`};
+    ${isSquare &&
+    css`
+      aspect-ratio: 1;
+    `}
+  `,
+});
+
+const sizeStylesForIconPadding: Record<
+  ButtonSize,
+  Pick<CSSProperties, "paddingLeft" | "paddingRight">
+> = {
+  sm: {
+    paddingLeft: 6,
+    paddingRight: 6,
+  },
+  md: {
+    paddingLeft: 12,
+    paddingRight: 12,
+  },
+  lg: {
+    paddingLeft: 16,
+    paddingRight: 16,
+  },
+};
+
+const getSizeFontStyle = (
+  theme: DefaultTheme
+): Record<ButtonSize, RuleSet<object>> => {
+  return {
+    sm: css`
+      font-size: ${rem(13)};
+    `,
+    md: css`
+      font-size: ${rem(14)};
+    `,
+    lg: css`
+      font-size: ${rem(15)};
+    `,
+  };
+};
+
+function generateSizeStyle({
+  theme,
+  size,
+  hasStartIcon,
+  hasEndIcon,
+  isSquare,
+}: {
+  theme: DefaultTheme;
+  size: ButtonSize;
+  hasStartIcon: boolean;
+  hasEndIcon: boolean;
+  isSquare: boolean;
+}): RuleSet<object> {
+  const { paddingLeft = 0, paddingRight = 0 } = sizeStylesForIconPadding[size];
+
+  return css`
+    ${getSizeFontStyle(theme)[size]};
+    ${getSizeStyles(isSquare)[size]};
+    ${!isSquare &&
+    hasStartIcon &&
+    css`
+      padding-left: ${rem(paddingLeft as number)};
+    `};
+    ${!isSquare &&
+    hasEndIcon &&
+    css`
+      padding-right: ${rem(paddingRight as number)};
+    `};
+  `;
+}
+
+const radiusStyles: Record<ButtonRadius, RuleSet<object>> = {
+  rounded: css`
+    border-radius: ${rem(6)};
+  `,
+  full: css`
+    border-radius: ${rem(100)};
+  `,
+};
+
+const fluidStyle = css`
+  width: 100%;
+`;
+
+const alignmentStyles: Record<ButtonAlignment, RuleSet<object>> = {
+  center: css`
+    justify-content: center;
+  `,
+  left: css`
+    justify-content: flex-start;
+  `,
+  right: css`
+    justify-content: flex-end;
+  `,
+  stretch: css`
+    justify-content: space-between;
+    > span {
+      margin-right: auto;
+    }
+  `,
+};

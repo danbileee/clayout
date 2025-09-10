@@ -1,19 +1,18 @@
 import { css, styled } from "styled-components";
 import useMeasure from "react-use-measure";
-import { SIDEBAR_WIDTH } from "./constants";
+import { SIDEBAR_WIDTH } from "../shared/constants";
 import { Page } from "./page";
 import { Header } from "./header";
 import { rem } from "@/utils/rem";
 import { useSiteContext } from "../contexts/site.context";
 
 export function EditorViewer() {
-  const { site } = useSiteContext();
-  const [page] = site.pages;
+  const { page } = useSiteContext();
   const [headerRef, { height: headerHeight }] = useMeasure();
 
   return (
     <Wrapper>
-      <Header ref={headerRef} site={site} />
+      <Header ref={headerRef} />
       <Main $headerHeight={headerHeight}>
         <Canvas>{page ? <Page page={page} /> : null}</Canvas>
       </Main>

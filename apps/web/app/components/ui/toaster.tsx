@@ -1,10 +1,15 @@
 import { Toaster as Sonner, type ToasterProps } from "sonner";
+import { Icon } from "./icon";
+import { IconExclamationCircle } from "@tabler/icons-react";
 
 const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       theme={"system"}
       className="toaster group"
+      icons={{
+        error: <Icon color="var(--destructive)">{IconExclamationCircle}</Icon>,
+      }}
       style={
         {
           "--normal-bg": "var(--popover)",
