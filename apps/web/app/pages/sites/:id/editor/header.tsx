@@ -28,16 +28,28 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   });
 
   const handleBack = () => {
-    navigate(
-      joinPath([Paths.sites, ":id"], {
-        ids: [
-          {
-            key: ":id",
-            value: id,
-          },
-        ],
-      })
-    );
+    if (window.history.length <= 1) {
+      navigate(
+        joinPath([Paths.sites, ":id"], {
+          ids: [
+            {
+              key: ":id",
+              value: id,
+            },
+          ],
+        })
+      );
+      return;
+    }
+
+    const referrer = document.referrer;
+    const loginPath = `/${Paths.login}`;
+
+    if (referrer.includes(loginPath)) {
+      navigate(-2);
+    } else {
+      navigate(-1);
+    }
   };
 
   const handlePublish = async () => {
