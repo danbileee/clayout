@@ -182,7 +182,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
 export const ImageBlockData: z.infer<typeof ImageBlockSchema> = {
   type: SiteBlockTypes.Image,
   name: "Image Block",
-  slug: `image-block-${Date.now()}`,
+  slug: "image-block",
   data: {
     url: "https://i.ytimg.com/vi/fK9CNdJK9lo/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA2y_V7p3K3rc1MT0byoni-LpQoVA",
     link: "https://youtu.be/CGC0BhQwnik?si=XGgxXwxqDl2dsJAy",

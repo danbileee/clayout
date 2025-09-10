@@ -134,7 +134,7 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
 export const ButtonBlockData: z.infer<typeof ButtonBlockSchema> = {
   type: SiteBlockTypes.Button,
   name: "Button Block",
-  slug: `button-block-${Date.now()}`,
+  slug: "button-block",
   data: {
     link: "https://www.youtube.com/@lifeisworship.studio",
     text: "View Channel",

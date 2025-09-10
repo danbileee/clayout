@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { SiteBlocksService } from './blocks.service';
 import { Roles } from 'src/users/decorators/role.decorator';
@@ -31,6 +32,15 @@ export class SiteBlocksController {
     createSiteBlockDto: CreateSiteBlockDto,
   ) {
     return this.siteBlocksService.create(createSiteBlockDto, siteId, pageId);
+  }
+
+  @Get('slug-duplication')
+  validateSlug(
+    @Param('siteId', ParseIntPipe) siteId: number,
+    @Param('pageId', ParseIntPipe) pageId: number,
+    @Query('slug') slug: string,
+  ) {
+    return this.siteBlocksService.validateSlug({ siteId, pageId, slug });
   }
 
   @Get(':id')

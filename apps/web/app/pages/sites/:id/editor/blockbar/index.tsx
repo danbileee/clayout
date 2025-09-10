@@ -21,6 +21,8 @@ import { postSiteBlocks } from "@/apis/sites/pages/blocks";
 import { handleError } from "@/lib/axios/handleError";
 import { useSiteContext } from "../../contexts/site.context";
 import { toast } from "sonner";
+import { getSiteBlockSlugValidation } from "@/apis/sites/pages/blocks/slug-duplication";
+import { nanoid } from "nanoid";
 
 export function Blockbar() {
   const { site, page, refetchSite } = useSiteContext();
@@ -37,11 +39,20 @@ export function Blockbar() {
         return;
       }
 
+      const { data: isSlugDuplicated } = await getSiteBlockSlugValidation({
+        params: { siteId: site.id, pageId: page.id, slug: data.slug ?? "" },
+      });
+
       await addBlock({
         params: {
           siteId: site.id,
           pageId: page.id,
-          block: data,
+          block: isSlugDuplicated
+            ? {
+                ...data,
+                slug: `${data.slug}-${nanoid(4)}`,
+              }
+            : data,
         },
       });
       await refetchSite();
