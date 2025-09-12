@@ -1,7 +1,7 @@
 import { css, styled } from "styled-components";
 import * as Typo from "@/components/ui/typography";
 import { rem } from "@/utils/rem";
-import { BarBase } from "../../shared/styled";
+import { BarBase } from "../styled";
 import { BlockData } from "@clayout/kit";
 import {
   type CreateSiteBlockDto,
@@ -15,7 +15,7 @@ import { useSiteContext } from "../../contexts/site.context";
 import { toast } from "sonner";
 import { getSiteBlockSlugValidation } from "@/apis/sites/pages/blocks/slug-duplication";
 import { nanoid } from "nanoid";
-import { BlockIcons, BlockNames } from "../../shared/constants";
+import { BlockIcons, BlockNames } from "../constants";
 
 export function BlockBar() {
   const { site, page, refetchSite } = useSiteContext();

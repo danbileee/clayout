@@ -1,5 +1,5 @@
 import { styled } from "styled-components";
-import { SIDEBAR_WIDTH } from "../shared/constants";
+import { SIDEBAR_WIDTH } from "./constants";
 import { rem } from "@/utils/rem";
 import { SiteMenus, useSiteContext } from "../contexts/site.context";
 import { Menu } from "./menu";

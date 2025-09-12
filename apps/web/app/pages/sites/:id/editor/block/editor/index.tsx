@@ -1,12 +1,12 @@
 import { HFlexBox } from "@/components/ui/box";
-import { EditorBase } from "../../shared/styled";
+import { EditorBase } from "../../styled";
 import { Button } from "@/components/ui/button";
 import { IconChevronLeft } from "@tabler/icons-react";
 import * as Typo from "@/components/ui/typography";
 import * as Tab from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/icon";
-import { BlockNames } from "../../shared/constants";
-import { BlockTabs, useSiteContext } from "../../contexts/site.context";
+import { BlockNames } from "../../constants";
+import { BlockTabs, useSiteContext } from "../../../contexts/site.context";
 import { BlockEditorContent } from "./content";
 import { BlockEditorDesign } from "./design";
 

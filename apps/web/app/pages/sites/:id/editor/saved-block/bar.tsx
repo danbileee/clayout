@@ -1,4 +1,4 @@
-import { BarBase } from "../../shared/styled";
+import { BarBase } from "../styled";
 import * as Typo from "@/components/ui/typography";
 
 export function SavedBlockBar() {

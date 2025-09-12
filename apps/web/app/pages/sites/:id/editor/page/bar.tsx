@@ -9,7 +9,7 @@ import { css, styled } from "styled-components";
 import { rem } from "@/utils/rem";
 import { PageBarItem } from "./bar-item";
 import { useSiteContext } from "../../contexts/site.context";
-import { BarBase } from "../../shared/styled";
+import { BarBase } from "../styled";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";

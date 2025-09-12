@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import * as Typo from "@/components/ui/typography";
 import { forwardRef } from "react";
 import { css, styled, useTheme } from "styled-components";
-import { SIDEBAR_WIDTH } from "../shared/constants";
+import { SIDEBAR_WIDTH } from "./constants";
 import { rem } from "@/utils/rem";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePublish } from "@/apis/sites/publish";

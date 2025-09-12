@@ -1,6 +1,6 @@
 import { rem } from "@/utils/rem";
 import { css, styled } from "styled-components";
-import { MENU_WIDTH } from "../shared/constants";
+import { MENU_WIDTH } from "./constants";
 import {
   SiteMenus,
   useSiteContext,

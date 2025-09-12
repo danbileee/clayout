@@ -1,3 +1,4 @@
+import { cn } from "@/lib/utils";
 import type { HTMLAttributes, ReactNode } from "react";
 
 interface Props extends HTMLAttributes<HTMLElement> {
@@ -58,16 +59,21 @@ export function P({
   size = "base",
   weight = "normal",
   style,
+  flex = false,
   ...props
 }: Props & {
   size?: "base" | "lg" | "sm" | "xs";
   weight?: "normal" | "medium" | "semibold" | "bold";
+  flex?: boolean;
 }) {
   return (
     <p
       {...props}
       style={{ color, ...style }}
-      className={`leading-5 text-${size} font-${weight} [&:not(:first-child)]:mt-6`}
+      className={cn(
+        `leading-5 text-${size} font-${weight} [&:not(:first-child)]:mt-6`,
+        flex ? `flex items-center gap-2` : undefined
+      )}
     >
       {children}
     </p>
