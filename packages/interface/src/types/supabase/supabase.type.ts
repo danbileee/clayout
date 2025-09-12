@@ -215,6 +215,7 @@ export type Database = {
           data: Json | null
           id: number
           name: string
+          order: number
           pageId: number
           siteId: number
           slug: string
@@ -228,6 +229,7 @@ export type Database = {
           data?: Json | null
           id: number
           name: string
+          order?: number
           pageId: number
           siteId: number
           slug: string
@@ -241,6 +243,7 @@ export type Database = {
           data?: Json | null
           id: number
           name?: string
+          order?: number
           pageId?: number
           siteId?: number
           slug?: string
@@ -366,6 +369,7 @@ export type Database = {
       site_releases: {
         Row: {
           createdAt: Date
+          dataSnapshot: Json
           htmlSnapshot: string
           id: number
           publishedAt: string | null
@@ -375,6 +379,7 @@ export type Database = {
         }
         Insert: {
           createdAt: Date
+          dataSnapshot: Json
           htmlSnapshot: string
           id: number
           publishedAt?: string | null
@@ -384,6 +389,7 @@ export type Database = {
         }
         Update: {
           createdAt?: Date
+          dataSnapshot?: Json
           htmlSnapshot?: string
           id: number
           publishedAt?: string | null

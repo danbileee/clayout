@@ -1,4 +1,10 @@
-import { IsObject, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Column, Entity, Index, ManyToOne } from 'typeorm';
 import { KebabCase, SiteBlockTypes, SiteBlockType } from '@clayout/interface';
@@ -25,6 +31,13 @@ export class SiteBlockEntity extends BaseEntity {
     default: SiteBlockTypes.None,
   })
   type: SiteBlockType;
+
+  @Column({
+    nullable: false,
+    default: 0,
+  })
+  @IsInt()
+  order: number;
 
   @Column({
     nullable: true,

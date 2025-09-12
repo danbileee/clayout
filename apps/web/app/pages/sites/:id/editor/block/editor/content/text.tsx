@@ -6,10 +6,25 @@ import * as Typo from "@/components/ui/typography";
 import { Icon } from "@/components/ui/icon";
 import { IconMessage } from "@tabler/icons-react";
 import { Textarea } from "@/components/ui/textarea";
+import { useBlocksStore } from "@/lib/zustand";
 
 export function TextEditorContent({
   block,
 }: BlockEditorProps<z.infer<typeof TextBlockSchema>>) {
+  const updateBlock = useBlocksStore((s) => s.updateBlock);
+
+  const handleChange: React.ChangeEventHandler<HTMLTextAreaElement> = (e) => {
+    if (!block.id) return;
+
+    updateBlock(block.id, "Text", (prev) => ({
+      ...prev,
+      data: {
+        ...prev.data,
+        value: e.target.value,
+      },
+    }));
+  };
+
   if (!block.id) return null;
 
   return (
@@ -21,7 +36,11 @@ export function TextEditorContent({
             <span>Content</span>
           </Typo.P>
         </BlockEditor.Header>
-        <Textarea id={block.id.toString()} defaultValue={block.data?.value} />
+        <Textarea
+          id={block.id.toString()}
+          value={block.data?.value}
+          onChange={handleChange}
+        />
       </BlockEditor.Item>
     </BlockEditor.List>
   );

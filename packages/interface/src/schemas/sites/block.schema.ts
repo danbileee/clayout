@@ -5,7 +5,14 @@ import { Tables } from "../../types";
 type BlockSchemaObject = Record<
   keyof Pick<
     Tables<"site_blocks">,
-    "id" | "slug" | "name" | "type" | "data" | "style" | "containerStyle"
+    | "id"
+    | "slug"
+    | "name"
+    | "type"
+    | "data"
+    | "style"
+    | "containerStyle"
+    | "order"
   >,
   ZodTypeAny
 >;
@@ -14,7 +21,8 @@ const siteBlockShapeBase = {
   id: z.number().optional(),
   slug: z.string(),
   name: z.string(),
-} satisfies Pick<BlockSchemaObject, "id" | "slug" | "name">;
+  order: z.number(),
+} satisfies Pick<BlockSchemaObject, "id" | "slug" | "name" | "order">;
 
 const aligns = {
   left: "left",
