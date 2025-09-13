@@ -67,7 +67,7 @@ type SiteContextReducer = (
 ) => SiteContextState;
 
 interface SiteContextValue extends SiteContextState {
-  site: SiteWithRelations;
+  site?: SiteWithRelations;
   refetchSite: Refetcher<typeof getSite>;
   openBlockEditor: (block: SiteBlock) => void;
   closeBlockEditor: VoidFunction;
@@ -173,7 +173,7 @@ export function SiteContextProvider({ children }: Props) {
 
   /**
    * @useEffect
-   * Hydrate store data
+   * Hydrate blocks store data
    */
   useHydrateBlocksStore(hydrationData);
 
@@ -187,27 +187,45 @@ export function SiteContextProvider({ children }: Props) {
     }
   }, [firstPage, state.page]);
 
+  /**
+   * @useMemo
+   * Create a memoized context value
+   */
+  const contextValue = useMemo<SiteContextValue>(
+    () => ({
+      site: data?.data?.site,
+      refetchSite,
+      ...state,
+      openBlockEditor: async (block: SiteBlock) => {
+        dispatch({ type: OPEN_BLOCK_EDITOR, block });
+        await refetchSite();
+      },
+      closeBlockEditor: async () => {
+        dispatch({ type: CLOSE_BLOCK_EDITOR });
+        await refetchSite();
+      },
+      setMenu: async (menu: SiteMenu) => {
+        dispatch({ type: SET_MENU, menu });
+        await refetchSite();
+      },
+      setPage: async (page: SitePageWithRelations | null) => {
+        dispatch({ type: SET_PAGE, page });
+        await refetchSite();
+      },
+      setBlockTab: async (tab: BlockTab) => {
+        dispatch({ type: SET_BLOCK_TAB, tab });
+        await refetchSite();
+      },
+    }),
+    [data?.data?.site, refetchSite, state]
+  );
+
   if (!data) {
     return <Loading />;
   }
 
   return (
-    <SiteContext.Provider
-      value={{
-        site: data.data.site,
-        refetchSite,
-        ...state,
-        openBlockEditor: (block: SiteBlock) =>
-          dispatch({ type: OPEN_BLOCK_EDITOR, block }),
-        closeBlockEditor: () => dispatch({ type: CLOSE_BLOCK_EDITOR }),
-        setMenu: (menu: SiteMenu) => dispatch({ type: SET_MENU, menu }),
-        setPage: (page: SitePageWithRelations | null) =>
-          dispatch({ type: SET_PAGE, page }),
-        setBlockTab: (tab: BlockTab) => dispatch({ type: SET_BLOCK_TAB, tab }),
-      }}
-    >
-      {children}
-    </SiteContext.Provider>
+    <SiteContext.Provider value={contextValue}>{children}</SiteContext.Provider>
   );
 }
 

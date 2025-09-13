@@ -78,6 +78,7 @@ export function PageBarItem({ page }: Props) {
 
   const updatePageName = async (newValue: string) => {
     const fn = async () => {
+      if (!site?.id) return;
       await updatePage({
         params: {
           siteId: site.id,
@@ -121,6 +122,8 @@ export function PageBarItem({ page }: Props) {
     e.stopPropagation();
 
     const submit = async (newId: number) => {
+      if (!site?.id) return;
+
       const fn = async () => {
         await updateHomePage({
           params: {
@@ -149,7 +152,7 @@ export function PageBarItem({ page }: Props) {
     openDialog({
       content: (
         <SelectHomeDialog
-          pages={site.pages.filter((p) => p.id !== page.id)}
+          pages={site?.pages?.filter((p) => p.id !== page.id) ?? []}
           onSubmit={submit}
         />
       ),
@@ -160,6 +163,8 @@ export function PageBarItem({ page }: Props) {
     e.stopPropagation();
 
     const fn = async () => {
+      if (!site?.id) return;
+
       await updatePage({
         params: {
           siteId: site.id,

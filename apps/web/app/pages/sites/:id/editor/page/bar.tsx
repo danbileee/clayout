@@ -23,6 +23,8 @@ export function PageBar() {
 
   const handleAddPage = async () => {
     const fn = async () => {
+      if (!site?.id) return;
+
       const response = await createPage({
         params: {
           siteId: site.id,
@@ -69,9 +71,11 @@ export function PageBar() {
         </Tooltip.Root>
       </HFlexBox>
       <PageBarList>
-        {site.pages.map((page) => (
-          <PageBarItem key={page.id} page={page} />
-        ))}
+        {site ? (
+          site.pages.map((page) => <PageBarItem key={page.id} page={page} />)
+        ) : (
+          <></>
+        )}
       </PageBarList>
     </BarBase>
   );

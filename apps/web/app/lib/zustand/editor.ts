@@ -130,22 +130,6 @@ const useBlocksStore = <T>(
   return useStore(blocksStore, memoizedSelector);
 };
 
-export const useBlockById = (blockId: string) =>
-  useBlocksStore((s) => s.byId[blockId] ?? null, [blockId]);
-
-export const useBlockIdsForPage = (pageId?: number) =>
-  useBlocksStore(
-    (s) =>
-      pageId
-        ? s.idsByPageId[toKey(pageId)] ?? EMPTY_STRING_ARRAY
-        : EMPTY_STRING_ARRAY,
-    [pageId]
-  );
-
-export const useUpdateBlock = () => useBlocksStore((s) => s.updateBlock, []);
-
-export const useHydrateBlocks = () => useBlocksStore((s) => s.hydrate, []);
-
 export const useHydrateBlocksStore = (data: {
   pages: Array<{ id: number; blocks: BlockSchema[] }>;
 }) => {
@@ -160,6 +144,20 @@ export const useHydrateBlocksStore = (data: {
     }
   }, [data]);
 };
+
+export const useBlockById = (blockId: string) =>
+  useBlocksStore((s) => s.byId[blockId] ?? null, [blockId]);
+
+export const useBlockIdsForPage = (pageId?: number) =>
+  useBlocksStore(
+    (s) =>
+      pageId
+        ? s.idsByPageId[toKey(pageId)] ?? EMPTY_STRING_ARRAY
+        : EMPTY_STRING_ARRAY,
+    [pageId]
+  );
+
+export const useUpdateBlock = () => useBlocksStore((s) => s.updateBlock, []);
 
 export const useBlockOrder = (pageId: number) =>
   useBlocksStore(
@@ -245,6 +243,7 @@ type EditorStatusState = {
 type EditorStatusActions = {
   setSave: (status: SaveStatus) => void;
   setAuth: (status: AuthStatus) => void;
+  hydrate: (state: EditorStatusState) => void;
 };
 
 type EditorStatusStore = EditorStatusState & EditorStatusActions;
@@ -255,6 +254,7 @@ const createEditorStatusStore = () =>
     auth: "loading",
     setSave: (status) => set(() => ({ save: status })),
     setAuth: (status) => set(() => ({ auth: status })),
+    hydrate: (state) => set(() => state),
   }));
 
 const editorStatusStore = createEditorStatusStore();
@@ -268,6 +268,14 @@ const useEditorStatusStore = <T>(
   return useStore(editorStatusStore, memoizedSelector);
 };
 
-export const useSaveStatus = () => useEditorStatusStore((s) => s.save, []);
+export const useEditorSaveStatus = () =>
+  useEditorStatusStore((s) => s.save, []);
 
-export const useAuthStatus = () => useEditorStatusStore((s) => s.auth, []);
+export const useEditorAuthStatus = () =>
+  useEditorStatusStore((s) => s.auth, []);
+
+export const useUpdateEditorSaveStatus = () =>
+  useEditorStatusStore((s) => s.setSave, []);
+
+export const useUpdateEditorAuthStatus = () =>
+  useEditorStatusStore((s) => s.setAuth, []);

@@ -55,6 +55,7 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
 
   const handlePublish = async () => {
     const fn = async () => {
+      if (!site?.id) return;
       await publish({ params: { id: site.id } });
       toast.success("Published sucessfully! 🚀");
     };
@@ -82,7 +83,7 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
           weight="medium"
           style={{ display: "flex", alignItems: "center" }}
         >
-          <SiteName hasPage={Boolean(page)}>{site.name}</SiteName>
+          <SiteName hasPage={Boolean(page)}>{site?.name}</SiteName>
           {page && (
             <>
               <Icon

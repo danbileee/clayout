@@ -12,7 +12,6 @@ import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSiteBlocks } from "@/apis/sites/pages/blocks";
 import { handleError } from "@/lib/axios/handleError";
 import { useSiteContext } from "../../contexts/site.context";
-import { toast } from "sonner";
 import { getSiteBlockSlugValidation } from "@/apis/sites/pages/blocks/slug-duplication";
 import { nanoid } from "nanoid";
 import { BlockIcons, BlockNames } from "../constants";
@@ -25,12 +24,7 @@ export function BlockBar() {
 
   const handleClickBlockButton = async (data: CreateSiteBlockDto) => {
     const fn = async () => {
-      if (!page) {
-        toast.error(
-          "Page not found. A block must have a selected page as its parent."
-        );
-        return;
-      }
+      if (!site?.id || !page) return;
 
       const { data: isSlugDuplicated } = await getSiteBlockSlugValidation({
         params: { siteId: site.id, pageId: page.id, slug: data.slug ?? "" },
