@@ -4,12 +4,15 @@ import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
+import { useHydrateBlocksStore } from "@/lib/zustand/editor";
 import { joinPath, Paths } from "@/routes";
-import type {
-  SiteBlock,
-  SitePageWithRelations,
-  SiteWithRelations,
+import {
+  SiteBlockSchema,
+  type SiteBlock,
+  type SitePageWithRelations,
+  type SiteWithRelations,
 } from "@clayout/interface";
+import { BlockRegistry } from "@clayout/kit";
 import {
   createContext,
   useContext,
@@ -111,7 +114,7 @@ export function SiteContextProvider({ children }: Props) {
   const id = useParamsId();
   const { data, refetch: refetchSite } = useClientQuery({
     queryKey: getSiteQueryKey({ id }),
-    queryFn: async (ctx) => {
+    queryFn: async () => {
       const fn = async () => await getSite({ params: { id } });
       const redirect = async () => navigate(joinPath([Paths.login]));
 
@@ -142,6 +145,37 @@ export function SiteContextProvider({ children }: Props) {
     block: null,
     blockTab: BlockTabs.Content,
   });
+
+  /**
+   * @useMemo
+   * Memoize hydration data to prevent infinite loops
+   */
+  const hydrationData = useMemo(
+    () => ({
+      pages:
+        data?.data?.site?.pages?.map((page) => {
+          const blocks = page.blocks.map((block) => {
+            const parsedBlock = SiteBlockSchema.parse(block);
+            const { block: registeredBlock } = new BlockRegistry().find(
+              parsedBlock
+            );
+            return registeredBlock;
+          });
+
+          return {
+            id: page.id,
+            blocks,
+          };
+        }) ?? [],
+    }),
+    [data?.data?.site?.pages]
+  );
+
+  /**
+   * @useEffect
+   * Hydrate store data
+   */
+  useHydrateBlocksStore(hydrationData);
 
   /**
    * @useEffect
@@ -181,6 +215,15 @@ export function useSiteContext(): SiteContextValue {
   const context = useContext(SiteContext);
 
   if (!context) {
+    /**
+     * During HMR, sometimes the context gets lost temporarily
+     */
+    if (process.env.NODE_ENV === "development") {
+      console.warn(
+        "useSiteContext called outside of provider - this might be due to HMR"
+      );
+    }
+
     throw new Error(
       `useSiteContext should be called within SiteContext.Provider`
     );

@@ -1,24 +1,24 @@
+import { useEffect, useRef, useCallback } from "react";
 import { createStore } from "zustand";
 import { useStore } from "zustand/react";
 import { BlockSchemaByType } from "@clayout/interface";
 import type { BlockSchema, BlockOf } from "@clayout/interface";
+import type { DependencyList } from "react";
+
+const EMPTY_STRING_ARRAY: string[] = [];
 
 // ----------------------------------------------------------------------------
 // Blocks Store
 // ----------------------------------------------------------------------------
 
-export type BlocksState = {
+type BlocksState = {
   byId: Record<string, BlockSchema>;
   idsByPageId: Record<string, string[]>;
 };
 
-export type BlocksActions = {
+type BlocksActions = {
   upsertBlocks: (pageId: number, blocks: BlockSchema[]) => void;
   upsertBlock: (pageId: number, block: BlockSchema) => void;
-  updateBlockData: (
-    blockId: number,
-    updater: (prev: BlockSchema) => BlockSchema
-  ) => void;
   updateBlock: <K extends keyof typeof BlockSchemaByType>(
     blockId: number,
     type: K,
@@ -27,13 +27,16 @@ export type BlocksActions = {
   removeBlock: (pageId: number, blockId: number) => void;
   reorderBlock: (pageId: number, blockId: number, newIndex: number) => void;
   reorderBlocks: (pageId: number, blockIds: string[]) => void;
+  hydrate: (data: {
+    pages: Array<{ id: number; blocks: BlockSchema[] }>;
+  }) => void;
 };
 
-export type BlocksStore = BlocksState & BlocksActions;
+type BlocksStore = BlocksState & BlocksActions;
 
 const toKey = (id: number) => String(id);
 
-export const createBlocksStore = () =>
+const createBlocksStore = () =>
   createStore<BlocksStore>()((set) => ({
     byId: {},
     idsByPageId: {},
@@ -71,14 +74,8 @@ export const createBlocksStore = () =>
         };
       }),
 
-    // Performance-oriented: only replace the specific block entry
-    updateBlockData: (blockId, updater) =>
-      set((state) => updateBlockDataCompute(state, toKey(blockId), updater)),
-
     updateBlock: (blockId, type, updater) => {
-      set((state) =>
-        updateBlockDataAsCompute(state, toKey(blockId), type, updater)
-      );
+      set((state) => updateBlockData(state, toKey(blockId), type, updater));
     },
 
     removeBlock: (pageId, blockId) =>
@@ -86,7 +83,6 @@ export const createBlocksStore = () =>
         removeBlockFromState(state, toKey(pageId), toKey(blockId))
       ),
 
-    // Block ordering actions
     reorderBlock: (pageId, blockId, newIndex) =>
       set((state) =>
         reorderBlockInState(state, toKey(pageId), toKey(blockId), newIndex)
@@ -97,52 +93,94 @@ export const createBlocksStore = () =>
         ...state,
         idsByPageId: { ...state.idsByPageId, [toKey(pageId)]: blockIds },
       })),
+
+    hydrate: (data) =>
+      set((state) => {
+        const newById = { ...state.byId };
+        const newIdsByPageId = { ...state.idsByPageId };
+
+        for (const page of data.pages) {
+          const pageKey = toKey(page.id);
+          const blockIds: string[] = [];
+
+          for (const block of page.blocks) {
+            const blockKey = toKey(block.id!);
+            newById[blockKey] = block;
+            blockIds.push(blockKey);
+          }
+
+          newIdsByPageId[pageKey] = blockIds;
+        }
+
+        return {
+          byId: newById,
+          idsByPageId: newIdsByPageId,
+        };
+      }),
   }));
 
-export const blocksStore = createBlocksStore();
+const blocksStore = createBlocksStore();
 
-export const useBlocksStore = <T>(selector: (state: BlocksStore) => T) =>
-  useStore(blocksStore, selector);
-
-// Selectors for performance subscriptions
-export const selectBlockById = (blockId: number) => (s: BlocksStore) =>
-  s.byId[toKey(blockId)] ?? null;
-export const selectBlocksForPage = (pageId: number) => (s: BlocksStore) => {
-  const ids = s.idsByPageId[toKey(pageId)] ?? [];
-  // ensure each block carries its current order index
-  return ids
-    .map((id, index) => ({ block: s.byId[id], index }))
-    .filter((x) => Boolean(x.block))
-    .map(({ block, index }) => ({ ...block, order: index }));
+const useBlocksStore = <T>(
+  selector: (state: BlocksStore) => T,
+  deps: DependencyList = []
+) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const memoizedSelector = useCallback(selector, deps);
+  return useStore(blocksStore, memoizedSelector);
 };
 
-// Block ordering selectors
-export const selectBlockOrder = (pageId: number) => (s: BlocksStore) =>
-  s.idsByPageId[toKey(pageId)] ?? [];
+export const useBlockById = (blockId: string) =>
+  useBlocksStore((s) => s.byId[blockId] ?? null, [blockId]);
 
-export const selectBlockIndex =
-  (pageId: number, blockId: number) => (s: BlocksStore) => {
-    const ids = s.idsByPageId[toKey(pageId)] ?? [];
-    return ids.indexOf(toKey(blockId));
-  };
+export const useBlockIdsForPage = (pageId?: number) =>
+  useBlocksStore(
+    (s) =>
+      pageId
+        ? s.idsByPageId[toKey(pageId)] ?? EMPTY_STRING_ARRAY
+        : EMPTY_STRING_ARRAY,
+    [pageId]
+  );
+
+export const useUpdateBlock = () => useBlocksStore((s) => s.updateBlock, []);
+
+export const useHydrateBlocks = () => useBlocksStore((s) => s.hydrate, []);
+
+export const useHydrateBlocksStore = (data: {
+  pages: Array<{ id: number; blocks: BlockSchema[] }>;
+}) => {
+  const hydrate = useBlocksStore((s) => s.hydrate);
+  const hydrateRef = useRef(hydrate);
+
+  hydrateRef.current = hydrate;
+
+  useEffect(() => {
+    if (data.pages.length > 0) {
+      hydrateRef.current(data);
+    }
+  }, [data]);
+};
+
+export const useBlockOrder = (pageId: number) =>
+  useBlocksStore(
+    (s) => s.idsByPageId[toKey(pageId)] ?? EMPTY_STRING_ARRAY,
+    [pageId]
+  );
+
+export const useBlockIndex = (pageId: number, blockId: number) =>
+  useBlocksStore(
+    (s) => {
+      const ids = s.idsByPageId[toKey(pageId)] ?? EMPTY_STRING_ARRAY;
+      return ids.indexOf(toKey(blockId));
+    },
+    [pageId, blockId]
+  );
 
 // ----------------------------------------------------------------------------
 // Helpers (pure) to keep lints and nesting low
 // ----------------------------------------------------------------------------
 
-function updateBlockDataCompute(
-  state: BlocksState,
-  key: string,
-  updater: (prev: BlockSchema) => BlockSchema
-): BlocksState {
-  const prev = state.byId[key];
-  if (!prev) return state;
-  const next = updater(prev);
-  if (next === prev) return state;
-  return { ...state, byId: { ...state.byId, [key]: next } };
-}
-
-function updateBlockDataAsCompute<K extends keyof typeof BlockSchemaByType>(
+function updateBlockData<K extends keyof typeof BlockSchemaByType>(
   state: BlocksState,
   key: string,
   type: K,
@@ -196,22 +234,22 @@ function reorderBlockInState(
 // Editor Status Store
 // ----------------------------------------------------------------------------
 
-export type SaveStatus = "idle" | "saving" | "saved" | "error";
-export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+type SaveStatus = "idle" | "saving" | "saved" | "error";
+type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
-export type EditorStatusState = {
+type EditorStatusState = {
   save: SaveStatus;
   auth: AuthStatus;
 };
 
-export type EditorStatusActions = {
+type EditorStatusActions = {
   setSave: (status: SaveStatus) => void;
   setAuth: (status: AuthStatus) => void;
 };
 
-export type EditorStatusStore = EditorStatusState & EditorStatusActions;
+type EditorStatusStore = EditorStatusState & EditorStatusActions;
 
-export const createEditorStatusStore = () =>
+const createEditorStatusStore = () =>
   createStore<EditorStatusStore>()((set) => ({
     save: "idle",
     auth: "loading",
@@ -219,10 +257,17 @@ export const createEditorStatusStore = () =>
     setAuth: (status) => set(() => ({ auth: status })),
   }));
 
-export const editorStatusStore = createEditorStatusStore();
-export const useEditorStatusStore = <T>(
-  selector: (state: EditorStatusStore) => T
-) => useStore(editorStatusStore, selector);
+const editorStatusStore = createEditorStatusStore();
 
-export const selectSave = (s: EditorStatusStore) => s.save;
-export const selectAuth = (s: EditorStatusStore) => s.auth;
+const useEditorStatusStore = <T>(
+  selector: (state: EditorStatusStore) => T,
+  deps: DependencyList = []
+) => {
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const memoizedSelector = useCallback(selector, deps);
+  return useStore(editorStatusStore, memoizedSelector);
+};
+
+export const useSaveStatus = () => useEditorStatusStore((s) => s.save, []);
+
+export const useAuthStatus = () => useEditorStatusStore((s) => s.auth, []);

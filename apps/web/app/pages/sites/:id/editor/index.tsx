@@ -22,7 +22,7 @@ export default function Editor() {
   useAuthMeta(meta);
 
   return (
-    <SiteContextProvider>
+    <SiteContextProvider key="site-context">
       <EditorSidebar />
       <EditorViewer />
     </SiteContextProvider>

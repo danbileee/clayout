@@ -1,28 +1,23 @@
-import {
-  SitePageFitWidth,
-  type SitePageWithRelations,
-} from "@clayout/interface";
+import { SitePageFitWidth } from "@clayout/interface";
 import { Block } from "../block";
-import { forwardRef } from "react";
+import { useSiteContext } from "../../contexts/site.context";
+import { useBlockIdsForPage } from "@/lib/zustand/editor";
 
-interface Props {
-  page: SitePageWithRelations;
-}
+export function Page() {
+  const { page } = useSiteContext();
+  const blockIds = useBlockIdsForPage(page?.id);
 
-export const Page = forwardRef<HTMLDivElement, Props>(function Page(
-  { page },
-  ref
-) {
+  if (!page) {
+    return null;
+  }
+
   const { pageFit = "md" } = page.meta ?? {};
 
   return (
-    <div
-      ref={ref}
-      style={{ width: "100%", maxWidth: SitePageFitWidth[pageFit] }}
-    >
-      {page.blocks.map((block) => (
-        <Block key={block.id} block={block} />
+    <div style={{ width: "100%", maxWidth: SitePageFitWidth[pageFit] }}>
+      {blockIds.map((blockId) => (
+        <Block key={blockId} blockId={blockId} />
       ))}
     </div>
   );
-});
+}

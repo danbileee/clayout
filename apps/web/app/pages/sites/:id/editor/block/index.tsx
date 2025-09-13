@@ -1,29 +1,32 @@
 import { BlockRegistry } from "@clayout/kit";
-import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
+import { SiteBlockSchema } from "@clayout/interface";
 import { styled } from "styled-components";
 import { useSiteContext } from "../../contexts/site.context";
 import type { MouseEvent } from "react";
+import { useBlockById } from "@/lib/zustand/editor";
 
 interface Props {
-  block: SiteBlock;
+  blockId: string;
 }
 
-export function Block({ block: blockProp }: Props) {
-  const { block: selected, openBlockEditor } = useSiteContext();
-  const parsedBlock = SiteBlockSchema.parse(blockProp);
-  const block = new BlockRegistry().find(parsedBlock);
+export function Block({ blockId }: Props) {
+  const { page, block: selected, openBlockEditor } = useSiteContext();
+  const blockSchema = useBlockById(blockId);
+  const block = page?.blocks.find((b) => b.id === blockSchema.id);
+  const parsedBlock = SiteBlockSchema.parse(blockSchema);
+  const registerdBlock = new BlockRegistry().find(parsedBlock);
 
   const handleClickBlock = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
-    if (selected === blockProp) return;
+    if (!block || selected === block) return;
 
-    openBlockEditor(blockProp);
+    openBlockEditor(block);
   };
 
   return (
     <BlockBase onClick={handleClickBlock}>
-      {block.renderToJsx()}
+      {registerdBlock.renderToJsx()}
       <BlockCover />
     </BlockBase>
   );

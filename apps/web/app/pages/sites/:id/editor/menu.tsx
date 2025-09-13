@@ -65,7 +65,8 @@ const MenuBase = styled.div`
     align-items: center;
     gap: ${rem(16)};
     width: ${rem(MENU_WIDTH)};
-    background-color: ${theme.colors.slate["900"]};
+    background-color: ${theme.colors.slate[200]};
+    border-right: 1px solid ${theme.colors.slate[200]};
     padding: ${rem(20)} ${rem(12)};
   `}
 `;
@@ -77,7 +78,7 @@ type MenuButtonProps = {
 const MenuButton = styled.button<MenuButtonProps>`
   ${({ theme, $selected }) => css`
     background-color: ${$selected
-      ? theme.colors.indigo[500]
+      ? theme.colors.slate[950]
       : theme.colors.slate[50]};
     color: ${$selected ? theme.colors.slate[50] : theme.colors.slate[950]};
     padding: ${rem(13)};
@@ -86,14 +87,14 @@ const MenuButton = styled.button<MenuButtonProps>`
 
     &:hover {
       background-color: ${$selected
-        ? theme.colors.indigo[600]
-        : theme.colors.slate[200]};
+        ? theme.colors.slate[800]
+        : theme.colors.slate[100]};
     }
 
     &:active {
       background-color: ${$selected
-        ? theme.colors.indigo[700]
-        : theme.colors.slate[300]};
+        ? theme.colors.slate[700]
+        : theme.colors.slate[200]};
     }
   `}
 `;
