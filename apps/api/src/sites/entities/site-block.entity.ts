@@ -23,6 +23,7 @@ export class SiteBlockEntity extends BaseEntity {
 
   @Column()
   @IsString()
+  @IsOptional()
   name: string;
 
   @Column({
@@ -43,25 +44,22 @@ export class SiteBlockEntity extends BaseEntity {
     nullable: true,
     type: 'jsonb',
   })
-  @IsOptional()
   @IsObject()
-  data: Record<string, any>;
+  data: Record<string, string>;
 
   @Column({
     nullable: true,
     type: 'jsonb',
   })
-  @IsOptional()
   @IsObject()
-  style: Record<string, any>;
+  style: Record<string, string>;
 
   @Column({
     nullable: true,
     type: 'jsonb',
   })
-  @IsOptional()
   @IsObject()
-  containerStyle: Record<string, any>;
+  containerStyle: Record<string, string>;
 
   @ManyToOne(() => SitePageEntity, (page) => page.blocks, {
     nullable: false,

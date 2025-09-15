@@ -74,3 +74,9 @@ export const isBlockOfType = <T extends keyof typeof BlockSchemaByType>(
   block: BlockSchema,
   type: T
 ): block is BlockOf<T> => block.type === type;
+
+export type BlockDataOf<T extends BlockSchema["type"]> = BlockOf<T>["data"];
+export type BlockStyleOf<T extends BlockSchema["type"]> = BlockOf<T>["style"];
+export type BlockContainerStyleOf<T extends BlockSchema["type"]> =
+  BlockOf<T>["containerStyle"];
+export type BlockContainerStyle = NonNullable<BlockSchema["containerStyle"]>;

@@ -4,6 +4,7 @@ import { useStore } from "zustand/react";
 import { BlockSchemaByType } from "@clayout/interface";
 import type { BlockSchema, BlockOf } from "@clayout/interface";
 import type { DependencyList } from "react";
+import { deepMerge } from "@/utils/deepMerge";
 
 const EMPTY_STRING_ARRAY: string[] = [];
 
@@ -19,11 +20,18 @@ type BlocksState = {
 type BlocksActions = {
   upsertBlocks: (pageId: number, blocks: BlockSchema[]) => void;
   upsertBlock: (pageId: number, block: BlockSchema) => void;
-  updateBlock: <K extends keyof typeof BlockSchemaByType>(
-    blockId: number,
-    type: K,
-    updater: (prev: BlockOf<K>) => BlockOf<K>
-  ) => void;
+  updateBlock: {
+    <K extends keyof typeof BlockSchemaByType>(
+      blockId: number,
+      type: K,
+      updates: Partial<BlockOf<K>>
+    ): void;
+    <K extends keyof typeof BlockSchemaByType>(
+      blockId: number,
+      type: K,
+      updater: (prev: BlockOf<K>) => Partial<BlockOf<K>>
+    ): void;
+  };
   removeBlock: (pageId: number, blockId: number) => void;
   reorderBlock: (pageId: number, blockId: number, newIndex: number) => void;
   reorderBlocks: (pageId: number, blockIds: string[]) => void;
@@ -74,9 +82,24 @@ const createBlocksStore = () =>
         };
       }),
 
-    updateBlock: (blockId, type, updater) => {
-      set((state) => updateBlockData(state, toKey(blockId), type, updater));
-    },
+    updateBlock: ((
+      blockId: number,
+      type: keyof typeof BlockSchemaByType,
+      third:
+        | Partial<BlockSchema>
+        | ((prev: BlockSchema) => Partial<BlockSchema>)
+    ) => {
+      set((state) =>
+        updateBlockData(
+          state,
+          toKey(blockId),
+          type,
+          third as
+            | Partial<BlockSchema>
+            | ((prev: BlockSchema) => Partial<BlockSchema>)
+        )
+      );
+    }) as BlocksActions["updateBlock"],
 
     removeBlock: (pageId, blockId) =>
       set((state) =>
@@ -182,12 +205,24 @@ function updateBlockData<K extends keyof typeof BlockSchemaByType>(
   state: BlocksState,
   key: string,
   type: K,
-  updater: (prev: BlockOf<K>) => BlockOf<K>
+  updatesOrUpdater:
+    | Partial<BlockOf<K>>
+    | ((prev: BlockOf<K>) => Partial<BlockOf<K>>)
 ): BlocksState {
   const prev = state.byId[key];
   if (!prev || prev.type !== type) return state;
-  const next = updater(prev);
+
+  const partial =
+    typeof updatesOrUpdater === "function"
+      ? (updatesOrUpdater as (prev: BlockOf<K>) => Partial<BlockOf<K>>)(prev)
+      : (updatesOrUpdater as Partial<BlockOf<K>>);
+
+  if (!partial || partial === prev) return state;
+
+  const next = deepMerge(prev, partial as BlockOf<K>);
+
   if (next === prev) return state;
+
   return { ...state, byId: { ...state.byId, [key]: next } };
 }
 

@@ -4,6 +4,11 @@
     "body": ["import * as Dialog from \"@/components/ui/dialog\";"],
     "description": "web-import-dialog"
   },
+  "web-import-popover": {
+    "prefix": "web-import-popover",
+    "body": ["import * as Popover from \"@/components/ui/popover\";"],
+    "description": "web-import-popover"
+  },
   "web-import-tab": {
     "prefix": "web-import-tab",
     "body": ["import * as Tab from \"@/components/ui/tabs\";"],

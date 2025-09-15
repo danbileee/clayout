@@ -187,6 +187,9 @@ export class SitePagesService {
       const updatedSitePage = await this.sitesPagesRepository.save({
         ...matchedSitePage,
         ...updateSitePageDto,
+        meta: updateSitePageDto.meta
+          ? { ...matchedSitePage.meta, ...updateSitePageDto.meta }
+          : matchedSitePage.meta,
       });
       return { page: updatedSitePage };
     } catch (error: unknown) {

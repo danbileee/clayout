@@ -1,9 +1,8 @@
-import type { SiteBlockSchema } from "@clayout/interface";
+import type { BlockContainerStyle } from "@clayout/interface";
 import type { CSSProperties } from "react";
-import type { z } from "zod";
 
 const alignMap: Record<
-  "left" | "right" | "center" | "justify",
+  NonNullable<BlockContainerStyle["align"]>,
   CSSProperties["justifyContent"]
 > = {
   left: "flex-start",
@@ -12,7 +11,7 @@ const alignMap: Record<
   justify: "stretch",
 };
 
-type Params = z.infer<typeof SiteBlockSchema>["containerStyle"];
+type Params = BlockContainerStyle;
 
 type Returns = Pick<CSSProperties, "display" | "alignItems" | "justifyContent">;
 

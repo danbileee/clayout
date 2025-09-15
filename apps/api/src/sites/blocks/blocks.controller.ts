@@ -18,6 +18,7 @@ import {
   SiteBlockSchema,
   UpdateSiteBlockDto,
 } from '@clayout/interface';
+import { EnrichBlockPipe } from './pipes/enrich-block.pipe';
 
 @Roles({ minWeight: UserRoleWeights.User })
 @Controller('sites/:siteId/pages/:pageId/blocks')
@@ -51,8 +52,7 @@ export class SiteBlocksController {
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ZodValidationPipe(SiteBlockSchema))
-    updateSiteBlockDto: UpdateSiteBlockDto,
+    @Body(EnrichBlockPipe) updateSiteBlockDto: UpdateSiteBlockDto,
   ) {
     return this.siteBlocksService.update(id, updateSiteBlockDto);
   }

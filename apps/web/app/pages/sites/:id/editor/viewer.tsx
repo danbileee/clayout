@@ -4,14 +4,16 @@ import { SIDEBAR_WIDTH } from "./constants";
 import { Page } from "./page";
 import { Header } from "./header";
 import { rem } from "@/utils/rem";
-import { useSiteContext } from "../contexts/site.context";
+import { SiteMenus, useSiteContext } from "../contexts/site.context";
 
 export function EditorViewer() {
-  const { closeBlockEditor } = useSiteContext();
+  const { menu, closeBlockEditor } = useSiteContext();
   const [headerRef, { height: headerHeight }] = useMeasure();
 
   const handleMainClick = () => {
-    closeBlockEditor();
+    if (menu === SiteMenus.Block) {
+      closeBlockEditor();
+    }
   };
 
   return (

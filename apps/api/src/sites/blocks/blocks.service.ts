@@ -125,6 +125,18 @@ export class SiteBlocksService {
       const updatedSiteBlock = await this.sitesBlocksRepository.save({
         ...matchedSiteBlock,
         ...updateSiteBlockDto,
+        data: updateSiteBlockDto.data
+          ? { ...matchedSiteBlock.data, ...updateSiteBlockDto.data }
+          : matchedSiteBlock.data,
+        style: updateSiteBlockDto.style
+          ? { ...matchedSiteBlock.style, ...updateSiteBlockDto.style }
+          : matchedSiteBlock.style,
+        containerStyle: updateSiteBlockDto.containerStyle
+          ? {
+              ...matchedSiteBlock.containerStyle,
+              ...updateSiteBlockDto.containerStyle,
+            }
+          : matchedSiteBlock.containerStyle,
       });
       return { block: updatedSiteBlock };
     } catch (error: unknown) {

@@ -145,7 +145,7 @@ export class SitesService implements AuthorService {
       },
     });
 
-    const { pages, ...restSite } = dto;
+    const { pages, ...updateSiteDto } = dto;
 
     for (const page of pages) {
       const { blocks, ...restPage } = page;
@@ -189,7 +189,10 @@ export class SitesService implements AuthorService {
     const newSite: SiteEntity = await this.sitesRepository.save({
       id,
       ...matchedSite,
-      ...restSite,
+      ...updateSiteDto,
+      meta: updateSiteDto.meta
+        ? { ...matchedSite.meta, ...updateSiteDto.meta }
+        : matchedSite.meta,
     });
     const finalSite = await this.sitesRepository.findOne({
       where: { id: newSite.id },
