@@ -5,12 +5,12 @@ import {
   type BlockContainerStyle,
 } from "@clayout/interface";
 import type { BlockEditorProps } from "../types";
-import { Alignment } from "../shared/align";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import { useUpdateBlock } from "@/lib/zustand/editor";
 import { useMutateBlock } from "../hooks/useMutateBlock";
 import * as BlockEditor from "../styled";
 import * as BoxModel from "../shared/box-model";
+import * as Background from "../shared/background";
 
 export function TextEditorDesign({
   block,
@@ -22,13 +22,14 @@ export function TextEditorDesign({
   if (!block.id) return null;
 
   const {
-    align,
     borderWidth,
     borderColor,
     borderRadius,
     borderStyle,
     padding,
     margin,
+    backgroundColor,
+    backgroundImage,
   } = block.containerStyle ?? {};
 
   const handleChangeContainerStyle = async (value: BlockContainerStyle) => {
@@ -36,10 +37,16 @@ export function TextEditorDesign({
       throw new Error(`siteId, pageId, and blockId are required.`);
     }
 
+    /**
+     * real-time UI update (w/ zustand)
+     */
     updateBlock(block.id, SiteBlockTypes.Text, {
       containerStyle: value,
     });
 
+    /**
+     * debounced DB update (w/ API request)
+     */
     await mutateBlock.current({
       siteId: site.id,
       pageId: page.id,
@@ -52,7 +59,6 @@ export function TextEditorDesign({
 
   return (
     <BlockEditor.List>
-      <Alignment value={{ align }} onChange={handleChangeContainerStyle} />
       <BoxModel.Root>
         <BoxModel.Borders
           value={{
@@ -72,6 +78,16 @@ export function TextEditorDesign({
           onChange={handleChangeContainerStyle}
         />
       </BoxModel.Root>
+      <Background.Root>
+        <Background.Color
+          value={{ backgroundColor }}
+          onChange={handleChangeContainerStyle}
+        />
+        <Background.Image
+          value={{ backgroundImage }}
+          onChange={handleChangeContainerStyle}
+        />
+      </Background.Root>
     </BlockEditor.List>
   );
 }

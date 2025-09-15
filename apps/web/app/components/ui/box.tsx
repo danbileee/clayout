@@ -8,7 +8,7 @@ interface FlexProps {
   gap?: number;
 }
 
-interface BoxProps extends FlexProps {
+interface FlexBoxProps extends FlexProps {
   isFluid?: boolean;
   width?: number | string;
   height?: number | string;
@@ -29,7 +29,7 @@ function shouldForwardProp(prop: string) {
 
 export const HFlexBox = styled.div.withConfig({
   shouldForwardProp,
-})<BoxProps>`
+})<FlexBoxProps>`
   display: flex;
   align-items: center;
   gap: ${({ gap = 0 }) => getSizeValue(gap)};
@@ -49,7 +49,7 @@ export const HFlexBox = styled.div.withConfig({
 
 export const VFlexBox = styled.div.withConfig({
   shouldForwardProp,
-})<BoxProps>`
+})<FlexBoxProps>`
   display: flex;
   flex-direction: column;
   gap: ${({ gap = 0 }) => getSizeValue(gap)};
@@ -76,3 +76,33 @@ export const HInlineFlexBox = styled(HFlexBox).withConfig({
 function getSizeValue(value: number | string): string {
   return typeof value === "number" ? rem(value) : value;
 }
+
+interface GridProps {
+  colums: number;
+  gap?: number;
+}
+
+interface GridBoxProps extends GridProps {
+  isFluid?: boolean;
+  width?: number | string;
+  height?: number | string;
+}
+
+export const GridBox = styled.div.withConfig({
+  shouldForwardProp: (prop) => {
+    const nonForwardedProps = ["isFluid", "columns", "gap", "width", "height"];
+
+    return !nonForwardedProps.includes(prop);
+  },
+})<GridBoxProps>`
+  display: grid;
+  grid-template-columns: ${({ colums }) => `repeat(${colums}, 1fr)`};
+  gap: ${({ gap = 0 }) => getSizeValue(gap)};
+  width: ${({ width }) => (width ? getSizeValue(width) : "auto")};
+  height: ${({ height }) => (height ? getSizeValue(height) : "auto")};
+  ${({ isFluid }) =>
+    isFluid &&
+    css`
+      width: 100%;
+    `}
+`;

@@ -96,12 +96,7 @@
       "  return {",
       "    meta,",
       "  }",
-      "}",
-      "",
-      "export function HydrateFallback() {",
-      "  return <Loading />;",
-      "}",
-      ""
+      "}"
     ],
     "description": "web-client-loader-auth"
   },

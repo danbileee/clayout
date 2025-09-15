@@ -26,10 +26,16 @@ export function TextEditorContent({
 
     const { value } = e.target;
 
+    /**
+     * real-time UI update (w/ zustand)
+     */
     updateBlock(block.id, SiteBlockTypes.Text, {
       data: { value },
     });
 
+    /**
+     * debounced DB update (w/ API request)
+     */
     await mutateBlock.current({
       siteId: site.id,
       pageId: page.id,

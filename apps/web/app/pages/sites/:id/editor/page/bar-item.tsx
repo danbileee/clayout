@@ -30,8 +30,8 @@ import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
 import { useDialog } from "@/components/ui/dialog";
-import { SelectHomeDialog } from "../../dialogs/select-home";
 import { patchSitePagesHome } from "@/apis/sites/pages/home";
+import { SelectHomeDialog } from "../shared/dialogs/select-home";
 
 interface Props {
   page: SitePageWithRelations;

@@ -1,5 +1,5 @@
 import { getSite, getSiteQueryKey } from "@/apis/sites";
-import { Loading } from "@/components/placeholder/loading";
+import { Loading } from "@/components/shared/placeholder/loading";
 import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";

@@ -36,6 +36,8 @@ const BlockBase = styled.div`
   position: relative;
   width: 100%;
   height: auto;
+  display: flow-root;
+  box-sizing: content-box;
 `;
 
 const BlockCover = styled.div`

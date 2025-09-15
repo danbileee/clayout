@@ -29,6 +29,7 @@ export const Button = styled.button.withConfig({
   },
 })<{ selected?: boolean }>`
   ${({ theme, selected = false }) => css`
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
