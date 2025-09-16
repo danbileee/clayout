@@ -29,6 +29,10 @@ export function BlockBar() {
       const { data: isSlugDuplicated } = await getSiteBlockSlugValidation({
         params: { siteId: site.id, pageId: page.id, slug: data.slug ?? "" },
       });
+      const dataWithOrder: CreateSiteBlockDto = {
+        ...data,
+        order: page.blocks.length,
+      };
 
       await addBlock({
         params: {
@@ -36,10 +40,10 @@ export function BlockBar() {
           pageId: page.id,
           block: isSlugDuplicated
             ? {
-                ...data,
-                slug: `${data.slug}-${nanoid(4)}`,
+                ...dataWithOrder,
+                slug: `${dataWithOrder.slug}-${nanoid(4)}`,
               }
-            : data,
+            : dataWithOrder,
         },
       });
       await refetchSite();

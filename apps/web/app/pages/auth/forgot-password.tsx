@@ -1,11 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import * as Card from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router";
@@ -63,30 +57,32 @@ export default function ForgotPassword() {
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
           {form.status === "success" ? (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Check Your Email</CardTitle>
-                <CardDescription>
+            <Card.Root>
+              <Card.Header>
+                <Card.Title className="text-2xl">Check Your Email</Card.Title>
+                <Card.Description>
                   Password reset instructions sent
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </Card.Description>
+              </Card.Header>
+              <Card.Content>
                 <p className="text-sm text-muted-foreground">
                   If you registered using your email and password, you will
                   receive a password reset email.
                 </p>
-              </CardContent>
-            </Card>
+              </Card.Content>
+            </Card.Root>
           ) : (
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-                <CardDescription>
+            <Card.Root>
+              <Card.Header>
+                <Card.Title className="text-2xl">
+                  Reset Your Password
+                </Card.Title>
+                <Card.Description>
                   Type in your email and we&apos;ll send you a link to reset
                   your password
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
+                </Card.Description>
+              </Card.Header>
+              <Card.Content>
                 <form {...getFormProps(form)}>
                   <div className="flex flex-col gap-6">
                     <div className="grid gap-2">
@@ -129,8 +125,8 @@ export default function ForgotPassword() {
                     </Link>
                   </div>
                 </form>
-              </CardContent>
-            </Card>
+              </Card.Content>
+            </Card.Root>
           )}
         </div>
       </div>

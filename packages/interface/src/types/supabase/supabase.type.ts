@@ -495,7 +495,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      assets_targettype_enum: "None" | "Site" | "SitePage" | "SiteBlock"
+      assets_targettype_enum: "None" | "Site"
       site_blocks_type_enum: "None" | "Text" | "Image" | "Button"
       site_domains_status_enum: "Pending" | "Verified" | "Error"
       site_pages_category_enum: "Static" | "List" | "Article"
@@ -644,7 +644,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      assets_targettype_enum: ["None", "Site", "SitePage", "SiteBlock"],
+      assets_targettype_enum: ["None", "Site"],
       site_blocks_type_enum: ["None", "Text", "Image", "Button"],
       site_domains_status_enum: ["Pending", "Verified", "Error"],
       site_pages_category_enum: ["Static", "List", "Article"],

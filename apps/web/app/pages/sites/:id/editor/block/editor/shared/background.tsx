@@ -3,11 +3,17 @@ import { Icon } from "@/components/ui/icon";
 import * as Typo from "@/components/ui/typography";
 import * as BlockEditor from "../styled";
 import { HFlexBox, VFlexBox } from "@/components/ui/box";
-import type { BlockContainerStyle } from "@clayout/interface";
+import {
+  AssetPaths,
+  AssetTargetTypes,
+  type BlockContainerStyle,
+} from "@clayout/interface";
 import { IconBackground, IconRadiusBottomLeft } from "@tabler/icons-react";
 import { useTheme } from "styled-components";
 import { PickColorPopover } from "@/components/shared/popovers/pick-color";
 import { UploadImageDialog } from "@/components/shared/dialogs/upload-image";
+import { rem } from "@/utils/rem";
+import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 
 interface RootProps {
   children: ReactNode;
@@ -63,22 +69,28 @@ export function Image({
   onChange,
 }: ImageProps) {
   const theme = useTheme();
+  const { site } = useSiteContext();
 
   return (
-    <>
-      <Typo.P
-        color={theme.colors.slate[600]}
-        size="sm"
-        flex
-        style={{ marginBottom: 6 }}
-      >
+    <VFlexBox gap={8} isFluid>
+      <Typo.P color={theme.colors.slate[600]} size="sm" flex>
         <Icon color={theme.colors.slate[300]}>{IconRadiusBottomLeft}</Icon>
         <span>Image</span>
       </Typo.P>
-      <UploadImageDialog
-        value={backgroundImage}
-        onChange={(v) => onChange({ backgroundImage: v })}
-      />
-    </>
+      <HFlexBox isFluid>
+        <div style={{ width: rem(24) }} />
+        <UploadImageDialog
+          value={backgroundImage}
+          onChange={(v) => onChange({ backgroundImage: v })}
+          options={{
+            createAssetDto: {
+              path: `${AssetPaths.Site}/${site?.id ?? "temp"}`,
+              targetId: site?.id ?? 0,
+              targetType: AssetTargetTypes.Site,
+            },
+          }}
+        />
+      </HFlexBox>
+    </VFlexBox>
   );
 }

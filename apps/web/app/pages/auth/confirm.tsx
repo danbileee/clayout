@@ -1,5 +1,5 @@
 import { useLoaderData, type LoaderFunctionArgs } from "react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import * as Card from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { patchAuthRegister } from "@/apis/auth/register";
 import { postEmailsTrackClick } from "@/apis/emails/track-click";
@@ -68,11 +68,11 @@ export default function AuthConfirm() {
   if (isSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">Registration Confirmed!</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
+        <Card.Root className="w-full max-w-md">
+          <Card.Header className="text-center">
+            <Card.Title className="text-xl">Registration Confirmed!</Card.Title>
+          </Card.Header>
+          <Card.Content className="text-center">
             <div className="space-y-4">
               <div className="text-green-500 text-4xl">✓</div>
               <p className="text-green-700">
@@ -80,8 +80,8 @@ export default function AuthConfirm() {
               </p>
               <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-green-500 mx-auto"></div>
             </div>
-          </CardContent>
-        </Card>
+          </Card.Content>
+        </Card.Root>
       </div>
     );
   }
@@ -89,11 +89,11 @@ export default function AuthConfirm() {
   if (isError) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-        <Card className="w-full max-w-md">
-          <CardHeader className="text-center">
-            <CardTitle className="text-xl">Confirmation Failed</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
+        <Card.Root className="w-full max-w-md">
+          <Card.Header className="text-center">
+            <Card.Title className="text-xl">Confirmation Failed</Card.Title>
+          </Card.Header>
+          <Card.Content className="text-center">
             <div className="space-y-4">
               <div className="text-red-500 text-4xl">✗</div>
               <p className="text-red-700">
@@ -106,27 +106,29 @@ export default function AuthConfirm() {
                 Go to Home
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </Card.Content>
+        </Card.Root>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <CardTitle className="text-xl">Confirming Registration...</CardTitle>
-        </CardHeader>
-        <CardContent className="text-center">
+      <Card.Root className="w-full max-w-md">
+        <Card.Header className="text-center">
+          <Card.Title className="text-xl">
+            Confirming Registration...
+          </Card.Title>
+        </Card.Header>
+        <Card.Content className="text-center">
           <div className="space-y-4">
             <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500 mx-auto"></div>
             <p className="text-gray-600">
               Please wait while we verify your email address...
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </Card.Content>
+      </Card.Root>
     </div>
   );
 }

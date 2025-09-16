@@ -22,6 +22,8 @@ import {
   UploadAssetInputDto,
 } from '@clayout/interface';
 import { ZodValidationPipe } from 'src/shared/pipes/zod.pipe';
+import { User } from 'src/users/decorators/user.decorator';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 @Controller('assets')
 export class AssetsController {
@@ -29,10 +31,11 @@ export class AssetsController {
 
   @Get()
   async getAssets(
+    @User() user: UserEntity,
     @Query(new ZodValidationPipe(PaginateAssetsSchema))
     paginateAssetDto: PaginateAssetDto,
-  ): Promise<Pagination<AssetEntity>> {
-    return await this.assetsService.paginate(paginateAssetDto);
+  ): Promise<{ results: Pagination<AssetEntity> }> {
+    return await this.assetsService.paginate(user.id, paginateAssetDto);
   }
 
   @Get('signed-url')
@@ -45,9 +48,10 @@ export class AssetsController {
 
   @Post()
   async postAsset(
+    @User() user: UserEntity,
     @Body(new ZodValidationPipe(AssetSchema)) createAssetDto: CreateAssetDto,
   ): Promise<{ asset: AssetEntity }> {
-    return await this.assetsService.create(createAssetDto);
+    return await this.assetsService.create(user, createAssetDto);
   }
 
   @Get(':id')

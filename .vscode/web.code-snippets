@@ -1,4 +1,9 @@
 {
+  "web-import-card": {
+    "prefix": "web-import-card",
+    "body": ["import * as Card from \"@/components/ui/card\";"],
+    "description": "web-import-card"
+  },
   "web-import-dialog": {
     "prefix": "web-import-dialog",
     "body": ["import * as Dialog from \"@/components/ui/dialog\";"],

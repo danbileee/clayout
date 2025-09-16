@@ -4,7 +4,7 @@ import { PaginationService } from 'src/shared/services/pagination.service';
 import { AssetEntity } from './entities/asset.entity';
 import { DataSource, Repository } from 'typeorm';
 import {
-  AssetTypes,
+  AssetTargetTypes,
   CreateAssetDto,
   PaginateAssetDto,
   Pagination,
@@ -15,6 +15,7 @@ import { UploaderService } from 'src/shared/services/uploader.service';
 import { SiteBlockEntity } from 'src/sites/entities/site-block.entity';
 import { SitePageEntity } from 'src/sites/entities/site-page.entity';
 import { SiteEntity } from 'src/sites/entities/site.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 @Injectable()
 export class AssetsService {
@@ -26,13 +27,25 @@ export class AssetsService {
     private readonly assetsRepository: Repository<AssetEntity>,
   ) {}
 
-  async paginate(dto: PaginateAssetDto): Promise<Pagination<AssetEntity>> {
-    return this.paginationService.paginate<AssetEntity>({
+  async paginate(
+    userId: number,
+    dto: PaginateAssetDto,
+  ): Promise<{ results: Pagination<AssetEntity> }> {
+    const results = await this.paginationService.paginate<AssetEntity>({
       paginationDto: dto,
       repository: this.assetsRepository,
-      findManyOptions: {},
+      findManyOptions: {
+        where: {
+          author: { id: userId },
+        },
+        relations: {
+          author: true,
+        },
+      },
       path: 'assets',
     });
+
+    return { results };
   }
 
   async getSignedUrl(dto: UploadAssetInputDto): Promise<{ signedUrl: string }> {
@@ -44,8 +57,14 @@ export class AssetsService {
     return { signedUrl };
   }
 
-  async create(dto: CreateAssetDto): Promise<{ asset: AssetEntity }> {
-    const createdAsset = this.assetsRepository.create(dto);
+  async create(
+    user: UserEntity,
+    dto: CreateAssetDto,
+  ): Promise<{ asset: AssetEntity }> {
+    const createdAsset = this.assetsRepository.create({
+      ...dto,
+      author: user,
+    });
     const savedAsset = await this.assetsRepository.save(createdAsset);
 
     return { asset: savedAsset };
@@ -63,31 +82,23 @@ export class AssetsService {
     let target: T;
 
     switch (matchedAsset.targetType) {
-      case AssetTypes.Site:
-        target = (await this.dataSource.getRepository(SiteEntity).findOne({
+      case AssetTargetTypes.Site:
+        const result = await this.dataSource.getRepository(SiteEntity).findOne({
           where: { id: matchedAsset.targetId },
-        })) as T;
+        });
+        if (!result) {
+          throw new NotFoundException(
+            `No matched target exists for given target id: ${matchedAsset.targetId}`,
+          );
+        }
+        target = result as T;
         break;
-      case AssetTypes.SitePage:
-        target = (await this.dataSource.getRepository(SitePageEntity).findOne({
-          where: { id: matchedAsset.targetId },
-        })) as T;
-        break;
-      case AssetTypes.SiteBlock:
-        target = (await this.dataSource.getRepository(SiteBlockEntity).findOne({
-          where: { id: matchedAsset.targetId },
-        })) as T;
-        break;
+      case AssetTargetTypes.None:
+        target = null;
       default:
         throw new NotFoundException(
           `Unknown target type: ${matchedAsset.targetType}`,
         );
-    }
-
-    if (!target) {
-      throw new NotFoundException(
-        `Target ${matchedAsset.targetType} with id ${matchedAsset.targetId} not found`,
-      );
     }
 
     return {

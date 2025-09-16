@@ -12,6 +12,8 @@ import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { cn } from "@/lib/utils";
 import { Icon } from "./icon";
 import { IconX } from "@tabler/icons-react";
+import { ThemeProvider } from "styled-components";
+import { theme } from "@/themes";
 
 export function Root({
   ...props
@@ -22,7 +24,9 @@ export function Root({
 export function Trigger({
   ...props
 }: ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />;
+  return (
+    <DialogPrimitive.Trigger data-slot="dialog-trigger" asChild {...props} />
+  );
 }
 
 export function Portal({
@@ -67,7 +71,7 @@ export function Content({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-lg",
+          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-lg max-w-[calc(100%-2rem)] max-h-[calc(100svh-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border p-6 shadow-lg duration-200 sm:max-w-[calc(100%-1rem)] sm:max-h-[calc(100svh-1rem)]",
           className
         )}
         {...props}
@@ -76,7 +80,7 @@ export function Content({
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
-            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-4 right-4 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
+            className="ring-offset-background focus:ring-ring data-[state=open]:bg-accent data-[state=open]:text-muted-foreground absolute top-6 right-6 rounded-xs opacity-70 transition-opacity hover:opacity-100 focus:ring-2 focus:ring-offset-2 focus:outline-hidden disabled:pointer-events-none [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4"
           >
             <Icon>{IconX}</Icon>
             <span className="sr-only">Close</span>
@@ -178,7 +182,9 @@ export function DialogProvider({ children }: Props) {
     <DialogProviderContext.Provider value={contextValue}>
       {children}
       <Root open={dialogState.isOpen} onOpenChange={closeDialog}>
-        <Portal>{dialogState.content}</Portal>
+        <Portal>
+          <ThemeProvider theme={theme}>{dialogState.content}</ThemeProvider>
+        </Portal>
       </Root>
     </DialogProviderContext.Provider>
   );

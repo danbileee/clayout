@@ -18,7 +18,7 @@ type BlockSchemaObject = Record<
 >;
 
 const siteBlockShapeBase = {
-  id: z.number(),
+  id: z.number().optional(),
   slug: z.string(),
   name: z.string().optional(),
   order: z.number(),

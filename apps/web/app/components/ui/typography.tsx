@@ -71,7 +71,7 @@ export function P({
       {...props}
       style={{ color, ...style }}
       className={cn(
-        `leading-5 text-${size} font-${weight} [&:not(:first-child)]:mt-6`,
+        `leading-5 text-${size} font-${weight} [&:not(:first-child)]:mt-6 whitespace-pre-line`,
         flex ? `flex items-center gap-2` : undefined
       )}
     >

@@ -4,3 +4,4 @@ export * from "./user.type";
 export * from "./email.type";
 export * from "./site.type";
 export * from "./asset.type";
+export * from "./base.type";
