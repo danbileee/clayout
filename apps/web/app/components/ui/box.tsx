@@ -9,13 +9,13 @@ import type { ReactElement } from "react";
 import useMeasure from "react-use-measure";
 import { styled, css } from "styled-components";
 
-interface FlexProps {
+export interface FlexProps {
   alignItems?: CSSProperties["alignItems"];
   justifyContent?: CSSProperties["justifyContent"];
   gap?: number;
 }
 
-interface FlexBoxProps extends FlexProps {
+export interface FlexBoxProps extends FlexProps {
   isFluid?: boolean;
   width?: number | string;
   height?: number | string;
@@ -125,6 +125,7 @@ export const ScrollBox = styled.div.withConfig({
     return !nonForwardedProps.includes(prop);
   },
 })<ScrollBoxProps>`
+  position: relative;
   ${({ padding }) =>
     padding
       ? css`

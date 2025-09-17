@@ -10,7 +10,9 @@ import {
 import { deleteAssets, getAssets, getAssetsQueryKey } from "@/apis/assets";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { handleError } from "@/lib/axios/handleError";
-import { Empty } from "../../placeholder/empty";
+import { EmptyPlaceholder } from "@/components/shared/placeholder/empty";
+import { LoadingPlaceholder } from "@/components/shared/placeholder/loading";
+import { ErrorPlaceholder } from "@/components/shared/placeholder/error";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -22,12 +24,17 @@ import {
   VFlexBox,
 } from "@/components/ui/box";
 import { rem } from "@/utils/rem";
-import { styled, css } from "styled-components";
 import type { Props } from "./types";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { useDialog } from "@/components/ui/dialog";
-import { ConfirmDeleteDialog } from "../confirm/delete";
 import { toast } from "sonner";
+import {
+  ButtonsWrapper,
+  ImageCard,
+  ImageCardWrapper,
+  InputsWrapper,
+} from "./styled";
+import { ConfirmDeleteDialog } from "../confirm/delete";
 
 const baseQueryKey: Omit<PaginationOptions<Tables<"assets">>, "from"> = {
   take: 20,
@@ -56,7 +63,12 @@ export function Manual({ value, onChange, options }: Props) {
       mutationFn: deleteAssets,
     }
   );
-  const { data, refetch: refetchAssets } = useInfiniteQuery({
+  const {
+    data,
+    refetch: refetchAssets,
+    isFetching,
+    isError,
+  } = useInfiniteQuery({
     queryKey: getAssetsQueryKey(baseQueryKey),
     queryFn: async ({ pageParam }) => {
       const fn = async () =>
@@ -86,7 +98,7 @@ export function Manual({ value, onChange, options }: Props) {
     initialPageParam: 0,
   });
   const assets = useMemo(
-    () => data?.pages.flatMap((d) => d?.data?.results?.data ?? []) ?? [],
+    () => data?.pages.flatMap((page) => page?.data?.results?.data ?? []) ?? [],
     [data?.pages]
   );
 
@@ -131,7 +143,7 @@ export function Manual({ value, onChange, options }: Props) {
 
   return (
     <>
-      <ManualOptions gap={8}>
+      <InputsWrapper gap={8}>
         <Button
           startIcon={<Icon>{IconCloudUp}</Icon>}
           onClick={handleButtonClick}
@@ -150,11 +162,18 @@ export function Manual({ value, onChange, options }: Props) {
           <Input id="upload-image-url" placeholder="Enter the image URL" />
           <Button>Submit</Button>
         </HFlexBox>
-      </ManualOptions>
+      </InputsWrapper>
       <VFlexBox gap={20}>
         <Typo.P weight="medium">Recently uploaded</Typo.P>
         <ScrollBox padding={20} style={{ height: rem(400) }}>
-          {assets.length > 0 ? (
+          {isFetching && <LoadingPlaceholder />}
+          {!isFetching && !assets.length && (
+            <EmptyPlaceholder>{`No results yet\nTry another keyword — we'll find something lovely!`}</EmptyPlaceholder>
+          )}
+          {!isFetching && isError && (
+            <ErrorPlaceholder>{`Something is wrong\nPlease try again after a moment.`}</ErrorPlaceholder>
+          )}
+          {!isFetching && !isError && assets.length > 0 ? (
             <DynamicGridBox
               variant="filled"
               cardWidth={{
@@ -167,10 +186,8 @@ export function Manual({ value, onChange, options }: Props) {
                   asset.path
                 }`;
                 return asset ? (
-                  <ImageCard
-                    key={asset.id}
-                    backgroundImage={`"${backgroundImage}"`}
-                  >
+                  <ImageCardWrapper>
+                    <ImageCard key={asset.id} src={backgroundImage} />
                     <ButtonsWrapper gap={8}>
                       <Tooltip.Root>
                         <Tooltip.Trigger>
@@ -200,85 +217,17 @@ export function Manual({ value, onChange, options }: Props) {
                         </Tooltip.Content>
                       </Tooltip.Root>
                     </ButtonsWrapper>
-                  </ImageCard>
+                  </ImageCardWrapper>
                 ) : null;
               })}
             </DynamicGridBox>
           ) : (
-            <Empty>
+            <EmptyPlaceholder>
               {`No images yet\nUpload a file or paste an image URL to get started!`}
-            </Empty>
+            </EmptyPlaceholder>
           )}
         </ScrollBox>
       </VFlexBox>
     </>
   );
 }
-
-const ManualOptions = styled(HFlexBox)`
-  position: absolute;
-  top: ${rem(58)};
-  right: ${rem(24)};
-`;
-
-interface ImageCardProps {
-  backgroundImage: string;
-}
-
-const ImageCard = styled.div.withConfig({
-  shouldForwardProp: (prop) => {
-    const nonForwardedProps = ["backgroundImage"];
-
-    return !nonForwardedProps.includes(prop);
-  },
-})<ImageCardProps>`
-  ${({ theme, backgroundImage }) => css`
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1 / 1;
-    background-color: ${theme.colors.slate[50]};
-    border: 1px solid ${theme.colors.slate[200]};
-    border-radius: ${rem(6)};
-
-    ${backgroundImage &&
-    css`
-      background-image: url(${backgroundImage});
-      background-size: cover;
-      background-repeat: no-repeat;
-      background-position: center;
-    `}
-
-    &:hover {
-      &::after {
-        background-color: rgba(255, 255, 255, 0.4);
-      }
-      > div {
-        opacity: 1;
-      }
-    }
-
-    &::after {
-      position: absolute;
-      display: block;
-      content: "";
-      width: 100%;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: transparent;
-      border-radius: ${rem(6)};
-      z-index: 1;
-      transition: background-color ease-in-out 200ms;
-    }
-  `}
-`;
-
-const ButtonsWrapper = styled(HFlexBox)`
-  opacity: 0;
-  position: absolute;
-  top: ${rem(8)};
-  right: ${rem(8)};
-  transition: opacity ease-in-out 200ms;
-  z-index: 2;
-`;

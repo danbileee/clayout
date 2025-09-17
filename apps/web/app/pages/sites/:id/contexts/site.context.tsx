@@ -1,5 +1,5 @@
 import { getSite, getSiteQueryKey } from "@/apis/sites";
-import { Loading } from "@/components/shared/placeholder/loading";
+import { LoadingPlaceholder } from "@/components/shared/placeholder/loading";
 import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";
@@ -221,7 +221,7 @@ export function SiteContextProvider({ children }: Props) {
   );
 
   if (!data) {
-    return <Loading />;
+    return <LoadingPlaceholder />;
   }
 
   return (
