@@ -30,6 +30,9 @@ export function TextEditorDesign({
     margin,
     backgroundColor,
     backgroundImage,
+    backgroundPosition,
+    backgroundRepeat,
+    backgroundSize,
   } = block.containerStyle ?? {};
 
   const handleChangeContainerStyle = async (value: BlockContainerStyle) => {
@@ -84,7 +87,12 @@ export function TextEditorDesign({
           onChange={handleChangeContainerStyle}
         />
         <Background.Image
-          value={{ backgroundImage }}
+          value={{
+            backgroundImage,
+            backgroundPosition,
+            backgroundRepeat,
+            backgroundSize,
+          }}
           onChange={handleChangeContainerStyle}
         />
       </Background.Root>

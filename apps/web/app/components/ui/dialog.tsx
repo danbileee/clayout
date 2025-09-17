@@ -141,7 +141,7 @@ export function Description({
 }
 
 type DialogProviderContextValue = {
-  openDialog: (props: { content: ReactNode }) => void;
+  openDialog: (content: ReactNode) => void;
   closeDialog: () => void;
 };
 
@@ -156,18 +156,24 @@ type Props = {
 export function DialogProvider({ children }: Props) {
   const [dialogState, setDialogState] = useState<{
     isOpen: boolean;
-    content: ReactNode;
+    dialogs: ReactNode[];
   }>({
     isOpen: false,
-    content: null,
+    dialogs: [],
   });
 
-  const openDialog = useCallback(({ content }: { content: ReactNode }) => {
-    setDialogState({ isOpen: true, content });
+  const openDialog = useCallback((content: ReactNode) => {
+    setDialogState((prev) => ({
+      isOpen: true,
+      dialogs: [...prev.dialogs, content],
+    }));
   }, []);
 
   const closeDialog = useCallback(() => {
-    setDialogState({ isOpen: false, content: null });
+    setDialogState((prev) => ({
+      isOpen: false,
+      dialogs: prev.dialogs.filter((d, idx) => idx === prev.dialogs.length - 1),
+    }));
   }, []);
 
   const contextValue = useMemo<DialogProviderContextValue>(
@@ -183,7 +189,9 @@ export function DialogProvider({ children }: Props) {
       {children}
       <Root open={dialogState.isOpen} onOpenChange={closeDialog}>
         <Portal>
-          <ThemeProvider theme={theme}>{dialogState.content}</ThemeProvider>
+          <ThemeProvider theme={theme}>
+            {dialogState.dialogs.map((dialog) => dialog)}
+          </ThemeProvider>
         </Portal>
       </Root>
     </DialogProviderContext.Provider>

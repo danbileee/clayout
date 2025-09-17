@@ -4,6 +4,7 @@ import { ImageBlockSchema, SiteBlockTypes } from "@clayout/interface";
 import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
 import { getAlignStyle } from "../utils/getAlignStyle";
+import { getComposedStyleObject } from "../utils/getComposedStyleObject";
 
 export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
   static readonly type = SiteBlockTypes.Image;
@@ -31,7 +32,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
           style={{
             width: "100%",
             padding,
-            ...containerStyle,
+            ...getComposedStyleObject(containerStyle),
             ...alignStyle,
           }}
         >

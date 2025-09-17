@@ -7,5 +7,5 @@ interface Options {
 export interface Props {
   value: string;
   onChange: (value: string) => void;
-  options?: Options;
+  options: Options;
 }

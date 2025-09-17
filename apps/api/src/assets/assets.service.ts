@@ -16,6 +16,8 @@ import { SiteBlockEntity } from 'src/sites/entities/site-block.entity';
 import { SitePageEntity } from 'src/sites/entities/site-page.entity';
 import { SiteEntity } from 'src/sites/entities/site.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
+import { ConfigService } from '@nestjs/config';
+import { EnvKeys } from 'src/shared/constants/env.const';
 
 @Injectable()
 export class AssetsService {
@@ -23,6 +25,7 @@ export class AssetsService {
     private readonly dataSource: DataSource,
     private readonly paginationService: PaginationService,
     private readonly uploaderService: UploaderService,
+    private readonly configService: ConfigService,
     @InjectRepository(AssetEntity)
     private readonly assetsRepository: Repository<AssetEntity>,
   ) {}
@@ -132,6 +135,27 @@ export class AssetsService {
   }
 
   async delete(id: number): Promise<{ id: number }> {
+    const asset = await this.assetsRepository.findOne({ where: { id } });
+
+    if (!asset) {
+      throw new NotFoundException(`Asset not found`);
+    }
+
+    try {
+      await this.uploaderService.delete({
+        Bucket: this.configService.get(EnvKeys.CF_R2_ASSETS_BUCKET),
+        Key: asset.path,
+      });
+    } catch (error) {
+      console.error('Failed to delete file from storage:', {
+        assetId: id,
+        path: asset.path,
+        error: error.message,
+      });
+      // Continue with database deletion even if file deletion fails
+      // This prevents orphaned database records
+    }
+
     await this.assetsRepository.delete({ id });
 
     return { id };

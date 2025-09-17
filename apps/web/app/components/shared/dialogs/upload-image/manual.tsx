@@ -1,4 +1,5 @@
 import * as Typo from "@/components/ui/typography";
+import * as Tooltip from "@/components/ui/tooltip";
 import { Input } from "@/components/ui/input";
 import { useUploadAssets } from "@/hooks/useUploadAssets";
 import {
@@ -6,14 +7,14 @@ import {
   PaginationOptions,
   type Tables,
 } from "@clayout/interface";
-import { getAssets, getAssetsQueryKey } from "@/apis/assets";
+import { deleteAssets, getAssets, getAssetsQueryKey } from "@/apis/assets";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { handleError } from "@/lib/axios/handleError";
 import { Empty } from "../../placeholder/empty";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
-import { IconCloudUp } from "@tabler/icons-react";
+import { IconCloudUp, IconPhotoPlus, IconTrash } from "@tabler/icons-react";
 import {
   DynamicGridBox,
   HFlexBox,
@@ -23,13 +24,17 @@ import {
 import { rem } from "@/utils/rem";
 import { styled, css } from "styled-components";
 import type { Props } from "./types";
+import { useClientMutation } from "@/lib/react-query/useClientMutation";
+import { useDialog } from "@/components/ui/dialog";
+import { ConfirmDeleteDialog } from "../confirm/delete";
+import { toast } from "sonner";
 
 const baseQueryKey: Omit<PaginationOptions<Tables<"assets">>, "from"> = {
   take: 20,
   sort: [
     {
       property: "createdAt",
-      direction: "asc",
+      direction: "desc",
     },
   ],
   filter: [
@@ -40,15 +45,18 @@ const baseQueryKey: Omit<PaginationOptions<Tables<"assets">>, "from"> = {
   ],
 };
 
-export function Manual({
-  onChange,
-  options,
-}: Pick<Props, "onChange" | "options">) {
+export function Manual({ value, onChange, options }: Props) {
   const { createAssetDto } = options ?? {};
+  const { openDialog, closeDialog } = useDialog();
   const { inputRef, handleButtonClick, handleUploadAssets } = useUploadAssets({
     params: createAssetDto,
   });
-  const { data } = useInfiniteQuery({
+  const { mutateAsync: deleteAsset, isPending: isDeleting } = useClientMutation(
+    {
+      mutationFn: deleteAssets,
+    }
+  );
+  const { data, refetch: refetchAssets } = useInfiniteQuery({
     queryKey: getAssetsQueryKey(baseQueryKey),
     queryFn: async ({ pageParam }) => {
       const fn = async () =>
@@ -82,6 +90,45 @@ export function Manual({
     [data?.pages]
   );
 
+  const handleDeleteAsset = async (asset: Tables<"assets">) => {
+    const fn = async () => {
+      await deleteAsset({
+        params: { id: asset.id },
+      });
+      if (value.includes(asset.path)) {
+        onChange("");
+      }
+      toast.success("Deleted the image.");
+      await refetchAssets();
+    };
+
+    try {
+      await fn();
+    } catch (e) {
+      const { error } = await handleError(e, {
+        onRetry: fn,
+      });
+
+      if (error) {
+        throw error;
+      }
+    }
+  };
+
+  const handleConfirmDelete = async (asset: Tables<"assets">) => {
+    openDialog(
+      <ConfirmDeleteDialog
+        confirmButtonProps={{
+          isLoading: isDeleting,
+          onClick: () => {
+            handleDeleteAsset(asset);
+            closeDialog();
+          },
+        }}
+      />
+    );
+  };
+
   return (
     <>
       <ManualOptions gap={8}>
@@ -96,7 +143,7 @@ export function Manual({
           hidden
           type="file"
           accept="image/*"
-          onChange={handleUploadAssets}
+          onChange={(e) => handleUploadAssets(e, { onSuccess: refetchAssets })}
         />
         <Typo.Small>or</Typo.Small>
         <HFlexBox gap={6}>
@@ -115,16 +162,47 @@ export function Manual({
                 max: 150,
               }}
             >
-              {assets.map((asset) =>
-                asset ? (
+              {assets.map((asset) => {
+                const backgroundImage = `${import.meta.env.VITE_ASSETS_HOST}/${
+                  asset.path
+                }`;
+                return asset ? (
                   <ImageCard
                     key={asset.id}
-                    backgroundImage={`${import.meta.env.VITE_ASSETS_HOST}/${
-                      asset.path
-                    }`}
-                  ></ImageCard>
-                ) : null
-              )}
+                    backgroundImage={`"${backgroundImage}"`}
+                  >
+                    <ButtonsWrapper gap={8}>
+                      <Tooltip.Root>
+                        <Tooltip.Trigger>
+                          <Button
+                            isSquare
+                            size="sm"
+                            onClick={() => onChange(backgroundImage)}
+                          >
+                            <Icon size={14}>{IconPhotoPlus}</Icon>
+                          </Button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>Apply this image</Tooltip.Content>
+                      </Tooltip.Root>
+                      <Tooltip.Root>
+                        <Tooltip.Trigger>
+                          <Button
+                            isSquare
+                            size="sm"
+                            level="secondary"
+                            onClick={() => handleConfirmDelete(asset)}
+                          >
+                            <Icon size={14}>{IconTrash}</Icon>
+                          </Button>
+                        </Tooltip.Trigger>
+                        <Tooltip.Content>
+                          Remove from recent uploads
+                        </Tooltip.Content>
+                      </Tooltip.Root>
+                    </ButtonsWrapper>
+                  </ImageCard>
+                ) : null;
+              })}
             </DynamicGridBox>
           ) : (
             <Empty>
@@ -154,12 +232,53 @@ const ImageCard = styled.div.withConfig({
     return !nonForwardedProps.includes(prop);
   },
 })<ImageCardProps>`
-  ${({ backgroundImage }) => css`
+  ${({ theme, backgroundImage }) => css`
+    position: relative;
     width: 100%;
     aspect-ratio: 1 / 1;
-    background-image: ${backgroundImage};
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
+    background-color: ${theme.colors.slate[50]};
+    border: 1px solid ${theme.colors.slate[200]};
+    border-radius: ${rem(6)};
+
+    ${backgroundImage &&
+    css`
+      background-image: url(${backgroundImage});
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center;
+    `}
+
+    &:hover {
+      &::after {
+        background-color: rgba(255, 255, 255, 0.4);
+      }
+      > div {
+        opacity: 1;
+      }
+    }
+
+    &::after {
+      position: absolute;
+      display: block;
+      content: "";
+      width: 100%;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: transparent;
+      border-radius: ${rem(6)};
+      z-index: 1;
+      transition: background-color ease-in-out 200ms;
+    }
   `}
+`;
+
+const ButtonsWrapper = styled(HFlexBox)`
+  opacity: 0;
+  position: absolute;
+  top: ${rem(8)};
+  right: ${rem(8)};
+  transition: opacity ease-in-out 200ms;
+  z-index: 2;
 `;

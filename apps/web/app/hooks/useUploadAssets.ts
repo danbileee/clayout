@@ -3,6 +3,10 @@ import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { getAssetSignedUrl, postAssets, uploadFile } from "@/apis/assets";
 import { handleError } from "@/lib/axios/handleError";
 
+interface Options {
+  onSuccess?: VoidFunction;
+}
+
 interface Params {
   params: Awaited<ReturnType<typeof postAssets>>["config"]["data"];
 }
@@ -10,7 +14,10 @@ interface Params {
 interface Returns {
   inputRef: RefObject<HTMLInputElement | null>;
   handleButtonClick: VoidFunction;
-  handleUploadAssets: (e: ChangeEvent<HTMLInputElement>) => Promise<void>;
+  handleUploadAssets: (
+    e: ChangeEvent<HTMLInputElement>,
+    options?: Options
+  ) => Promise<void>;
 }
 
 export function useUploadAssets({ params }: Params): Returns {
@@ -25,8 +32,12 @@ export function useUploadAssets({ params }: Params): Returns {
     }
   };
 
-  const handleUploadAssets = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleUploadAssets = async (
+    e: ChangeEvent<HTMLInputElement>,
+    options?: Options
+  ) => {
     const { files } = e.target;
+    const { onSuccess } = options ?? {};
 
     if (!files || !files.length) return;
 
@@ -50,6 +61,7 @@ export function useUploadAssets({ params }: Params): Returns {
 
     try {
       await fn();
+      onSuccess?.();
     } catch (e) {
       const { error } = await handleError(e, {
         onRetry: fn,

@@ -14,6 +14,7 @@ import { PickColorPopover } from "@/components/shared/popovers/pick-color";
 import { UploadImageDialog } from "@/components/shared/dialogs/upload-image";
 import { rem } from "@/utils/rem";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
+import { HelpButton } from "@/components/shared/buttons/help";
 
 interface RootProps {
   children: ReactNode;
@@ -27,6 +28,7 @@ export function Root({ children }: RootProps) {
           <Icon>{IconBackground}</Icon>
           <span>Background</span>
         </Typo.P>
+        <HelpButton>{`The image will appear on top of the\nbackground color when both are set`}</HelpButton>
       </BlockEditor.Header>
       <VFlexBox gap={12}>{children}</VFlexBox>
     </BlockEditor.Item>
@@ -57,7 +59,13 @@ export function Color({ value: { backgroundColor }, onChange }: ColorProps) {
   );
 }
 
-type ImageProperties = Pick<BlockContainerStyle, "backgroundImage">;
+type ImageProperties = Pick<
+  BlockContainerStyle,
+  | "backgroundImage"
+  | "backgroundSize"
+  | "backgroundPosition"
+  | "backgroundRepeat"
+>;
 
 interface ImageProps {
   value: ImageProperties;
@@ -81,7 +89,14 @@ export function Image({
         <div style={{ width: rem(24) }} />
         <UploadImageDialog
           value={backgroundImage}
-          onChange={(v) => onChange({ backgroundImage: v })}
+          onChange={(v) =>
+            onChange({
+              backgroundImage: v,
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+              backgroundSize: "cover",
+            })
+          }
           options={{
             createAssetDto: {
               path: `${AssetPaths.Site}/${site?.id ?? "temp"}`,

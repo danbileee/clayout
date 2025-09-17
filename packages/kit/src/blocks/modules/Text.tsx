@@ -3,6 +3,7 @@ import { Block } from "../block";
 import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
 import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
+import { getComposedStyleObject } from "../utils/getComposedStyleObject";
 
 export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   static readonly type = SiteBlockTypes.Text;
@@ -21,7 +22,7 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
       >
         <div
           style={{
-            ...containerStyle,
+            ...getComposedStyleObject(containerStyle),
           }}
         >
           <p style={{ wordBreak: "break-word", ...this.block.style }}>

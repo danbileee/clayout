@@ -149,14 +149,12 @@ export function PageBarItem({ page }: Props) {
       }
     };
 
-    openDialog({
-      content: (
-        <SelectHomeDialog
-          pages={site?.pages?.filter((p) => p.id !== page.id) ?? []}
-          onSubmit={submit}
-        />
-      ),
-    });
+    openDialog(
+      <SelectHomeDialog
+        pages={site?.pages?.filter((p) => p.id !== page.id) ?? []}
+        onSubmit={submit}
+      />
+    );
   };
 
   const handleChangeVisible = async (e: MouseEvent<HTMLButtonElement>) => {

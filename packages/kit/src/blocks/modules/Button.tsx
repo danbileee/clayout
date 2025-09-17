@@ -4,6 +4,7 @@ import { SiteBlockTypes, ButtonBlockSchema } from "@clayout/interface";
 import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
 import { getAlignStyle } from "../utils/getAlignStyle";
+import { getComposedStyleObject } from "../utils/getComposedStyleObject";
 
 export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
   static readonly type = SiteBlockTypes.Button;
@@ -31,7 +32,7 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
           style={{
             width: "100%",
             padding,
-            ...containerStyle,
+            ...getComposedStyleObject(containerStyle),
             ...alignStyle,
           }}
         >

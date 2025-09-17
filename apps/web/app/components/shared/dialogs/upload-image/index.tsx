@@ -3,7 +3,7 @@ import * as Dialog from "@/components/ui/dialog";
 import * as Tooltip from "@/components/ui/tooltip";
 import * as Tab from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/icon";
-import { IconPhoto, IconTrash, IconUpload } from "@tabler/icons-react";
+import { IconPhoto, IconPhotoCog, IconTrash } from "@tabler/icons-react";
 import { HFlexBox } from "@/components/ui/box";
 import { css, styled, useTheme } from "styled-components";
 import { rem } from "@/utils/rem";
@@ -23,25 +23,32 @@ export function UploadImageDialog({ value, options, onChange }: Props) {
 
   return (
     <Dialog.Root>
-      <ImagePlaceholder backgroundImage={value}>
-        <Icon size={32} color={theme.colors.slate[200]}>
-          {IconPhoto}
-        </Icon>
-        <ButtonsWrapper gap={8}>
+      <ImagePlaceholder backgroundImage={`"${value}"`}>
+        {!value && (
+          <Icon size={32} color={theme.colors.slate[200]}>
+            {IconPhoto}
+          </Icon>
+        )}
+        <ButtonsWrapper gap={6}>
           <Tooltip.Root>
             <Tooltip.Trigger>
               <Dialog.Trigger>
                 <Button isSquare size="sm" level="secondary">
-                  <Icon size={14}>{IconUpload}</Icon>
+                  <Icon size={14}>{IconPhotoCog}</Icon>
                 </Button>
               </Dialog.Trigger>
             </Tooltip.Trigger>
-            <Tooltip.Content>Upload image</Tooltip.Content>
+            <Tooltip.Content>Manage images</Tooltip.Content>
           </Tooltip.Root>
           {value && (
             <Tooltip.Root>
               <Tooltip.Trigger>
-                <Button isSquare size="sm" level="secondary">
+                <Button
+                  isSquare
+                  size="sm"
+                  level="secondary"
+                  onClick={() => onChange("")}
+                >
                   <Icon size={14}>{IconTrash}</Icon>
                 </Button>
               </Tooltip.Trigger>
@@ -60,7 +67,7 @@ export function UploadImageDialog({ value, options, onChange }: Props) {
             <Tab.Trigger value={Tabs.Search}>Via search</Tab.Trigger>
           </Tab.List>
           <Tab.Content value={Tabs.Manual}>
-            <Manual onChange={onChange} options={options} />
+            <Manual value={value} onChange={onChange} options={options} />
           </Tab.Content>
           <Tab.Content value={Tabs.Search}>
             <Search onChange={onChange} />
@@ -95,7 +102,7 @@ const ImagePlaceholder = styled.div.withConfig({
 
     ${backgroundImage &&
     css`
-      background-image: ${backgroundImage};
+      background-image: url(${backgroundImage});
       background-size: cover;
       background-repeat: no-repeat;
       background-position: center;
