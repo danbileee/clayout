@@ -6,9 +6,7 @@ export function getComposedStyleString(style: CSSProperties) {
       const newKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 
       if (newKey === "background-image") {
-        // Properly encode the URL for CSS using built-in encoding
-        const encodedUrl = encodeURIComponent(value.trim());
-        return `${newKey}: url(&quot;${encodedUrl}&quot;);`;
+        return `${newKey}: url('${value.trim()}');`;
       }
 
       return `${newKey}: ${value};`;
