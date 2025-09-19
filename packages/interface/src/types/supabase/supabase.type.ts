@@ -36,6 +36,7 @@ export type Database = {
     Tables: {
       assets: {
         Row: {
+          authorId: number
           createdAt: Date
           id: number
           order: number
@@ -45,6 +46,7 @@ export type Database = {
           updatedAt: Date
         }
         Insert: {
+          authorId: number
           createdAt: Date
           id: number
           order?: number
@@ -54,6 +56,7 @@ export type Database = {
           updatedAt: Date
         }
         Update: {
+          authorId?: number
           createdAt?: Date
           id: number
           order?: number
@@ -62,7 +65,15 @@ export type Database = {
           targetType?: Database["public"]["Enums"]["assets_targettype_enum"]
           updatedAt?: Date
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "FK_a2021c6185f9e15e682c43c460e"
+            columns: ["authorId"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       counters: {
         Row: {
