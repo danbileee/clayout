@@ -34,7 +34,11 @@ export default defineConfig((config) => {
       },
     },
     ssr: {
-      noExternal: ["react-router-dom"], // Ensure it gets bundled
+      noExternal: [
+        "react-router-dom",
+        "@uiw/react-color-sketch",
+        "@uiw/react-color-compact",
+      ], // Ensure it gets bundled
     },
   };
 });

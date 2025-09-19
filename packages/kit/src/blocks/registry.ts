@@ -8,10 +8,10 @@ const SiteBlocks = [TextBlock, ImageBlock, ButtonBlock];
 
 export class BlockRegistry {
   find(block: z.infer<typeof SiteBlockSchema>) {
-    const { type, ...data } = block;
+    const { type } = block;
 
     if (!type) {
-      throw new Error("Block type is wrong!");
+      throw new Error("Block type is required.");
     }
 
     const Block = SiteBlocks.find(
@@ -22,6 +22,6 @@ export class BlockRegistry {
       throw new Error("Block data is wrong!");
     }
 
-    return new Block(data);
+    return new Block(block as never);
   }
 }

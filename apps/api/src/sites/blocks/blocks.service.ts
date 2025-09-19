@@ -92,14 +92,14 @@ export class SiteBlocksService {
     id: number,
     updateSiteBlockDto: UpdateSiteBlockDto,
   ): Promise<{ block: SiteBlockEntity }> {
-    const matchedSitePage = await this.sitesBlocksRepository.findOne({
+    const matchedSiteBlock = await this.sitesBlocksRepository.findOne({
       where: {
         id,
       },
       relations: { site: true },
     });
 
-    if (!matchedSitePage) {
+    if (!matchedSiteBlock) {
       throw new BadRequestException(`Block not found`);
     }
 
@@ -110,7 +110,7 @@ export class SiteBlocksService {
       const slugExists = await this.sitesBlocksRepository.exists({
         where: {
           slug: updateSiteBlockDto.slug,
-          site: { id: matchedSitePage.site.id },
+          site: { id: matchedSiteBlock.site.id },
           id: Not(id),
         },
       });
@@ -123,8 +123,20 @@ export class SiteBlocksService {
 
     try {
       const updatedSiteBlock = await this.sitesBlocksRepository.save({
-        ...matchedSitePage,
+        ...matchedSiteBlock,
         ...updateSiteBlockDto,
+        data: updateSiteBlockDto.data
+          ? { ...matchedSiteBlock.data, ...updateSiteBlockDto.data }
+          : matchedSiteBlock.data,
+        style: updateSiteBlockDto.style
+          ? { ...matchedSiteBlock.style, ...updateSiteBlockDto.style }
+          : matchedSiteBlock.style,
+        containerStyle: updateSiteBlockDto.containerStyle
+          ? {
+              ...matchedSiteBlock.containerStyle,
+              ...updateSiteBlockDto.containerStyle,
+            }
+          : matchedSiteBlock.containerStyle,
       });
       return { block: updatedSiteBlock };
     } catch (error: unknown) {
@@ -144,5 +156,23 @@ export class SiteBlocksService {
     await this.sitesBlocksRepository.delete({ id });
 
     return { id };
+  }
+
+  async validateSlug({
+    siteId,
+    pageId,
+    slug,
+  }: {
+    siteId: number;
+    pageId: number;
+    slug: string;
+  }): Promise<boolean> {
+    return await this.sitesBlocksRepository.exists({
+      where: {
+        slug,
+        site: { id: siteId },
+        page: { id: pageId },
+      },
+    });
   }
 }

@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { BasePaginationSchema } from "../schemas";
+import { BaseEntity } from "./base.type";
 
-export interface PagePagination<T> {
+export interface PagePagination<T extends BaseEntity> {
   data: T[];
   total: number;
 }
 
-export interface CursorPagination<T> {
+export interface CursorPagination<T extends BaseEntity> {
   data: T[];
   cursor: {
     after: number | null;
@@ -15,39 +16,34 @@ export interface CursorPagination<T> {
   next: string | null;
 }
 
-export type Pagination<T> = PagePagination<T> | CursorPagination<T>;
+export type Pagination<T extends BaseEntity> =
+  | PagePagination<T>
+  | CursorPagination<T>;
 
-export interface PaginationParams {
-  from: number;
-  to?: number;
-  page?: number;
-  take: number;
-  sort?: string;
-  filter?: string;
-}
-
-export interface SortOption {
-  property: string;
+export interface SortOption<T extends BaseEntity> {
+  property: keyof T;
   direction: "asc" | "desc";
 }
 
-export interface FilterOption {
-  property: string;
+export interface FilterOption<T extends BaseEntity> {
+  property: keyof T;
   from?: number;
   to?: number;
   contains?: string[];
 }
 
-export class PaginationOptions {
+export class PaginationOptions<T extends BaseEntity> {
   from: number = 0;
   to?: number;
   page?: number;
   take: number = 20;
-  sort?: SortOption[];
-  filter?: FilterOption[];
+  sort?: SortOption<T>[];
+  filter?: FilterOption<T>[];
 
-  static fromDto(dto: z.infer<typeof BasePaginationSchema>): PaginationOptions {
-    const options = new PaginationOptions();
+  static fromDto<T extends BaseEntity>(
+    dto: z.infer<typeof BasePaginationSchema>
+  ): PaginationOptions<T> {
+    const options = new PaginationOptions<T>();
     options.from = dto.from;
     options.to = dto.to;
     options.page = dto.page;
@@ -57,7 +53,7 @@ export class PaginationOptions {
       options.sort = dto.sort.split("&").map((item) => {
         const [property, direction] = item.split(":");
         return {
-          property,
+          property: property as keyof T,
           direction: direction.toLowerCase() as "asc" | "desc",
         };
       });
@@ -69,15 +65,46 @@ export class PaginationOptions {
         const [from, to] = value.split("-").map(Number);
 
         if (from && to) {
-          return { property, from, to };
+          return { property: property as keyof T, from, to };
         }
 
         const contains = value.split(",");
 
-        return { property, contains };
+        return { property: property as keyof T, contains };
       });
     }
 
     return options;
+  }
+
+  static toDto<T extends BaseEntity>({
+    sort,
+    filter,
+    ...options
+  }: PaginationOptions<T>): z.infer<typeof BasePaginationSchema> {
+    return {
+      ...options,
+      sort: sort?.length
+        ? sort.reduce((acc, { property, direction }) => {
+            return `${acc}&sort=${property.toString()}:${direction}`;
+          }, "")
+        : undefined,
+      filter: filter?.length
+        ? filter.reduce((acc, { property, from, to, contains }) => {
+            let value: string = "";
+            if (from && to) {
+              value = `${from}-${to}`;
+            }
+            if (contains.length) {
+              if (contains.length === 1) {
+                value = contains[0];
+              } else {
+                value = contains.join(",");
+              }
+            }
+            return `${acc}&filter=${property.toString()}:${value}`;
+          }, "")
+        : undefined,
+    };
   }
 }

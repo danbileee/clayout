@@ -1,9 +1,9 @@
-import type { SiteBlockSchema } from "@clayout/interface";
+import type { SiteBlockSchema, SiteBlockType } from "@clayout/interface";
 import type { JSX } from "react";
 import type { z } from "zod";
 
 export abstract class Block<T extends z.infer<typeof SiteBlockSchema>> {
-  static readonly type: z.infer<typeof SiteBlockSchema>["type"];
+  static readonly type: SiteBlockType;
   readonly block: T;
 
   constructor(block: T) {

@@ -16,6 +16,7 @@ import { SitesModule } from './sites/sites.module';
 import { AssetsModule } from './assets/assets.module';
 import { SitePagesModule } from './sites/pages/pages.module';
 import { SiteBlocksModule } from './sites/blocks/blocks.module';
+import { PexelsModule } from './pexels/pexels.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { SiteBlocksModule } from './sites/blocks/blocks.module';
     AssetsModule,
     SitePagesModule,
     SiteBlocksModule,
+    PexelsModule,
   ],
   controllers: [AppController],
   providers: [

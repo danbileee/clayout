@@ -1,4 +1,4 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import * as Card from "@/components/ui/card";
 import { useSearchParams } from "react-router";
 
 export default function Page() {
@@ -8,13 +8,13 @@ export default function Page() {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">
+          <Card.Root>
+            <Card.Header>
+              <Card.Title className="text-2xl">
                 Sorry, something went wrong.
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+              </Card.Title>
+            </Card.Header>
+            <Card.Content>
               {searchParams?.get("error") ? (
                 <p className="text-sm text-muted-foreground">
                   Code error: {searchParams?.get("error")}
@@ -24,8 +24,8 @@ export default function Page() {
                   An unspecified error occurred.
                 </p>
               )}
-            </CardContent>
-          </Card>
+            </Card.Content>
+          </Card.Root>
         </div>
       </div>
     </div>

@@ -30,14 +30,14 @@ import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
 import { useDialog } from "@/components/ui/dialog";
-import { SelectHomeDialog } from "../../dialogs/select-home";
 import { patchSitePagesHome } from "@/apis/sites/pages/home";
+import { SelectHomeDialog } from "../shared/dialogs/select-home";
 
 interface Props {
   page: SitePageWithRelations;
 }
 
-export function PagebarItem({ page }: Props) {
+export function PageBarItem({ page }: Props) {
   const theme = useTheme();
   const { site, refetchSite, page: selectedPage, setPage } = useSiteContext();
   const { openDialog, closeDialog } = useDialog();
@@ -78,6 +78,7 @@ export function PagebarItem({ page }: Props) {
 
   const updatePageName = async (newValue: string) => {
     const fn = async () => {
+      if (!site?.id) return;
       await updatePage({
         params: {
           siteId: site.id,
@@ -121,6 +122,8 @@ export function PagebarItem({ page }: Props) {
     e.stopPropagation();
 
     const submit = async (newId: number) => {
+      if (!site?.id) return;
+
       const fn = async () => {
         await updateHomePage({
           params: {
@@ -146,20 +149,20 @@ export function PagebarItem({ page }: Props) {
       }
     };
 
-    openDialog({
-      content: (
-        <SelectHomeDialog
-          pages={site.pages.filter((p) => p.id !== page.id)}
-          onSubmit={submit}
-        />
-      ),
-    });
+    openDialog(
+      <SelectHomeDialog
+        pages={site?.pages?.filter((p) => p.id !== page.id) ?? []}
+        onSubmit={submit}
+      />
+    );
   };
 
   const handleChangeVisible = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
     const fn = async () => {
+      if (!site?.id) return;
+
       await updatePage({
         params: {
           siteId: site.id,

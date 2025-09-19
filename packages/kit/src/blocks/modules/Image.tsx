@@ -4,6 +4,7 @@ import { ImageBlockSchema, SiteBlockTypes } from "@clayout/interface";
 import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
 import { getAlignStyle } from "../utils/getAlignStyle";
+import { getComposedStyleObject } from "../utils/getComposedStyleObject";
 
 export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
   static readonly type = SiteBlockTypes.Image;
@@ -31,7 +32,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
           style={{
             width: "100%",
             padding,
-            ...containerStyle,
+            ...getComposedStyleObject(containerStyle),
             ...alignStyle,
           }}
         >
@@ -182,7 +183,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
 export const ImageBlockData: z.infer<typeof ImageBlockSchema> = {
   type: SiteBlockTypes.Image,
   name: "Image Block",
-  slug: `image-block-${Date.now()}`,
+  slug: "image-block",
   data: {
     url: "https://i.ytimg.com/vi/fK9CNdJK9lo/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA2y_V7p3K3rc1MT0byoni-LpQoVA",
     link: "https://youtu.be/CGC0BhQwnik?si=XGgxXwxqDl2dsJAy",

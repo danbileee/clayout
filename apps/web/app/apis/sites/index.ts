@@ -1,13 +1,14 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
 import { getQueryKey } from "@/lib/react-query/getQueryKey";
-import type {
-  CursorPagination,
-  SitesWithRelations,
-  SiteWithRelations,
-  Tables,
-  CreateSiteDto,
-  UpdateSiteDto,
-  PaginateSiteDto,
+import {
+  type CursorPagination,
+  type SitesWithRelations,
+  type SiteWithRelations,
+  type Tables,
+  type CreateSiteDto,
+  type UpdateSiteDto,
+  type PaginateSiteDto,
+  PaginationOptions,
 } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
 import qs from "qs";
@@ -18,7 +19,7 @@ import qs from "qs";
 
 interface GetAllEndpointParams {}
 
-interface GetAllQueryParams extends PaginateSiteDto {}
+interface GetAllQueryParams extends PaginationOptions<Tables<"sites">> {}
 
 interface GetAllParams extends GetAllEndpointParams, GetAllQueryParams {}
 
@@ -36,12 +37,14 @@ export async function getSites(args: {
 }) {
   const { params, request } = args;
   const axios = createAxiosInstance(request);
-  const queryString = qs.stringify(params, { addQueryPrefix: true });
+  const { sort = "", filter = "", ...dto } = PaginationOptions.toDto(params);
+  const queryString = qs.stringify(dto, { addQueryPrefix: false });
+  const finalQueryString = `?${queryString}${sort}${filter}`;
   return await axios.get<
     GetAllResponse,
-    AxiosResponse<GetAllResponse, GetAllParams>,
-    GetAllParams
-  >(`/sites${queryString}`);
+    AxiosResponse<GetAllResponse, PaginateSiteDto>,
+    PaginateSiteDto
+  >(`/sites${queryString ? finalQueryString : ""}`);
 }
 
 /**

@@ -1,6 +1,6 @@
 import { rem } from "@/utils/rem";
 import { css, styled } from "styled-components";
-import { MENU_WIDTH } from "../shared/constants";
+import { MENU_WIDTH } from "./constants";
 import {
   SiteMenus,
   useSiteContext,
@@ -16,9 +16,12 @@ import { Icon } from "@/components/ui/icon";
 import * as Tooltip from "@/components/ui/tooltip";
 
 const MenuIcons: Record<SiteMenu, TablerIcon> = {
-  Blocks: IconCube,
   Pages: IconClipboardText,
+  Page: IconClipboardText,
+  Blocks: IconCube,
+  Block: IconCube,
   "Saved Blocks": IconBookmark,
+  "Saved Block": IconBookmark,
 } as const;
 
 export function Menu() {
@@ -26,18 +29,31 @@ export function Menu() {
 
   return (
     <MenuBase>
-      {Object.values(SiteMenus).map((m) => (
-        <Tooltip.Root key={m}>
-          <Tooltip.Trigger>
-            <MenuButton $selected={menu === m} onClick={() => setMenu(m)}>
-              <Icon>{MenuIcons[m]}</Icon>
-            </MenuButton>
-          </Tooltip.Trigger>
-          <Tooltip.Content side="right" sideOffset={12}>
-            {m}
-          </Tooltip.Content>
-        </Tooltip.Root>
-      ))}
+      {Object.values(SiteMenus)
+        .filter((m) =>
+          (
+            [
+              SiteMenus.Pages,
+              SiteMenus.Blocks,
+              SiteMenus["Saved Blocks"],
+            ] as SiteMenu[]
+          ).includes(m)
+        )
+        .map((m) => (
+          <Tooltip.Root key={m}>
+            <Tooltip.Trigger>
+              <MenuButton
+                $selected={m === menu || m === `${menu}s`}
+                onClick={() => setMenu(m)}
+              >
+                <Icon>{MenuIcons[m]}</Icon>
+              </MenuButton>
+            </Tooltip.Trigger>
+            <Tooltip.Content side="right" sideOffset={12}>
+              {m}
+            </Tooltip.Content>
+          </Tooltip.Root>
+        ))}
     </MenuBase>
   );
 }
@@ -49,7 +65,8 @@ const MenuBase = styled.div`
     align-items: center;
     gap: ${rem(16)};
     width: ${rem(MENU_WIDTH)};
-    background-color: ${theme.colors.slate["900"]};
+    background-color: ${theme.colors.slate[200]};
+    border-right: 1px solid ${theme.colors.slate[200]};
     padding: ${rem(20)} ${rem(12)};
   `}
 `;
@@ -61,7 +78,7 @@ type MenuButtonProps = {
 const MenuButton = styled.button<MenuButtonProps>`
   ${({ theme, $selected }) => css`
     background-color: ${$selected
-      ? theme.colors.indigo[500]
+      ? theme.colors.slate[950]
       : theme.colors.slate[50]};
     color: ${$selected ? theme.colors.slate[50] : theme.colors.slate[950]};
     padding: ${rem(13)};
@@ -70,14 +87,14 @@ const MenuButton = styled.button<MenuButtonProps>`
 
     &:hover {
       background-color: ${$selected
-        ? theme.colors.indigo[600]
-        : theme.colors.slate[200]};
+        ? theme.colors.slate[800]
+        : theme.colors.slate[100]};
     }
 
     &:active {
       background-color: ${$selected
-        ? theme.colors.indigo[700]
-        : theme.colors.slate[300]};
+        ? theme.colors.slate[700]
+        : theme.colors.slate[200]};
     }
   `}
 `;

@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken } from '@nestjs/typeorm';
+import { ConfigService } from '@nestjs/config';
 import { AssetsService } from './assets.service';
 import { AssetEntity } from './entities/asset.entity';
 import { PaginationService } from 'src/shared/services/pagination.service';
@@ -16,6 +17,7 @@ describe('AssetsService', () => {
   let mockPaginationService: Partial<PaginationService>;
   let mockUploaderService: Partial<UploaderService>;
   let mockDataSource: Partial<DataSource>;
+  let mockConfigService: Partial<ConfigService>;
 
   beforeEach(async () => {
     mockPaginationService = {
@@ -28,6 +30,10 @@ describe('AssetsService', () => {
 
     mockDataSource = {
       getRepository: jest.fn(),
+    };
+
+    mockConfigService = {
+      get: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -45,6 +51,10 @@ describe('AssetsService', () => {
         {
           provide: DataSource,
           useValue: mockDataSource,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
         },
       ],
     }).compile();

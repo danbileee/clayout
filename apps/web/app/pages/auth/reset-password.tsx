@@ -1,13 +1,7 @@
 import { postAuthResetPassword } from "@/apis/auth/reset-password";
 import { postEmailsTrackClick } from "@/apis/emails/track-click";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import * as Card from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
@@ -112,14 +106,14 @@ export default function ResetPassword() {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Reset Your Password</CardTitle>
-              <CardDescription>
+          <Card.Root>
+            <Card.Header>
+              <Card.Title className="text-2xl">Reset Your Password</Card.Title>
+              <Card.Description>
                 Please enter your new password below.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </Card.Description>
+            </Card.Header>
+            <Card.Content>
               <form {...getFormProps(form)}>
                 <div className="flex flex-col gap-6">
                   <input type="hidden" name="token" value={query?.token} />
@@ -150,8 +144,8 @@ export default function ResetPassword() {
                   </Button>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </Card.Content>
+          </Card.Root>
         </div>
       </div>
     </div>

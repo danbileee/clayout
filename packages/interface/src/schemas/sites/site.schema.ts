@@ -30,6 +30,6 @@ export const SiteSchema = z.object(siteShape);
 export const PaginateSiteSchema = PaginationSchema.createWithConfig<
   Tables<"sites">
 >({
-  allowedSortFields: ["createdAt", "updatedAt", "lastPublishedAt"],
-  allowedFilterFields: ["createdAt", "updatedAt", "id", "category"],
+  allowedSortProperties: ["createdAt", "updatedAt", "lastPublishedAt"],
+  allowedFilterProperties: ["createdAt", "updatedAt", "id", "category"],
 });

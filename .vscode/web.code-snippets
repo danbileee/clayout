@@ -1,8 +1,23 @@
 {
+  "web-import-card": {
+    "prefix": "web-import-card",
+    "body": ["import * as Card from \"@/components/ui/card\";"],
+    "description": "web-import-card"
+  },
   "web-import-dialog": {
     "prefix": "web-import-dialog",
     "body": ["import * as Dialog from \"@/components/ui/dialog\";"],
     "description": "web-import-dialog"
+  },
+  "web-import-popover": {
+    "prefix": "web-import-popover",
+    "body": ["import * as Popover from \"@/components/ui/popover\";"],
+    "description": "web-import-popover"
+  },
+  "web-import-tab": {
+    "prefix": "web-import-tab",
+    "body": ["import * as Tab from \"@/components/ui/tabs\";"],
+    "description": "web-import-tab"
   },
   "web-import-typo": {
     "prefix": "web-import-typo",

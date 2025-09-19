@@ -1,28 +1,22 @@
 import { css, styled } from "styled-components";
 import * as Typo from "@/components/ui/typography";
 import { rem } from "@/utils/rem";
-import { BarBase } from "../../shared/styled";
+import { BarBase } from "../styled";
 import { BlockData } from "@clayout/kit";
 import {
-  SiteBlockTypes,
   type CreateSiteBlockDto,
   type SiteBlockType,
 } from "@clayout/interface";
-import {
-  IconHandFinger,
-  IconPhoto,
-  IconTextSize,
-  IconX,
-  type Icon as TablerIcon,
-} from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSiteBlocks } from "@/apis/sites/pages/blocks";
 import { handleError } from "@/lib/axios/handleError";
 import { useSiteContext } from "../../contexts/site.context";
-import { toast } from "sonner";
+import { getSiteBlockSlugValidation } from "@/apis/sites/pages/blocks/slug-duplication";
+import { nanoid } from "nanoid";
+import { BlockIcons, BlockNames } from "../constants";
 
-export function Blockbar() {
+export function BlockBar() {
   const { site, page, refetchSite } = useSiteContext();
   const { mutateAsync: addBlock } = useClientMutation({
     mutationFn: postSiteBlocks,
@@ -30,18 +24,26 @@ export function Blockbar() {
 
   const handleClickBlockButton = async (data: CreateSiteBlockDto) => {
     const fn = async () => {
-      if (!page) {
-        toast.error(
-          "Page not found. A block must have a selected page as its parent."
-        );
-        return;
-      }
+      if (!site?.id || !page) return;
+
+      const { data: isSlugDuplicated } = await getSiteBlockSlugValidation({
+        params: { siteId: site.id, pageId: page.id, slug: data.slug ?? "" },
+      });
+      const dataWithOrder: CreateSiteBlockDto = {
+        ...data,
+        order: page.blocks.length,
+      };
 
       await addBlock({
         params: {
           siteId: site.id,
           pageId: page.id,
-          block: data,
+          block: isSlugDuplicated
+            ? {
+                ...dataWithOrder,
+                slug: `${dataWithOrder.slug}-${nanoid(4)}`,
+              }
+            : dataWithOrder,
         },
       });
       await refetchSite();
@@ -113,17 +115,3 @@ const BlockButton = styled.button`
     }
   `}
 `;
-
-const BlockIcons: Record<SiteBlockType, TablerIcon> = {
-  [SiteBlockTypes.None]: IconX,
-  [SiteBlockTypes.Text]: IconTextSize,
-  [SiteBlockTypes.Image]: IconPhoto,
-  [SiteBlockTypes.Button]: IconHandFinger,
-} as const;
-
-const BlockNames: Record<SiteBlockType, string> = {
-  [SiteBlockTypes.None]: "None",
-  [SiteBlockTypes.Text]: "Text",
-  [SiteBlockTypes.Image]: "Image",
-  [SiteBlockTypes.Button]: "Button",
-} as const;

@@ -1,14 +1,9 @@
 import { z } from "zod";
-
-interface BaseEntity {
-  id: number;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { BaseEntity } from "../types";
 
 interface PaginationConfig<T extends BaseEntity> {
-  allowedSortFields: (keyof T)[];
-  allowedFilterFields: (keyof T)[];
+  allowedSortProperties: (keyof T)[];
+  allowedFilterProperties: (keyof T)[];
 }
 
 export const BasePaginationSchema = z.object({
@@ -20,19 +15,19 @@ export const BasePaginationSchema = z.object({
   filter: z.string().optional(),
 });
 
-function createSortPattern(allowedSortFields: string[]): RegExp {
+function createSortPattern(allowedSortProperties: string[]): RegExp {
   return new RegExp(
-    `^(${allowedSortFields.join("|")}):(asc|desc)(&(${allowedSortFields.join(
+    `^(${allowedSortProperties.join(
       "|"
-    )}):(asc|desc))*$`
+    )}):(asc|desc)(&(${allowedSortProperties.join("|")}):(asc|desc))*$`
   );
 }
 
-function createFilterPattern(allowedFilterFields: string[]): RegExp {
+function createFilterPattern(allowedFilterProperties: string[]): RegExp {
   return new RegExp(
-    `^(${allowedFilterFields.join(
+    `^(${allowedFilterProperties.join(
       "|"
-    )}):((\\d+(-\\d+)?|[^&:,]+(,[^&:,]+)*))(&(${allowedFilterFields.join(
+    )}):((\\d+(-\\d+)?|[^&:,]+(,[^&:,]+)*))(&(${allowedFilterProperties.join(
       "|"
     )}):((\\d+(-\\d+)?|[^&:,]+(,[^&:,]+)*)))*$`
   );
@@ -41,16 +36,18 @@ function createFilterPattern(allowedFilterFields: string[]): RegExp {
 function createPaginationSchema<T extends BaseEntity>(
   config: PaginationConfig<T>
 ) {
-  const { allowedSortFields, allowedFilterFields } = config;
+  const { allowedSortProperties, allowedFilterProperties } = config;
 
-  const sortPattern = createSortPattern(allowedSortFields as string[]);
-  const filterPattern = createFilterPattern(allowedFilterFields as string[]);
+  const sortPattern = createSortPattern(allowedSortProperties as string[]);
+  const filterPattern = createFilterPattern(
+    allowedFilterProperties as string[]
+  );
 
   return BasePaginationSchema.extend({
     sort: z
       .string()
       .regex(sortPattern, {
-        message: `Sort must be in format "field:direction" where field is one of: ${allowedSortFields.join(
+        message: `Sort must be in format "property:direction" where property is one of: ${allowedSortProperties.join(
           ", "
         )} and direction is either "asc" or "desc". Multiple sorts can be combined with "&".`,
       })
@@ -58,7 +55,7 @@ function createPaginationSchema<T extends BaseEntity>(
     filter: z
       .string()
       .regex(filterPattern, {
-        message: `Filter must be in format "field:value", "field:from-to", or "field:value1,value2,value3" where field is one of: ${allowedFilterFields.join(
+        message: `Filter must be in format "property:value", "property:from-to", or "property:value1,value2,value3" where property is one of: ${allowedFilterProperties.join(
           ", "
         )}. Multiple filters can be combined with "&".`,
       })

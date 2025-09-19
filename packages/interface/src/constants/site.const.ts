@@ -44,3 +44,19 @@ export const SiteDomainStatuses = {
 } as const;
 
 export type SitedomainStatus = keyof typeof SiteDomainStatuses;
+
+export const SitePageFits = {
+  sm: "sm",
+  md: "md",
+  lg: "lg",
+  full: "full",
+} as const;
+
+export type SitePageFit = keyof typeof SitePageFits;
+
+export const SitePageFitWidth: Record<SitePageFit, string> = {
+  sm: "375px",
+  md: "768px",
+  lg: "1440px",
+  full: "100%",
+};

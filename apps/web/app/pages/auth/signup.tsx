@@ -2,13 +2,7 @@ import { getFormProps, useForm } from "@conform-to/react";
 import { parseWithZod } from "@conform-to/zod";
 import { postAuthRegister } from "@/apis/auth/register";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import * as Card from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { joinPath, Paths } from "@/routes";
@@ -62,12 +56,12 @@ export default function SignUp() {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Sign up</CardTitle>
-              <CardDescription>Create a new account</CardDescription>
-            </CardHeader>
-            <CardContent>
+          <Card.Root>
+            <Card.Header>
+              <Card.Title className="text-2xl">Sign up</Card.Title>
+              <Card.Description>Create a new account</Card.Description>
+            </Card.Header>
+            <Card.Content>
               <form {...getFormProps(form)}>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
@@ -145,7 +139,7 @@ export default function SignUp() {
                       {getErrorMessage(error)}
                     </p>
                   ) : null}
-                  <Button type="submit" className="w-full" disabled={isPending}>
+                  <Button type="submit" isFluid disabled={isPending}>
                     {isPending ? "Creating an account..." : "Sign up"}
                   </Button>
                 </div>
@@ -159,8 +153,8 @@ export default function SignUp() {
                   </Link>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </Card.Content>
+          </Card.Root>
         </div>
       </div>
     </div>

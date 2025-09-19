@@ -1,11 +1,5 @@
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import * as Card from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router";
@@ -72,14 +66,14 @@ export default function Login() {
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
         <div className="flex flex-col gap-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-2xl">Login</CardTitle>
-              <CardDescription>
+          <Card.Root>
+            <Card.Header>
+              <Card.Title className="text-2xl">Login</Card.Title>
+              <Card.Description>
                 Enter your email below to login to your account
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+              </Card.Description>
+            </Card.Header>
+            <Card.Content>
               <form {...getFormProps(form)}>
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
@@ -128,7 +122,7 @@ export default function Login() {
                       {getErrorMessage(error)}
                     </p>
                   ) : null}
-                  <Button type="submit" className="w-full" disabled={isPending}>
+                  <Button type="submit" isFluid disabled={isPending}>
                     {isPending ? "Logging in..." : "Login"}
                   </Button>
                 </div>
@@ -142,8 +136,8 @@ export default function Login() {
                   </Link>
                 </div>
               </form>
-            </CardContent>
-          </Card>
+            </Card.Content>
+          </Card.Root>
         </div>
       </div>
     </div>

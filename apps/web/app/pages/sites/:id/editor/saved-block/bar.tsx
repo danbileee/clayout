@@ -1,7 +1,7 @@
-import { BarBase } from "../../shared/styled";
+import { BarBase } from "../styled";
 import * as Typo from "@/components/ui/typography";
 
-export function SavedBlockbar() {
+export function SavedBlockBar() {
   return (
     <BarBase>
       <Typo.P size="lg" weight="semibold" style={{ marginBottom: 16 }}>

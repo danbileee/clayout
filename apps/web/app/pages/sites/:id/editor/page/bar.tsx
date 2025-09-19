@@ -7,15 +7,15 @@ import { Icon } from "@/components/ui/icon";
 import { IconPlus } from "@tabler/icons-react";
 import { css, styled } from "styled-components";
 import { rem } from "@/utils/rem";
-import { PagebarItem } from "./item";
+import { PageBarItem } from "./bar-item";
 import { useSiteContext } from "../../contexts/site.context";
-import { BarBase } from "../../shared/styled";
+import { BarBase } from "../styled";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
 import { SitePageCategories } from "@clayout/interface";
 
-export function Pagebar() {
+export function PageBar() {
   const { site, refetchSite, setPage } = useSiteContext();
   const { mutateAsync: createPage } = useClientMutation({
     mutationFn: postSitePages,
@@ -23,6 +23,8 @@ export function Pagebar() {
 
   const handleAddPage = async () => {
     const fn = async () => {
+      if (!site?.id) return;
+
       const response = await createPage({
         params: {
           siteId: site.id,
@@ -68,16 +70,18 @@ export function Pagebar() {
           <Tooltip.Content>Add a new page</Tooltip.Content>
         </Tooltip.Root>
       </HFlexBox>
-      <PagebarList>
-        {site.pages.map((page) => (
-          <PagebarItem key={page.id} page={page} />
-        ))}
-      </PagebarList>
+      <PageBarList>
+        {site ? (
+          site.pages.map((page) => <PageBarItem key={page.id} page={page} />)
+        ) : (
+          <></>
+        )}
+      </PageBarList>
     </BarBase>
   );
 }
 
-const PagebarList = styled.ul`
+const PageBarList = styled.ul`
   ${({ theme }) => css`
     width: 100%;
     background-color: ${theme.colors.white};

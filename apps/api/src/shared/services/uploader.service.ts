@@ -7,6 +7,8 @@ import {
   GetObjectCommandInput,
   CopyObjectCommand,
   CopyObjectCommandInput,
+  DeleteObjectCommand,
+  DeleteObjectCommandInput,
 } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { Injectable } from '@nestjs/common';
@@ -99,6 +101,19 @@ export class UploaderService {
         bucket: input.Bucket,
         key: input.Key,
         copySource: input.CopySource,
+      });
+      throw error;
+    }
+  }
+
+  async delete(input: DeleteObjectCommandInput) {
+    try {
+      return await this.s3.send(new DeleteObjectCommand(input));
+    } catch (error) {
+      console.error('S3 Delete Object Error:', {
+        message: error.message,
+        bucket: input.Bucket,
+        key: input.Key,
       });
       throw error;
     }

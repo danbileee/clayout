@@ -1,12 +1,13 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
 import { getQueryKey } from "@/lib/react-query/getQueryKey";
-import type {
-  CursorPagination,
-  Tables,
-  PaginateAssetDto,
-  CreateAssetDto,
-  UpdateAssetDto,
-  UploadAssetInputDto,
+import {
+  type CursorPagination,
+  type Tables,
+  type PaginateAssetDto,
+  type CreateAssetDto,
+  type UpdateAssetDto,
+  type UploadAssetInputDto,
+  PaginationOptions,
 } from "@clayout/interface";
 import { type AxiosResponse } from "axios";
 import qs from "qs";
@@ -17,7 +18,7 @@ import qs from "qs";
 
 interface GetAllEndpointParams {}
 
-interface GetAllQueryParams extends PaginateAssetDto {}
+interface GetAllQueryParams extends PaginationOptions<Tables<"assets">> {}
 
 interface GetAllParams extends GetAllEndpointParams, GetAllQueryParams {}
 
@@ -35,12 +36,14 @@ export async function getAssets(args: {
 }) {
   const { params, request } = args;
   const axios = createAxiosInstance(request);
-  const queryString = qs.stringify(params, { addQueryPrefix: true });
+  const { sort = "", filter = "", ...dto } = PaginationOptions.toDto(params);
+  const queryString = qs.stringify(dto, { addQueryPrefix: false });
+  const finalQueryString = `?${queryString}${sort}${filter}`;
   return await axios.get<
     GetAllResponse,
-    AxiosResponse<GetAllResponse, GetAllParams>,
-    GetAllParams
-  >(`/assets${queryString}`);
+    AxiosResponse<GetAllResponse, PaginateAssetDto>,
+    PaginateAssetDto
+  >(`/assets${queryString ? finalQueryString : ""}`);
 }
 
 /**

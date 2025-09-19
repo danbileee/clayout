@@ -17,8 +17,8 @@ export const AssetSchema = z.object(assetShape);
 export const PaginateAssetsSchema = PaginationSchema.createWithConfig<
   Tables<"assets">
 >({
-  allowedSortFields: ["createdAt", "updatedAt", "order", "path"],
-  allowedFilterFields: ["createdAt", "updatedAt", "targetId", "targetType"],
+  allowedSortProperties: ["createdAt", "updatedAt", "order", "path"],
+  allowedFilterProperties: ["createdAt", "updatedAt", "targetId", "targetType"],
 });
 
 export const AssetUploadInputSchema = z.object({

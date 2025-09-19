@@ -1,7 +1,8 @@
-import { AssetType, AssetTypes } from '@clayout/interface';
+import { AssetTargetType, AssetTargetTypes } from '@clayout/interface';
 import { IsEnum, IsInt, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Column, Entity } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 import { BaseEntity } from 'src/shared/entities/base.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 @Entity('assets')
 export class AssetEntity extends BaseEntity {
@@ -14,11 +15,11 @@ export class AssetEntity extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: Object.values(AssetTypes),
-    default: AssetTypes.None,
+    enum: Object.values(AssetTargetTypes),
+    default: AssetTargetTypes.None,
   })
-  @IsEnum(AssetTypes)
-  targetType: AssetType;
+  @IsEnum(AssetTargetTypes)
+  targetType: AssetTargetType;
 
   @Column()
   @IsNumber()
@@ -27,4 +28,9 @@ export class AssetEntity extends BaseEntity {
   @Column()
   @IsString()
   path: string;
+
+  @ManyToOne(() => UserEntity, (user) => user.assets, {
+    nullable: false,
+  })
+  author: UserEntity;
 }

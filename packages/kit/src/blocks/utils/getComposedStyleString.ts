@@ -4,6 +4,11 @@ export function getComposedStyleString(style: CSSProperties) {
   return Object.entries(style)
     .map(([key, value]) => {
       const newKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
+
+      if (newKey === "background-image") {
+        return `${newKey}: url('${value.trim()}');`;
+      }
+
       return `${newKey}: ${value};`;
     })
     .filter((newStyle) => {

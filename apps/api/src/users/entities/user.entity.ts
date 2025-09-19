@@ -7,6 +7,7 @@ import { emailMessage } from 'src/shared/messages/email.message';
 import { EmailEntity } from 'src/emails/entities/email.entity';
 import { SiteEntity } from 'src/sites/entities/site.entity';
 import { UserRole, UserRoles } from '@clayout/interface';
+import { AssetEntity } from 'src/assets/entities/asset.entity';
 
 @Entity('users')
 export class UserEntity extends BaseEntity {
@@ -52,4 +53,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => SiteEntity, (site) => site.author)
   sites: SiteEntity[];
+
+  @OneToMany(() => AssetEntity, (asset) => asset.author)
+  assets: AssetEntity[];
 }

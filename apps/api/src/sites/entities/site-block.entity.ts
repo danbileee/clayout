@@ -1,4 +1,10 @@
-import { IsObject, IsOptional, IsString, Matches } from 'class-validator';
+import {
+  IsInt,
+  IsObject,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Column, Entity, Index, ManyToOne } from 'typeorm';
 import { KebabCase, SiteBlockTypes, SiteBlockType } from '@clayout/interface';
@@ -17,6 +23,7 @@ export class SiteBlockEntity extends BaseEntity {
 
   @Column()
   @IsString()
+  @IsOptional()
   name: string;
 
   @Column({
@@ -27,28 +34,32 @@ export class SiteBlockEntity extends BaseEntity {
   type: SiteBlockType;
 
   @Column({
-    nullable: true,
-    type: 'jsonb',
+    nullable: false,
+    default: 0,
   })
-  @IsOptional()
-  @IsObject()
-  data: Record<string, any>;
+  @IsInt()
+  order: number;
 
   @Column({
     nullable: true,
     type: 'jsonb',
   })
-  @IsOptional()
   @IsObject()
-  style: Record<string, any>;
+  data: Record<string, string>;
 
   @Column({
     nullable: true,
     type: 'jsonb',
   })
-  @IsOptional()
   @IsObject()
-  containerStyle: Record<string, any>;
+  style: Record<string, string>;
+
+  @Column({
+    nullable: true,
+    type: 'jsonb',
+  })
+  @IsObject()
+  containerStyle: Record<string, string>;
 
   @ManyToOne(() => SitePageEntity, (page) => page.blocks, {
     nullable: false,

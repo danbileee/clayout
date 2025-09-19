@@ -6,13 +6,19 @@ import { isAuthenticated } from "@/lib/axios/isAuthenticated";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { joinPath, Paths } from "@/routes";
 import {
+  PaginationOptions,
   SiteBlockTypes,
   SiteCategories,
   SitePageCategories,
   SiteStatuses,
+  type Tables,
 } from "@clayout/interface";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { useLoaderData, useNavigate } from "react-router";
+
+const baseQueryKey: Omit<PaginationOptions<Tables<"sites">>, "from"> = {
+  take: 20,
+};
 
 export async function clientLoader() {
   const { meta, error } = await isAuthenticated();
@@ -31,13 +37,13 @@ export default function Sites() {
   const { meta } = useLoaderData<typeof clientLoader>();
   useAuthMeta(meta);
   const { data } = useInfiniteQuery({
-    queryKey: getSitesQueryKey(),
+    queryKey: getSitesQueryKey(baseQueryKey),
     queryFn: async ({ pageParam }) => {
       const fn = async () =>
         await getSites({
           params: {
+            ...baseQueryKey,
             from: pageParam,
-            take: 20,
           },
         });
       const redirect = async () => navigate(joinPath([Paths.login]));
@@ -57,7 +63,8 @@ export default function Sites() {
         return data;
       }
     },
-    getNextPageParam: (lastGroup) => lastGroup?.data.results.cursor.after,
+    getNextPageParam: (lastGroup) =>
+      lastGroup?.data?.results?.cursor?.after ?? undefined,
     initialPageParam: 0,
   });
   const { mutateAsync: createSite } = useClientMutation({
@@ -86,6 +93,7 @@ export default function Sites() {
                   type: SiteBlockTypes.Image,
                   name: "Image Block",
                   slug: `image-block-${now}`,
+                  order: 0,
                   data: {
                     url: "https://i.ytimg.com/vi/fK9CNdJK9lo/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA2y_V7p3K3rc1MT0byoni-LpQoVA",
                     link: "https://youtu.be/CGC0BhQwnik?si=XGgxXwxqDl2dsJAy",
@@ -103,6 +111,7 @@ export default function Sites() {
                   type: SiteBlockTypes.Text,
                   name: "Text Block",
                   slug: `text-block-${now}`,
+                  order: 1,
                   data: {
                     value:
                       "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance. Everyone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers. Everyone has the right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay.",
@@ -124,6 +133,7 @@ export default function Sites() {
                   type: SiteBlockTypes.Button,
                   name: "Button Block",
                   slug: `button-block-${now}`,
+                  order: 2,
                   data: {
                     link: "https://www.youtube.com/@lifeisworship.studio",
                     text: "View Channel",
@@ -180,7 +190,7 @@ export default function Sites() {
       <Button onClick={handleCreate}>Create</Button>
       <ul>
         {data?.pages
-          .flatMap((d) => d?.data.results.data)
+          .flatMap((d) => d?.data.results.data ?? [])
           .map((item) =>
             item ? (
               <a

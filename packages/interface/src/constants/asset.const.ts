@@ -1,8 +1,11 @@
-export const AssetTypes = {
+export const AssetTargetTypes = {
   None: "None",
   Site: "Site",
-  SitePage: "SitePage",
-  SiteBlock: "SiteBlock",
 } as const;
 
-export type AssetType = keyof typeof AssetTypes;
+export type AssetTargetType = keyof typeof AssetTargetTypes;
+
+export const AssetPaths: Record<AssetTargetType, string> = {
+  [AssetTargetTypes.None]: "",
+  [AssetTargetTypes.Site]: "sites",
+};

@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
 } from '@nestjs/common';
 import { SiteBlocksService } from './blocks.service';
 import { Roles } from 'src/users/decorators/role.decorator';
@@ -17,6 +18,7 @@ import {
   SiteBlockSchema,
   UpdateSiteBlockDto,
 } from '@clayout/interface';
+import { EnrichBlockPipe } from './pipes/enrich-block.pipe';
 
 @Roles({ minWeight: UserRoleWeights.User })
 @Controller('sites/:siteId/pages/:pageId/blocks')
@@ -33,6 +35,15 @@ export class SiteBlocksController {
     return this.siteBlocksService.create(createSiteBlockDto, siteId, pageId);
   }
 
+  @Get('slug-duplication')
+  validateSlug(
+    @Param('siteId', ParseIntPipe) siteId: number,
+    @Param('pageId', ParseIntPipe) pageId: number,
+    @Query('slug') slug: string,
+  ) {
+    return this.siteBlocksService.validateSlug({ siteId, pageId, slug });
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.siteBlocksService.getById({ id });
@@ -41,8 +52,7 @@ export class SiteBlocksController {
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
-    @Body(new ZodValidationPipe(SiteBlockSchema))
-    updateSiteBlockDto: UpdateSiteBlockDto,
+    @Body(EnrichBlockPipe) updateSiteBlockDto: UpdateSiteBlockDto,
   ) {
     return this.siteBlocksService.update(id, updateSiteBlockDto);
   }

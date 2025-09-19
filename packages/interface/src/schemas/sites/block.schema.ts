@@ -5,7 +5,14 @@ import { Tables } from "../../types";
 type BlockSchemaObject = Record<
   keyof Pick<
     Tables<"site_blocks">,
-    "id" | "slug" | "name" | "type" | "data" | "style" | "containerStyle"
+    | "id"
+    | "slug"
+    | "name"
+    | "type"
+    | "data"
+    | "style"
+    | "containerStyle"
+    | "order"
   >,
   ZodTypeAny
 >;
@@ -13,10 +20,11 @@ type BlockSchemaObject = Record<
 const siteBlockShapeBase = {
   id: z.number().optional(),
   slug: z.string(),
-  name: z.string(),
-} satisfies Pick<BlockSchemaObject, "id" | "slug" | "name">;
+  name: z.string().optional(),
+  order: z.number(),
+} satisfies Pick<BlockSchemaObject, "id" | "slug" | "name" | "order">;
 
-const aligns = {
+const BlockAligns = {
   left: "left",
   right: "right",
   center: "center",
@@ -25,7 +33,7 @@ const aligns = {
 
 const containerStyleShapeBase = {
   width: z.string().optional(),
-  align: z.nativeEnum(aligns).optional(),
+  align: z.nativeEnum(BlockAligns).optional(),
   backgroundColor: z.string().optional(),
   backgroundSize: z.string().optional(),
   backgroundPosition: z.string().optional(),
@@ -42,68 +50,56 @@ const containerStyleShapeBase = {
 export const TextBlockSchema = z.object({
   ...siteBlockShapeBase,
   type: z.literal(SiteBlockTypes.Text),
-  data: z
-    .object({
-      value: z.string(),
-    })
-    .optional(),
-  style: z
-    .object({
-      color: z.string(),
-      fontFamily: z.string(),
-      fontSize: z.string(),
-      fontWeight: z.string(),
-      lineHeight: z.string(),
-      margin: z.string(),
-    })
-    .optional(),
-  containerStyle: z.object(containerStyleShapeBase).optional(),
+  data: z.object({
+    value: z.string(),
+  }),
+  style: z.object({
+    color: z.string(),
+    fontFamily: z.string(),
+    fontSize: z.string(),
+    fontWeight: z.string(),
+    lineHeight: z.string(),
+    margin: z.string(),
+  }),
+  containerStyle: z.object(containerStyleShapeBase),
 });
 
 export const ImageBlockSchema = z.object({
   ...siteBlockShapeBase,
   type: z.literal(SiteBlockTypes.Image),
-  data: z
-    .object({
-      url: z.string().url(),
-      link: z.string().url(),
-      alt: z.string(),
-    })
-    .optional(),
-  style: z
-    .object({
-      width: z.string(),
-    })
-    .optional(),
-  containerStyle: z.object(containerStyleShapeBase).optional(),
+  data: z.object({
+    url: z.string().url(),
+    link: z.string().url(),
+    alt: z.string(),
+  }),
+  style: z.object({
+    width: z.string(),
+  }),
+  containerStyle: z.object(containerStyleShapeBase),
 });
 
 export const ButtonBlockSchema = z.object({
   ...siteBlockShapeBase,
   type: z.literal(SiteBlockTypes.Button),
-  data: z
-    .object({
-      link: z.string().url(),
-      text: z.string(),
-    })
-    .optional(),
-  style: z
-    .object({
-      backgroundColor: z.string(),
-      padding: z.string(),
-      color: z.string(),
-      fontFamily: z.string(),
-      fontSize: z.string(),
-      fontWeight: z.string(),
-      borderWidth: z.string(),
-      borderStyle: z.string(),
-      borderColor: z.string(),
-      borderRadius: z.string(),
-      textDecoration: z.string(),
-      textAlign: z.nativeEnum(aligns),
-    })
-    .optional(),
-  containerStyle: z.object(containerStyleShapeBase).optional(),
+  data: z.object({
+    link: z.string().url(),
+    text: z.string(),
+  }),
+  style: z.object({
+    backgroundColor: z.string(),
+    padding: z.string(),
+    color: z.string(),
+    fontFamily: z.string(),
+    fontSize: z.string(),
+    fontWeight: z.string(),
+    borderWidth: z.string(),
+    borderStyle: z.string(),
+    borderColor: z.string(),
+    borderRadius: z.string(),
+    textDecoration: z.string(),
+    textAlign: z.nativeEnum(BlockAligns),
+  }),
+  containerStyle: z.object(containerStyleShapeBase),
 });
 
 export const SiteBlockSchema = z.discriminatedUnion("type", [

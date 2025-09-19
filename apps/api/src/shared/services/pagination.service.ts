@@ -149,11 +149,11 @@ export class PaginationService {
     };
   }
 
-  private parseFilterValue({
+  private parseFilterValue<T extends BaseEntity>({
     from,
     to,
     contains,
-  }: Omit<FilterOption, 'property'>): FindOperator<number> {
+  }: Omit<FilterOption<T>, 'property'>): FindOperator<number> {
     if (from && to) {
       return Between(from, to);
     }
