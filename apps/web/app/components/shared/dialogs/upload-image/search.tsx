@@ -149,7 +149,7 @@ export function Search({ onChange }: Pick<Props, "onChange">) {
                           <Button
                             isSquare
                             size="sm"
-                            onClick={() => onChange(photo.src.large)}
+                            onClick={() => onChange(photo.src.original)}
                           >
                             <Icon size={14}>{IconPhotoPlus}</Icon>
                           </Button>

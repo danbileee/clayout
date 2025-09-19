@@ -58,7 +58,7 @@ export function renderSiteBlocks({
     <link rel="stylesheet" href="./styles.css" type="text/css" />
   </head>
   <body>
-    <main style="width: 100%; max-width: ${maxWidth}">
+    <main style="width: 100%; max-width: ${maxWidth}; margin: 0 auto;">
       ${page.blocks
         .map((block) => {
           const parsedBlock = SiteBlockSchema.parse(block);
