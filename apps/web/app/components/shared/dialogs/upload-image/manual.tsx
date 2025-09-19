@@ -13,6 +13,7 @@ import { handleError } from "@/lib/axios/handleError";
 import { EmptyPlaceholder } from "@/components/shared/placeholder/empty";
 import { LoadingPlaceholder } from "@/components/shared/placeholder/loading";
 import { ErrorPlaceholder } from "@/components/shared/placeholder/error";
+import { Observer } from "@/components/shared/observer";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
@@ -68,6 +69,9 @@ export function Manual({ value, onChange, options }: Props) {
     refetch: refetchAssets,
     isFetching,
     isError,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
   } = useInfiniteQuery({
     queryKey: getAssetsQueryKey(baseQueryKey),
     queryFn: async ({ pageParam }) => {
@@ -166,65 +170,77 @@ export function Manual({ value, onChange, options }: Props) {
       <VFlexBox gap={20}>
         <Typo.P weight="medium">Recently uploaded</Typo.P>
         <ScrollBox padding={20} style={{ height: rem(400) }}>
-          {isFetching && <LoadingPlaceholder />}
+          {isFetching && !assets.length && <LoadingPlaceholder />}
+          {!isFetching && !isFetchingNextPage && isError && (
+            <ErrorPlaceholder>{`Something went wrong\nPlease try again after a moment.`}</ErrorPlaceholder>
+          )}
           {!isFetching && !assets.length && (
-            <EmptyPlaceholder>{`No results yet\nTry another keyword — we'll find something lovely!`}</EmptyPlaceholder>
-          )}
-          {!isFetching && isError && (
-            <ErrorPlaceholder>{`Something is wrong\nPlease try again after a moment.`}</ErrorPlaceholder>
-          )}
-          {!isFetching && !isError && assets.length > 0 ? (
-            <DynamicGridBox
-              variant="filled"
-              cardWidth={{
-                min: 125,
-                max: 150,
-              }}
-            >
-              {assets.map((asset) => {
-                const backgroundImage = `${import.meta.env.VITE_ASSETS_HOST}/${
-                  asset.path
-                }`;
-                return asset ? (
-                  <ImageCardWrapper>
-                    <ImageCard key={asset.id} src={backgroundImage} />
-                    <ButtonsWrapper gap={8}>
-                      <Tooltip.Root>
-                        <Tooltip.Trigger>
-                          <Button
-                            isSquare
-                            size="sm"
-                            onClick={() => onChange(backgroundImage)}
-                          >
-                            <Icon size={14}>{IconPhotoPlus}</Icon>
-                          </Button>
-                        </Tooltip.Trigger>
-                        <Tooltip.Content>Apply this image</Tooltip.Content>
-                      </Tooltip.Root>
-                      <Tooltip.Root>
-                        <Tooltip.Trigger>
-                          <Button
-                            isSquare
-                            size="sm"
-                            level="secondary"
-                            onClick={() => handleConfirmDelete(asset)}
-                          >
-                            <Icon size={14}>{IconTrash}</Icon>
-                          </Button>
-                        </Tooltip.Trigger>
-                        <Tooltip.Content>
-                          Remove from recent uploads
-                        </Tooltip.Content>
-                      </Tooltip.Root>
-                    </ButtonsWrapper>
-                  </ImageCardWrapper>
-                ) : null;
-              })}
-            </DynamicGridBox>
-          ) : (
             <EmptyPlaceholder>
               {`No images yet\nUpload a file or paste an image URL to get started!`}
             </EmptyPlaceholder>
+          )}
+          {!isError && assets.length > 0 && (
+            <>
+              <DynamicGridBox
+                variant="filled"
+                cardWidth={{
+                  min: 125,
+                  max: 150,
+                }}
+              >
+                {assets.map((asset) => {
+                  const backgroundImage = `${
+                    import.meta.env.VITE_ASSETS_HOST
+                  }/${asset.path}`;
+                  return asset ? (
+                    <ImageCardWrapper>
+                      <ImageCard key={asset.id} src={backgroundImage} />
+                      <ButtonsWrapper gap={8}>
+                        <Tooltip.Root>
+                          <Tooltip.Trigger>
+                            <Button
+                              isSquare
+                              size="sm"
+                              onClick={() => onChange(backgroundImage)}
+                            >
+                              <Icon size={14}>{IconPhotoPlus}</Icon>
+                            </Button>
+                          </Tooltip.Trigger>
+                          <Tooltip.Content>Apply this image</Tooltip.Content>
+                        </Tooltip.Root>
+                        <Tooltip.Root>
+                          <Tooltip.Trigger>
+                            <Button
+                              isSquare
+                              size="sm"
+                              level="secondary"
+                              onClick={() => handleConfirmDelete(asset)}
+                            >
+                              <Icon size={14}>{IconTrash}</Icon>
+                            </Button>
+                          </Tooltip.Trigger>
+                          <Tooltip.Content>
+                            Remove from recent uploads
+                          </Tooltip.Content>
+                        </Tooltip.Root>
+                      </ButtonsWrapper>
+                    </ImageCardWrapper>
+                  ) : null;
+                })}
+              </DynamicGridBox>
+              <Observer
+                onObserve={(isIntersecting) => {
+                  if (isIntersecting) {
+                    toast.promise(fetchNextPage, {
+                      loading: "Fetching previous...",
+                      success: "Fetched!",
+                      error: "Failed to fetch",
+                    });
+                  }
+                }}
+                hidden={isFetchingNextPage || !hasNextPage}
+              />
+            </>
           )}
         </ScrollBox>
       </VFlexBox>
