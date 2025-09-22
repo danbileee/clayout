@@ -14,9 +14,7 @@ import { SiteEntity } from './site.entity';
 @Entity('site_blocks')
 @Index('UQ_site_blocks_slug_per_page', ['page', 'slug'], { unique: true })
 export class SiteBlockEntity extends BaseEntity {
-  @Column({
-    unique: true,
-  })
+  @Column()
   @IsString()
   @Matches(KebabCase)
   slug: string;
