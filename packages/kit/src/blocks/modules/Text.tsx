@@ -9,9 +9,12 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   static readonly type = SiteBlockTypes.Text;
 
   renderToJsx() {
-    const { margin = "0px 0px 0px 0px", ...containerStyle } =
-      this.block.containerStyle ?? {};
-    const containerWidth = getMaxWidth("100%", margin);
+    const {
+      width: cWidth,
+      margin = "0px 0px 0px 0px",
+      ...containerStyle
+    } = this.block.containerStyle ?? {};
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
 
     return (
       <div
@@ -23,6 +26,7 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
         <div
           style={{
             ...getComposedStyleObject(containerStyle),
+            width: "100%",
           }}
         >
           <p style={{ wordBreak: "break-word", ...this.block.style }}>
@@ -34,15 +38,19 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   }
 
   renderToString(): string {
-    const { margin = "0px 0px 0px 0px", ...restContainerStyle } =
-      this.block.containerStyle ?? {};
+    const {
+      width: cWidth,
+      margin = "0px 0px 0px 0px",
+      ...restContainerStyle
+    } = this.block.containerStyle ?? {};
     const containerStyle = getComposedStyleString({
       ...restContainerStyle,
+      width: "100%",
     });
     const textStyle = getComposedStyleString({
       ...this.block.style,
     });
-    const containerWidth = getMaxWidth("100%", margin);
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
 
     return `<div style="width: ${containerWidth}; margin: ${margin}; ">
   <div style="${containerStyle}">
@@ -52,9 +60,12 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   }
 
   renderToTable(): string {
-    const { margin = "0px 0px 0px 0px", ...restContainerStyle } =
-      this.block.containerStyle ?? {};
-    const containerWidth = getMaxWidth("100%", margin);
+    const {
+      width: cWidth,
+      margin = "0px 0px 0px 0px",
+      ...restContainerStyle
+    } = this.block.containerStyle ?? {};
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
 
     const containerStyle = getComposedStyleString({
       width: containerWidth,

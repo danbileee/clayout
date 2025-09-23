@@ -1,7 +1,76 @@
-export function ButtonEditorContent() {
+import { z } from "zod";
+import { getErrors } from "@/lib/zod/getErrors";
+import { SiteBlockTypes, type ButtonBlockSchema } from "@clayout/interface";
+import * as Typo from "@/components/ui/typography";
+import * as BlockEditor from "../styled";
+import type { BlockEditorProps } from "../types";
+import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
+import { Link } from "../shared/link";
+import { Icon } from "@/components/ui/icon";
+import { IconTxt } from "@tabler/icons-react";
+import { VFlexBox } from "@/components/ui/box";
+import { Input } from "@/components/ui/input";
+import { useTheme } from "styled-components";
+
+/**
+ * This schema is locally defined
+ * because the schema from `@clayout/interface` package is for the API request
+ * This is intended to not block user's input every time onChange
+ */
+const schema = z.object({
+  link: z.string().url().optional(),
+  text: z.string().max(50).optional(),
+});
+
+export function ButtonEditorContent({
+  block,
+}: BlockEditorProps<z.infer<typeof ButtonBlockSchema>>) {
+  const theme = useTheme();
+  const { handleChangeData } = useHandleChangeBlock(
+    SiteBlockTypes.Button,
+    block.id
+  );
+  const validation = schema.safeParse(block.data);
+  const { link: linkError, text: textError } = getErrors(validation);
+
+  if (!block.id) return null;
   return (
-    <div>
-      <div>ButtonEditorContent</div>
-    </div>
+    <BlockEditor.List>
+      <BlockEditor.Item>
+        <BlockEditor.Header>
+          <Typo.P size="sm" flex>
+            <Icon>{IconTxt}</Icon>
+            <span>Button text</span>
+          </Typo.P>
+        </BlockEditor.Header>
+        <VFlexBox gap={6}>
+          <Input
+            id={`${block.id.toString()}-text`}
+            value={block.data?.text}
+            onChange={(e) =>
+              handleChangeData({
+                text: e.target.value,
+              })
+            }
+            placeholder="Enter the button text"
+          />
+          {block.data?.text && textError && (
+            <Typo.P
+              size="xs"
+              color={theme.colors.slate[400]}
+              style={{ marginTop: 4 }}
+            >
+              {textError}
+            </Typo.P>
+          )}
+        </VFlexBox>
+      </BlockEditor.Item>
+      <Link
+        id={`${block.id}-link`}
+        value={{ link: block.data?.link }}
+        error={block.data?.link ? linkError : undefined}
+        onChange={handleChangeData}
+      />
+    </BlockEditor.List>
   );
 }

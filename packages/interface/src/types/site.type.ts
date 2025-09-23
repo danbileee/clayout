@@ -79,4 +79,6 @@ export type BlockDataOf<T extends BlockSchema["type"]> = BlockOf<T>["data"];
 export type BlockStyleOf<T extends BlockSchema["type"]> = BlockOf<T>["style"];
 export type BlockContainerStyleOf<T extends BlockSchema["type"]> =
   BlockOf<T>["containerStyle"];
+export type BlockData = NonNullable<BlockSchema["data"]>;
+export type BlockStyle = NonNullable<BlockSchema["style"]>;
 export type BlockContainerStyle = NonNullable<BlockSchema["containerStyle"]>;

@@ -80,6 +80,14 @@ export function P({
   );
 }
 
+export function ErrorMessage({ children, ...props }: Props) {
+  return (
+    <p className="text-sm text-red-500" {...props}>
+      {children}
+    </p>
+  );
+}
+
 export function Small({ children, color, style, ...props }: Props) {
   return (
     <small

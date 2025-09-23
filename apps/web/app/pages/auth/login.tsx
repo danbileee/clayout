@@ -12,6 +12,7 @@ import { parseWithZod } from "@conform-to/zod";
 import { LoginSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
+import { ErrorMessage } from "@/components/ui/typography";
 
 export default function Login() {
   const { refetchUser, refetchCsrfToken } = useAuthContext();
@@ -87,9 +88,7 @@ export default function Login() {
                     />
                     {fields.email.errors?.length
                       ? fields.email.errors.map((error) => (
-                          <p key={error} className="text-sm text-red-500">
-                            {error}
-                          </p>
+                          <ErrorMessage key={error}>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
@@ -111,9 +110,7 @@ export default function Login() {
                     />
                     {fields.password.errors?.length
                       ? fields.password.errors.map((error) => (
-                          <p key={error} className="text-sm text-red-500">
-                            {error}
-                          </p>
+                          <ErrorMessage>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
