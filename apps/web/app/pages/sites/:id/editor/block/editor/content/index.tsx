@@ -35,7 +35,7 @@ export function BlockEditorContent() {
         <ImageEditorContent block={registeredBlock} {...restProps} />
       )}
       {registeredBlock.type === SiteBlockTypes.Button && (
-        <ButtonEditorContent />
+        <ButtonEditorContent block={registeredBlock} {...restProps} />
       )}
     </>
   );

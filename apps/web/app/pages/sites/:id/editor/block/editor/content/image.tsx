@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { SiteBlockTypes, ImageBlockSchema } from "@clayout/interface";
 import * as Typo from "@/components/ui/typography";
-import { IconAlt, IconLink, IconPhoto } from "@tabler/icons-react";
+import { IconAlt, IconPhoto } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
 import { Input } from "@/components/ui/input";
 import type { BlockEditorProps } from "../types";
@@ -12,6 +12,7 @@ import { useTheme } from "styled-components";
 import { VFlexBox } from "@/components/ui/box";
 import { getErrors } from "@/lib/zod/getErrors";
 import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
+import { Link } from "../shared/link";
 
 /**
  * This schema is locally defined
@@ -54,31 +55,12 @@ export function ImageEditorContent({
           }
         />
       </BlockEditor.Item>
-      <BlockEditor.Item>
-        <BlockEditor.Header>
-          <Typo.P size="sm" flex>
-            <Icon>{IconLink}</Icon>
-            <span>Link</span>
-          </Typo.P>
-        </BlockEditor.Header>
-        <VFlexBox gap={6}>
-          <Input
-            id={`${block.id.toString()}-link`}
-            value={block.data?.link}
-            onChange={(e) =>
-              handleChangeData({
-                link: e.target.value,
-              })
-            }
-            placeholder="Enter an external link"
-          />
-          {block.data?.link && linkError && (
-            <Typo.P size="xs" color={theme.colors.slate[400]}>
-              {linkError}
-            </Typo.P>
-          )}
-        </VFlexBox>
-      </BlockEditor.Item>
+      <Link
+        id={`${block.id}-link`}
+        value={{ link: block.data?.link }}
+        error={block.data?.link ? linkError : undefined}
+        onChange={handleChangeData}
+      />
       <BlockEditor.Item>
         <BlockEditor.Header>
           <Typo.P size="sm" flex>

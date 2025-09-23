@@ -34,7 +34,9 @@ export function BlockEditorDesign() {
       {registeredBlock.type === SiteBlockTypes.Image && (
         <ImageEditorDesign block={registeredBlock} {...restProps} />
       )}
-      {registeredBlock.type === SiteBlockTypes.Button && <ButtonEditorDesign />}
+      {registeredBlock.type === SiteBlockTypes.Button && (
+        <ButtonEditorDesign block={registeredBlock} {...restProps} />
+      )}
     </>
   );
 }

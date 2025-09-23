@@ -11,17 +11,16 @@ const alignMap: Record<
   justify: "stretch",
 };
 
-type Params = BlockContainerStyle;
-
-type Returns = Pick<CSSProperties, "display" | "alignItems" | "justifyContent">;
-
-export function getAlignStyle(containerStyle: Params): Returns {
+export function getAlignStyle(
+  containerStyle: BlockContainerStyle,
+  inline?: boolean
+): Pick<CSSProperties, "display" | "alignItems" | "justifyContent"> {
   const { align } = containerStyle ?? {};
 
   if (!align) return {};
 
   return {
-    display: "flex",
+    display: inline ? "inline-flex" : "flex",
     alignItems: "center",
     justifyContent: alignMap[align],
   };

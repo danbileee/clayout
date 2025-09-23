@@ -99,7 +99,7 @@ export const ButtonBlockSchema = z.object({
     borderColor: z.string().optional(),
     borderRadius: z.string().optional(),
     textDecoration: z.string().optional(),
-    textAlign: z.nativeEnum(BlockAligns),
+    textAlign: z.nativeEnum(BlockAligns).optional(),
   }),
   containerStyle: z.object(containerStyleShapeBase),
 });

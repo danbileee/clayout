@@ -8,12 +8,13 @@ import { Input } from "@/components/ui/input";
 import { type BlockContainerStyle } from "@clayout/interface";
 
 const Units = {
+  None: "auto",
   Static: "px",
   Relative: "%",
 } as const;
 
 type ParsedWidth = {
-  value: number;
+  value: number | string;
   unit: string;
 };
 
@@ -35,6 +36,13 @@ export function Width({ value, onChange }: Props) {
         };
       }
 
+      if (width === "auto") {
+        return {
+          value: "auto",
+          unit: Units.None,
+        };
+      }
+
       return acc;
     },
     {
@@ -42,6 +50,20 @@ export function Width({ value, onChange }: Props) {
       unit: Units.Static,
     }
   );
+
+  const handleValueChange = (v: string) => {
+    if (v === Units.None) {
+      return onChange({ width: v });
+    }
+
+    if (parsed.unit === Units.None && v !== Units.None) {
+      return onChange({ width: `100${v}` });
+    }
+
+    onChange({
+      width: `${parsed.value}${v}`,
+    });
+  };
 
   return (
     <BlockEditor.Item>
@@ -52,19 +74,21 @@ export function Width({ value, onChange }: Props) {
         </Typo.P>
       </BlockEditor.Header>
       <HFlexBox gap={8}>
-        <Input
-          type="tel"
-          value={parsed.value}
-          onChange={(e) =>
-            onChange({ width: `${e.target.value}${parsed.unit}` })
-          }
-        />
+        {([Units.Static, Units.Relative] as string[]).includes(parsed.unit) && (
+          <Input
+            type="tel"
+            value={parsed.value}
+            onChange={(e) =>
+              onChange({ width: `${e.target.value}${parsed.unit}` })
+            }
+          />
+        )}
         <Select.Root
           defaultValue={parsed.unit}
-          onValueChange={(v) => onChange({ width: `${parsed.value}${v}` })}
+          onValueChange={handleValueChange}
         >
           <Select.Trigger>
-            <Select.Value placeholder="Select a page" />
+            <Select.Value placeholder="Select unit" />
           </Select.Trigger>
           <Select.Content>
             <Select.Group>

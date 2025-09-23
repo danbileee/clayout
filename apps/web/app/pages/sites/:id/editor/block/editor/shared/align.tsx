@@ -42,7 +42,7 @@ export function Alignment({ value, onChange }: Props) {
               <Icon size={20}>{IconLayoutAlignLeft}</Icon>
             </BlockEditor.Button>
           </Tooltip.Trigger>
-          <Tooltip.Content side="bottom">Align left</Tooltip.Content>
+          <Tooltip.Content side="bottom">left</Tooltip.Content>
         </Tooltip.Root>
         <Tooltip.Root>
           <Tooltip.Trigger>
@@ -56,7 +56,7 @@ export function Alignment({ value, onChange }: Props) {
               <Icon size={20}>{IconLayoutAlignCenter}</Icon>
             </BlockEditor.Button>
           </Tooltip.Trigger>
-          <Tooltip.Content side="bottom">Align center</Tooltip.Content>
+          <Tooltip.Content side="bottom">center</Tooltip.Content>
         </Tooltip.Root>
         <Tooltip.Root>
           <Tooltip.Trigger>
@@ -70,7 +70,7 @@ export function Alignment({ value, onChange }: Props) {
               <Icon size={20}>{IconLayoutAlignRight}</Icon>
             </BlockEditor.Button>
           </Tooltip.Trigger>
-          <Tooltip.Content side="bottom">Align right</Tooltip.Content>
+          <Tooltip.Content side="bottom">right</Tooltip.Content>
         </Tooltip.Root>
       </HFlexBox>
     </BlockEditor.Item>

@@ -37,6 +37,10 @@ export function ImageEditorDesign({
       <Width value={{ width }} onChange={handleChangeStyle} />
       <Alignment value={{ align }} onChange={handleChangeContainerStyle} />
       <BoxModel.Root>
+        <BoxModel.Padding
+          value={{ padding }}
+          onChange={handleChangeContainerStyle}
+        />
         <BoxModel.Border
           value={{
             borderWidth,
@@ -44,10 +48,6 @@ export function ImageEditorDesign({
             borderRadius,
             borderStyle,
           }}
-          onChange={handleChangeContainerStyle}
-        />
-        <BoxModel.Padding
-          value={{ padding }}
           onChange={handleChangeContainerStyle}
         />
         <BoxModel.Margin

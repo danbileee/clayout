@@ -33,6 +33,10 @@ export function TextEditorDesign({
   return (
     <BlockEditor.List>
       <BoxModel.Root>
+        <BoxModel.Padding
+          value={{ padding }}
+          onChange={handleChangeContainerStyle}
+        />
         <BoxModel.Border
           value={{
             borderWidth,
@@ -40,10 +44,6 @@ export function TextEditorDesign({
             borderRadius,
             borderStyle,
           }}
-          onChange={handleChangeContainerStyle}
-        />
-        <BoxModel.Padding
-          value={{ padding }}
           onChange={handleChangeContainerStyle}
         />
         <BoxModel.Margin

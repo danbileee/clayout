@@ -11,15 +11,17 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
 
   renderToJsx() {
     const {
+      width: cWidth,
       margin = "0px 0px 0px 0px",
       padding = "0px 0px 0px 0px",
       align,
       ...containerStyle
     } = this.block.containerStyle ?? {};
-    const { ...style } = this.block.style ?? {};
+    const { width, textAlign, ...style } = this.block.style ?? {};
     const { link, text } = this.block.data ?? {};
-    const containerWidth = getMaxWidth("100%", margin);
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
     const alignStyle = getAlignStyle({ align });
+    const buttonAlignStyle = getAlignStyle({ align: textAlign }, true);
 
     return (
       <div
@@ -39,7 +41,8 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
           <a
             style={{
               ...style,
-              display: "inline-flex",
+              ...buttonAlignStyle,
+              width,
             }}
             href={link}
             target="_blank"
@@ -54,29 +57,32 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
 
   renderToString(): string {
     const {
+      width: cWidth,
       margin = "0px 0px 0px 0px",
       padding = "0px 0px 0px 0px",
       align,
       ...containerStyle
     } = this.block.containerStyle ?? {};
-    const { ...style } = this.block.style ?? {};
+    const { width, textAlign, ...style } = this.block.style ?? {};
     const { link, text } = this.block.data ?? {};
-    const containerWidth = getMaxWidth("100%", margin);
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
     const alignStyle = getAlignStyle({ align });
+    const buttonAlignStyle = getAlignStyle({ align: textAlign }, true);
 
     const outerContainerStyle = getComposedStyleString({
       width: containerWidth,
       margin,
     });
     const innerContainerStyle = getComposedStyleString({
-      width: "100%",
-      padding,
       ...containerStyle,
       ...alignStyle,
+      width: "100%",
+      padding,
     });
     const buttonStyle = getComposedStyleString({
-      display: "inline-flex",
       ...style,
+      ...buttonAlignStyle,
+      width,
     });
 
     return `<div style="${outerContainerStyle}">
@@ -95,25 +101,24 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
 
   renderToTable(): string {
     const {
+      width: cWidth,
       margin = "0px 0px 0px 0px",
       align,
       ...restContainerStyles
     } = this.block.containerStyle ?? {};
+    const { width, ...restStyles } = this.block.style ?? {};
     const { link, text } = this.block.data ?? {};
-
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
     const containerStyle = getComposedStyleString(restContainerStyles);
-
     const style = getComposedStyleString({
-      ...this.block.style,
+      ...restStyles,
       display: "inline-block",
+      width,
     });
 
     return `<tr>
   <td align="center" valign="top" style="width: 100%;">
-    <table border="0" cellpadding="0" cellspacing="0" style="width: ${getMaxWidth(
-      "100%",
-      margin
-    )}; margin: ${margin};">
+    <table border="0" cellpadding="0" cellspacing="0" style="width: ${containerWidth}; margin: ${margin};">
       <tbody>
         <tr>
           <td align="${align}" valign="top" style="${containerStyle}" class="button">
@@ -141,6 +146,7 @@ export const ButtonBlockData: z.infer<typeof ButtonBlockSchema> = {
     text: "View Channel",
   },
   style: {
+    width: "auto",
     backgroundColor: "white",
     padding: "8px 10px 8px 10px",
     color: "black",
