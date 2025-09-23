@@ -12,6 +12,7 @@ import { handleError } from "@/lib/axios/handleError";
 import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { toast } from "sonner";
+import { ErrorMessage } from "@/components/ui/typography";
 
 export default function ForgotPassword() {
   const {
@@ -96,16 +97,12 @@ export default function ForgotPassword() {
                       />
                       {fields.email.errors?.length
                         ? fields.email.errors.map((error) => (
-                            <p key={error} className="text-sm text-red-500">
-                              {error}
-                            </p>
+                            <ErrorMessage>{error}</ErrorMessage>
                           ))
                         : null}
                     </div>
                     {error ? (
-                      <p className="text-sm text-red-500">
-                        {getErrorMessage(error)}
-                      </p>
+                      <ErrorMessage>{getErrorMessage(error)}</ErrorMessage>
                     ) : null}
                     <Button
                       type="submit"

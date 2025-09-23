@@ -6,45 +6,15 @@ import * as Typo from "@/components/ui/typography";
 import { Icon } from "@/components/ui/icon";
 import { IconMessage } from "@tabler/icons-react";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateBlock } from "@/lib/zustand/editor";
-import { useMutateBlock } from "../hooks/useMutateBlock";
-import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
+import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 
 export function TextEditorContent({
   block,
 }: BlockEditorProps<z.infer<typeof TextBlockSchema>>) {
-  const { site, page } = useSiteContext();
-  const updateBlock = useUpdateBlock();
-  const mutateBlock = useMutateBlock();
-
-  const handleChange: React.ChangeEventHandler<HTMLTextAreaElement> = async (
-    e
-  ) => {
-    if (!site?.id || !page?.id || !block.id) {
-      throw new Error(`siteId, pageId, and blockId are required.`);
-    }
-
-    const { value } = e.target;
-
-    /**
-     * real-time UI update (w/ zustand)
-     */
-    updateBlock(block.id, SiteBlockTypes.Text, {
-      data: { value },
-    });
-
-    /**
-     * debounced DB update (w/ API request)
-     */
-    await mutateBlock.current({
-      siteId: site.id,
-      pageId: page.id,
-      block: {
-        id: block.id,
-        data: { value },
-      },
-    });
-  };
+  const { handleChangeData } = useHandleChangeBlock(
+    SiteBlockTypes.Text,
+    block.id
+  );
 
   if (!block.id) return null;
 
@@ -58,9 +28,13 @@ export function TextEditorContent({
           </Typo.P>
         </BlockEditor.Header>
         <Textarea
-          id={block.id.toString()}
+          id={`${block.id.toString()}-content`}
           value={block.data?.value}
-          onChange={handleChange}
+          onChange={(e) =>
+            handleChangeData({
+              value: e.target.value,
+            })
+          }
         />
       </BlockEditor.Item>
     </BlockEditor.List>

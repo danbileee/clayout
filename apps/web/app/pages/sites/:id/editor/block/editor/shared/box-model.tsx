@@ -45,7 +45,7 @@ interface BorderProps {
   onChange: (value: BorderProperties) => Promise<void>;
 }
 
-export function Borders({
+export function Border({
   value: { borderColor, borderRadius = "", borderStyle, borderWidth = "" },
   onChange,
 }: BorderProps) {
@@ -62,12 +62,12 @@ export function Borders({
             </BlockEditor.Button>
           </Popover.Trigger>
         </Tooltip.Trigger>
-        <Tooltip.Content side="bottom">Borders</Tooltip.Content>
+        <Tooltip.Content side="bottom">Border</Tooltip.Content>
       </Tooltip.Root>
       <Popover.Content align="start">
         <VFlexBox gap={16}>
           <Typo.P size="sm" weight="semibold">
-            Borders
+            Border
           </Typo.P>
           <HFlexBox gap={12}>
             <Typo.Small color={theme.colors.slate[600]}>Color</Typo.Small>

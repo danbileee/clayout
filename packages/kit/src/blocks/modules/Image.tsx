@@ -11,6 +11,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
 
   renderToJsx() {
     const {
+      width: cWidth,
       margin = "0px 0px 0px 0px",
       padding = "0px 0px 0px 0px",
       align,
@@ -18,7 +19,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
     } = this.block.containerStyle ?? {};
     const { width, ...style } = this.block.style ?? {};
     const { url, link, alt } = this.block.data ?? {};
-    const containerWidth = getMaxWidth("100%", margin);
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
     const alignStyle = getAlignStyle({ align });
 
     return (
@@ -30,10 +31,10 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
       >
         <div
           style={{
-            width: "100%",
-            padding,
             ...getComposedStyleObject(containerStyle),
             ...alignStyle,
+            width: "100%",
+            padding,
           }}
         >
           {link ? (
@@ -42,15 +43,16 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
               style={{
                 display: "inline-flex",
                 width,
+                maxWidth: "100%",
               }}
               target="_blank"
               rel="noopener noreferrer"
             >
               <img
                 style={{
+                  ...style,
                   width: "100%",
                   objectFit: "contain",
-                  ...style,
                 }}
                 src={url}
                 alt={alt}
@@ -59,9 +61,10 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
           ) : (
             <img
               style={{
-                width,
-                objectFit: "contain",
                 ...style,
+                width,
+                maxWidth: "100%",
+                objectFit: "contain",
               }}
               src={url}
               alt={alt}
@@ -74,6 +77,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
 
   renderToString(): string {
     const {
+      width: cWidth,
       margin = "0px 0px 0px 0px",
       padding = "0px 0px 0px 0px",
       align,
@@ -81,7 +85,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
     } = this.block.containerStyle ?? {};
     const { width, ...style } = this.block.style ?? {};
     const { url, link, alt } = this.block.data ?? {};
-    const containerWidth = getMaxWidth("100%", margin);
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
     const alignStyle = getAlignStyle({ align });
 
     const outerContainerStyle = getComposedStyleString({
@@ -89,15 +93,16 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
       margin,
     });
     const innerContainerStyle = getComposedStyleString({
-      width: "100%",
-      padding,
       ...containerStyle,
       ...alignStyle,
+      width: "100%",
+      padding,
     });
     const imageStyle = getComposedStyleString({
-      width: link ? "100%" : width,
-      objectFit: "contain",
       ...style,
+      width: link ? "100%" : width,
+      maxWidth: "100%",
+      objectFit: "contain",
     });
 
     return `<div style="${outerContainerStyle}">
@@ -128,6 +133,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
 
   renderToTable(): string {
     const {
+      width: cWidth,
       margin = "0px 0px 0px 0px",
       padding = "0px 0px 0px 0px",
       align,
@@ -135,7 +141,7 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
     } = this.block.containerStyle ?? {};
     const { width } = this.block.style ?? {};
     const { url, link, alt } = this.block.data ?? {};
-    const containerWidth = getMaxWidth("100%", margin);
+    const containerWidth = cWidth ?? getMaxWidth("100%", margin);
 
     const outerContainerStyle = getComposedStyleString({
       width: containerWidth,

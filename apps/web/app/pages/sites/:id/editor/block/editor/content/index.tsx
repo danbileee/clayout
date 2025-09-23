@@ -5,6 +5,8 @@ import { ButtonEditorContent } from "./button";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import { BlockRegistry } from "@clayout/kit";
 import { useBlockById } from "@/lib/zustand/editor";
+import type { BlockEditorProps } from "../types";
+import type { z } from "zod";
 
 export function BlockEditorContent() {
   const { block } = useSiteContext();
@@ -16,7 +18,10 @@ export function BlockEditorContent() {
 
   const parsedBlock = SiteBlockSchema.parse(blockSchema);
   const { block: registeredBlock } = new BlockRegistry().find(parsedBlock);
-  const dates = {
+  const restProps: Pick<
+    BlockEditorProps<z.infer<typeof SiteBlockSchema>>,
+    "createdAt" | "updatedAt"
+  > = {
     createdAt: block.createdAt,
     updatedAt: block.updatedAt,
   };
@@ -24,9 +29,11 @@ export function BlockEditorContent() {
   return (
     <>
       {registeredBlock.type === SiteBlockTypes.Text && (
-        <TextEditorContent block={registeredBlock} {...dates} />
+        <TextEditorContent block={registeredBlock} {...restProps} />
       )}
-      {registeredBlock.type === SiteBlockTypes.Image && <ImageEditorContent />}
+      {registeredBlock.type === SiteBlockTypes.Image && (
+        <ImageEditorContent block={registeredBlock} {...restProps} />
+      )}
       {registeredBlock.type === SiteBlockTypes.Button && (
         <ButtonEditorContent />
       )}

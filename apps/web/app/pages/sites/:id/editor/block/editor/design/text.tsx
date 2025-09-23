@@ -1,23 +1,18 @@
 import type { z } from "zod";
-import {
-  SiteBlockTypes,
-  TextBlockSchema,
-  type BlockContainerStyle,
-} from "@clayout/interface";
+import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
 import type { BlockEditorProps } from "../types";
-import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
-import { useUpdateBlock } from "@/lib/zustand/editor";
-import { useMutateBlock } from "../hooks/useMutateBlock";
 import * as BlockEditor from "../styled";
 import * as BoxModel from "../shared/box-model";
 import * as Background from "../shared/background";
+import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 
 export function TextEditorDesign({
   block,
 }: BlockEditorProps<z.infer<typeof TextBlockSchema>>) {
-  const { site, page } = useSiteContext();
-  const updateBlock = useUpdateBlock();
-  const mutateBlock = useMutateBlock();
+  const { handleChangeContainerStyle } = useHandleChangeBlock(
+    SiteBlockTypes.Text,
+    block.id
+  );
 
   if (!block.id) return null;
 
@@ -35,35 +30,10 @@ export function TextEditorDesign({
     backgroundSize,
   } = block.containerStyle ?? {};
 
-  const handleChangeContainerStyle = async (value: BlockContainerStyle) => {
-    if (!site?.id || !page?.id || !block.id) {
-      throw new Error(`siteId, pageId, and blockId are required.`);
-    }
-
-    /**
-     * real-time UI update (w/ zustand)
-     */
-    updateBlock(block.id, SiteBlockTypes.Text, {
-      containerStyle: value,
-    });
-
-    /**
-     * debounced DB update (w/ API request)
-     */
-    await mutateBlock.current({
-      siteId: site.id,
-      pageId: page.id,
-      block: {
-        id: block.id,
-        containerStyle: value,
-      },
-    });
-  };
-
   return (
     <BlockEditor.List>
       <BoxModel.Root>
-        <BoxModel.Borders
+        <BoxModel.Border
           value={{
             borderWidth,
             borderColor,

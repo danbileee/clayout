@@ -16,6 +16,7 @@ import { parseWithZod } from "@conform-to/zod";
 import { ResetPasswordSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
 import { toast } from "sonner";
+import { ErrorMessage } from "@/components/ui/typography";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
@@ -128,15 +129,11 @@ export default function ResetPassword() {
                     />
                     {fields.password.errors?.length
                       ? fields.password.errors.map((error) => (
-                          <p key={error} className="text-sm text-red-500">
-                            {error}
-                          </p>
+                          <ErrorMessage>{error}</ErrorMessage>
                         ))
                       : null}
                     {error ? (
-                      <p className="text-sm text-red-500">
-                        {getErrorMessage(error)}
-                      </p>
+                      <ErrorMessage>{getErrorMessage(error)}</ErrorMessage>
                     ) : null}
                   </div>
                   <Button type="submit" className="w-full" disabled={isPending}>

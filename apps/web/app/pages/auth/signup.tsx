@@ -11,6 +11,7 @@ import { SignupSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
 import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
+import { ErrorMessage } from "@/components/ui/typography";
 
 export default function SignUp() {
   const navigate = useNavigate();
@@ -75,9 +76,7 @@ export default function SignUp() {
                     />
                     {fields.username.errors?.length
                       ? fields.username.errors.map((error) => (
-                          <p key={error} className="text-sm text-red-500">
-                            {error}
-                          </p>
+                          <ErrorMessage>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
@@ -92,9 +91,7 @@ export default function SignUp() {
                     />
                     {fields.email.errors?.length
                       ? fields.email.errors.map((error) => (
-                          <p key={error} className="text-sm text-red-500">
-                            {error}
-                          </p>
+                          <ErrorMessage>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
@@ -110,9 +107,7 @@ export default function SignUp() {
                     />
                     {fields.password.errors?.length
                       ? fields.password.errors.map((error) => (
-                          <p key={error} className="text-sm text-red-500">
-                            {error}
-                          </p>
+                          <ErrorMessage>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
@@ -128,9 +123,7 @@ export default function SignUp() {
                     />
                     {fields.confirm.errors?.length
                       ? fields.confirm.errors.map((error) => (
-                          <p key={error} className="text-sm text-red-500">
-                            {error}
-                          </p>
+                          <ErrorMessage>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
