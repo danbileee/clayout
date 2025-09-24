@@ -13,7 +13,12 @@ export function ButtonEditorDesign({
   block,
 }: BlockEditorProps<z.infer<typeof ButtonBlockSchema>>) {
   const { handleChangeContainerStyle, handleChangeStyle } =
-    useHandleChangeBlock(SiteBlockTypes.Button, block.id);
+    useHandleChangeBlock({
+      block: {
+        type: SiteBlockTypes.Button,
+        id: block.id,
+      },
+    });
 
   if (!block.id) return null;
 

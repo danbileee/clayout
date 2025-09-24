@@ -15,6 +15,8 @@ import { UserRoleWeights } from 'src/users/constants/role.const';
 import { ZodValidationPipe } from 'src/shared/pipes/zod.pipe';
 import {
   CreateSiteBlockDto,
+  ReorderDto,
+  ReorderSchema,
   SiteBlockSchema,
   UpdateSiteBlockDto,
 } from '@clayout/interface';
@@ -42,6 +44,11 @@ export class SiteBlocksController {
     @Query('slug') slug: string,
   ) {
     return this.siteBlocksService.validateSlug({ siteId, pageId, slug });
+  }
+
+  @Post('reorder')
+  reorder(@Body(new ZodValidationPipe(ReorderSchema)) reorderDto: ReorderDto) {
+    return this.siteBlocksService.reorder(reorderDto);
   }
 
   @Get(':id')

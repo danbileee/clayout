@@ -24,7 +24,7 @@ export const ImageCardWrapper = styled.div`
       background-color: rgba(255, 255, 255, 0.4);
     }
     > div {
-      opacity: 1;
+      opacity: 0.99;
     }
   }
 

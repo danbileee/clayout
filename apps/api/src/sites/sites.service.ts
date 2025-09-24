@@ -157,6 +157,11 @@ export class SitesService implements AuthorService {
       }
 
       for (const block of blocks) {
+        if (typeof block.order === 'number') {
+          throw new BadRequestException(
+            'Changing block order via site update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
+          );
+        }
         if (!block.id) {
           throw new BadRequestException(
             `Block id is required to save the block changes.`,
@@ -179,6 +184,12 @@ export class SitesService implements AuthorService {
           id: page.id,
         },
       });
+
+      if (typeof restPage.order === 'number') {
+        throw new BadRequestException(
+          'Changing page order via site update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
+        );
+      }
 
       await this.sitesPagesRepository.save({
         ...matchedPage,

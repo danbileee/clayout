@@ -2,8 +2,10 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SiteBlockEntity } from '../entities/site-block.entity';
 import { Not, Repository } from 'typeorm';
+import { ReorderService } from 'src/shared/services/reorder.service';
 import {
   CreateSiteBlockDto,
+  ReorderDto,
   SiteBlockErrors,
   UpdateSiteBlockDto,
 } from '@clayout/interface';
@@ -17,6 +19,7 @@ export class SiteBlocksService {
   constructor(
     @InjectRepository(SiteBlockEntity)
     private readonly sitesBlocksRepository: Repository<SiteBlockEntity>,
+    private readonly reorderService: ReorderService,
   ) {}
 
   async create(
@@ -43,8 +46,14 @@ export class SiteBlocksService {
       }
     }
 
+    // Determine next order for the page (append to end)
+    const existingCount = await this.sitesBlocksRepository.count({
+      where: { page: { id: pageId } },
+    });
+
     const createdSiteBlock = this.sitesBlocksRepository.create({
       ...createSiteBlockDto,
+      order: existingCount,
       site: { id: siteId },
       page: { id: pageId },
     });
@@ -103,6 +112,13 @@ export class SiteBlocksService {
       throw new BadRequestException(`Block not found`);
     }
 
+    // Disallow direct order updates; instruct to use reorder API
+    if (typeof updateSiteBlockDto.order === 'number') {
+      throw new BadRequestException(
+        'Changing block order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
+      );
+    }
+
     /**
      * slug
      */
@@ -150,6 +166,43 @@ export class SiteBlocksService {
       }
       throw error;
     }
+  }
+
+  async reorder({
+    sourceId,
+    targetId,
+  }: ReorderDto): Promise<{ success: true }> {
+    if (sourceId === targetId) {
+      return { success: true };
+    }
+
+    const source = await this.sitesBlocksRepository.findOne({
+      where: { id: sourceId },
+      relations: { page: true },
+    });
+    const target = await this.sitesBlocksRepository.findOne({
+      where: { id: targetId },
+      relations: { page: true },
+    });
+
+    if (!source || !target) {
+      throw new BadRequestException('Source or target block not found');
+    }
+    if (source.page.id !== target.page.id) {
+      throw new BadRequestException(
+        'Blocks must be on the same page to reorder',
+      );
+    }
+
+    await this.reorderService.reorderWithinScope(
+      this.sitesBlocksRepository,
+      SiteBlockEntity,
+      { page: { id: source.page.id } },
+      sourceId,
+      targetId,
+    );
+
+    return { success: true };
   }
 
   async delete(id: number): Promise<{ id: number }> {

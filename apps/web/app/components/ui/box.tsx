@@ -114,6 +114,12 @@ export const GridBox = styled.div.withConfig({
     `}
 `;
 
+export const FullScreenBox = styled.div`
+  width: 100vw;
+  height: 100svh;
+  background-color: rgba(255, 255, 255, 0.4);
+`;
+
 interface ScrollBoxProps {
   padding?: number;
 }
