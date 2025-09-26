@@ -6,7 +6,6 @@ import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
 import { EnvKeys } from 'src/shared/constants/env.const';
-import { CountersModule } from './counters/counters.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { RoleGuard } from './users/guards/role.guard';
@@ -40,7 +39,6 @@ import { PexelsModule } from './pexels/pexels.module';
       },
       inject: [ConfigService],
     }),
-    CountersModule,
     AuthModule,
     UsersModule,
     EmailsModule,

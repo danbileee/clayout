@@ -2,7 +2,7 @@ import { css, styled } from "styled-components";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { BlockRegistry } from "@clayout/kit";
 import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
-import { useBlockById } from "@/lib/zustand/editor";
+import { useBlockById, useReorderBlock } from "@/lib/zustand/editor";
 import * as Tooltip from "@/components/ui/tooltip";
 import { HFlexBox } from "@/components/ui/box";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { handleError } from "@/lib/axios/handleError";
 import { useDialog } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/shared/dialogs/confirm/delete";
 import { useTimer } from "@/hooks/useTimer";
+import { toast } from "sonner";
 
 interface Props {
   blockId: string;
@@ -47,6 +48,7 @@ export function Block({ blockId, blockIndex }: Props) {
     invalidateSiteCache,
   } = useSiteContext();
   const blockSchema = useBlockById(blockId);
+  const reorderBlocksLocally = useReorderBlock();
   const matchedBlock = selectedPage?.blocks.find(
     (b) => b.id === blockSchema.id
   );
@@ -74,17 +76,16 @@ export function Block({ blockId, blockIndex }: Props) {
     openBlockEditor(matchedBlock.id);
   };
 
-  const handleReorder = async (targetBlock: SiteBlock) => {
+  const handleReorder = async (
+    matchedBlock: SiteBlock,
+    targetBlock: SiteBlock
+  ) => {
     const fn = async () => {
       if (!site?.id || !selectedPage?.id) {
         throw new Error(`siteId and pageId are required.`);
       }
 
-      if (!matchedBlock) {
-        throw new Error(
-          `matchedBlock not found for the given index: ${blockIndex}`
-        );
-      }
+      reorderBlocksLocally(selectedPage.id, matchedBlock.id, targetBlock.id);
 
       await reorderBlocks({
         params: {
@@ -113,29 +114,43 @@ export function Block({ blockId, blockIndex }: Props) {
   const handleMoveDown = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
-    const targetBlock = selectedPage?.blocks?.[blockIndex + 1];
+    const targetIndex = blockIndex + 1;
+    const targetBlock = selectedPage?.blocks?.[targetIndex];
 
     if (!targetBlock) {
       throw new Error(
-        `targetBlock not found for the given index: ${blockIndex + 1}`
+        `targetBlock not found for the given index: ${targetIndex}`
       );
     }
 
-    handleReorder(targetBlock);
+    if (!matchedBlock) {
+      throw new Error(
+        `matchedBlock not found for the given index: ${blockIndex}`
+      );
+    }
+
+    await handleReorder(matchedBlock, targetBlock);
   };
 
   const handleMoveUp = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
-    const targetBlock = selectedPage?.blocks?.[blockIndex - 1];
+    const targetIndex = blockIndex - 1;
+    const targetBlock = selectedPage?.blocks?.[targetIndex];
 
     if (!targetBlock) {
       throw new Error(
-        `targetBlock not found for the given index: ${blockIndex - 1}`
+        `targetBlock not found for the given index: ${targetIndex}`
       );
     }
 
-    handleReorder(targetBlock);
+    if (!matchedBlock) {
+      throw new Error(
+        `matchedBlock not found for the given index: ${blockIndex}`
+      );
+    }
+
+    await handleReorder(matchedBlock, targetBlock);
   };
 
   const handleDuplicate = async (e: MouseEvent<HTMLButtonElement>) => {
@@ -202,6 +217,8 @@ export function Block({ blockId, blockIndex }: Props) {
       }
 
       await invalidateSiteCache();
+
+      toast.success("Deleted successfully.");
     };
 
     try {
@@ -264,7 +281,7 @@ export function Block({ blockId, blockIndex }: Props) {
    */
   useEffect(() => {
     if (selected) {
-      blockRef.current?.scrollIntoView({ behavior: "smooth" });
+      blockRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   }, [selected]);
 

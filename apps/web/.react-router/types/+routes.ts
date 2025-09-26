@@ -50,15 +50,12 @@ type Pages = {
       "id": string;
     };
   };
-  "/counter": {
-    params: {};
-  };
 };
 
 type RouteFiles = {
   "root.tsx": {
     id: "root";
-    page: "/" | "/auth/confirm" | "/auth/error" | "/auth/oauth" | "/auth/verify" | "/login" | "/signup" | "/forgot-password" | "/reset-password" | "/sites" | "/sites/:id" | "/sites/:id/editor" | "/counter";
+    page: "/" | "/auth/confirm" | "/auth/error" | "/auth/oauth" | "/auth/verify" | "/login" | "/signup" | "/forgot-password" | "/reset-password" | "/sites" | "/sites/:id" | "/sites/:id/editor";
   };
   "./pages/home/index.tsx": {
     id: "pages/home/index";
@@ -115,9 +112,5 @@ type RouteFiles = {
   "./pages/sites/:id/editor/index.tsx": {
     id: "pages/sites/:id/editor/index";
     page: "/sites/:id/editor";
-  };
-  "./pages/counter/index.tsx": {
-    id: "pages/counter/index";
-    page: "/counter";
   };
 };
