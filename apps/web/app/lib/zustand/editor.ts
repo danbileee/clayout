@@ -189,6 +189,8 @@ export const useUpdateBlock = () => useBlocksStore((s) => s.updateBlock, []);
 
 export const useReorderBlock = () => useBlocksStore((s) => s.reorderBlock, []);
 
+export const useRemoveBlock = () => useBlocksStore((s) => s.removeBlock, []);
+
 export const useBlockOrder = (pageId: number) =>
   useBlocksStore(
     (s) => s.idsByPageId[toKey(pageId)] ?? EMPTY_STRING_ARRAY,

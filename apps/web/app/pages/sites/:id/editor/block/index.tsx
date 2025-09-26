@@ -2,7 +2,11 @@ import { css, styled } from "styled-components";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { BlockRegistry } from "@clayout/kit";
 import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
-import { useBlockById, useReorderBlock } from "@/lib/zustand/editor";
+import {
+  useBlockById,
+  useRemoveBlock,
+  useReorderBlock,
+} from "@/lib/zustand/editor";
 import * as Tooltip from "@/components/ui/tooltip";
 import { HFlexBox } from "@/components/ui/box";
 import { Button } from "@/components/ui/button";
@@ -49,6 +53,7 @@ export function Block({ blockId, blockIndex }: Props) {
   } = useSiteContext();
   const blockSchema = useBlockById(blockId);
   const reorderBlocksLocally = useReorderBlock();
+  const removeBlocksLocally = useRemoveBlock();
   const matchedBlock = selectedPage?.blocks.find(
     (b) => b.id === blockSchema.id
   );
@@ -203,6 +208,8 @@ export function Block({ blockId, blockIndex }: Props) {
           `matchedBlock not found for the given index: ${blockIndex}`
         );
       }
+
+      removeBlocksLocally(selectedPage.id, matchedBlock.id);
 
       await deleteBlock({
         params: {
