@@ -1,7 +1,7 @@
-import { BlockRegistry } from "@clayout/kit";
-import { SiteBlockSchema } from "@clayout/interface";
 import { css, styled } from "styled-components";
-import type { MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
+import { BlockRegistry } from "@clayout/kit";
+import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
 import { useBlockById } from "@/lib/zustand/editor";
 import * as Tooltip from "@/components/ui/tooltip";
 import { HFlexBox } from "@/components/ui/box";
@@ -9,87 +9,322 @@ import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import {
   IconArrowDown,
-  IconArrowsMove,
+  // IconArrowsMove,
   IconArrowUp,
-  IconBookmark,
+  // IconBookmark,
   IconCopy,
   IconTrash,
 } from "@tabler/icons-react";
 import { rem } from "@/utils/rem";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
+import { useClientMutation } from "@/lib/react-query/useClientMutation";
+import { postSiteBlockReorder } from "@/apis/sites/pages/blocks/reorder";
+import { postSiteBlockDuplicate } from "@/apis/sites/pages/blocks/duplicate";
+import { deleteSiteBlocks } from "@/apis/sites/pages/blocks";
+import { handleError } from "@/lib/axios/handleError";
+import { useDialog } from "@/components/ui/dialog";
+import { ConfirmDeleteDialog } from "@/components/shared/dialogs/confirm/delete";
+import { useTimer } from "@/hooks/useTimer";
 
 interface Props {
   blockId: string;
+  blockIndex: number;
 }
 
-export function Block({ blockId }: Props) {
-  const { page, block, openBlockEditor } = useSiteContext();
+export function Block({ blockId, blockIndex }: Props) {
+  const blockRef = useRef<HTMLDivElement>(null);
+  const timer = useTimer();
+  const [duplicatedBlockId, setDuplicatedBlockId] = useState<number | null>(
+    null
+  );
+  const { openDialog, closeDialog } = useDialog();
+  const {
+    site,
+    selectedPage,
+    selectedBlock,
+    closeBlockEditor,
+    openBlockEditor,
+    invalidateSiteCache,
+  } = useSiteContext();
   const blockSchema = useBlockById(blockId);
-  const matchedBlock = page?.blocks.find((b) => b.id === blockSchema.id);
+  const matchedBlock = selectedPage?.blocks.find(
+    (b) => b.id === blockSchema.id
+  );
   const parsedBlock = SiteBlockSchema.parse(blockSchema);
   const registerdBlock = new BlockRegistry().find(parsedBlock);
-  const selected = block === matchedBlock;
+  const selected = selectedBlock === matchedBlock;
+
+  const { mutateAsync: reorderBlocks } = useClientMutation({
+    mutationFn: postSiteBlockReorder,
+  });
+  const { mutateAsync: duplicateBlock } = useClientMutation({
+    mutationFn: postSiteBlockDuplicate,
+  });
+  const { mutateAsync: deleteBlock, isPending: isDeleting } = useClientMutation(
+    {
+      mutationFn: deleteSiteBlocks,
+    }
+  );
 
   const handleClickBlock = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
 
     if (!matchedBlock || selected) return;
 
-    openBlockEditor(matchedBlock);
+    openBlockEditor(matchedBlock.id);
   };
 
+  const handleReorder = async (targetBlock: SiteBlock) => {
+    const fn = async () => {
+      if (!site?.id || !selectedPage?.id) {
+        throw new Error(`siteId and pageId are required.`);
+      }
+
+      if (!matchedBlock) {
+        throw new Error(
+          `matchedBlock not found for the given index: ${blockIndex}`
+        );
+      }
+
+      await reorderBlocks({
+        params: {
+          siteId: site.id,
+          pageId: selectedPage.id,
+          sourceId: matchedBlock.id,
+          targetId: targetBlock.id,
+        },
+      });
+      await invalidateSiteCache();
+    };
+
+    try {
+      await fn();
+    } catch (e) {
+      const { error } = await handleError(e, {
+        onRetry: fn,
+      });
+
+      if (error) {
+        throw error;
+      }
+    }
+  };
+
+  const handleMoveDown = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    const targetBlock = selectedPage?.blocks?.[blockIndex + 1];
+
+    if (!targetBlock) {
+      throw new Error(
+        `targetBlock not found for the given index: ${blockIndex + 1}`
+      );
+    }
+
+    handleReorder(targetBlock);
+  };
+
+  const handleMoveUp = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    const targetBlock = selectedPage?.blocks?.[blockIndex - 1];
+
+    if (!targetBlock) {
+      throw new Error(
+        `targetBlock not found for the given index: ${blockIndex - 1}`
+      );
+    }
+
+    handleReorder(targetBlock);
+  };
+
+  const handleDuplicate = async (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+
+    const fn = async () => {
+      if (!site?.id || !selectedPage?.id) {
+        throw new Error(`siteId and pageId are required.`);
+      }
+
+      if (!matchedBlock) {
+        throw new Error(
+          `matchedBlock not found for the given index: ${blockIndex}`
+        );
+      }
+
+      const response = await duplicateBlock({
+        params: {
+          siteId: site.id,
+          pageId: selectedPage.id,
+          blockId: matchedBlock.id,
+        },
+      });
+      await invalidateSiteCache();
+
+      setDuplicatedBlockId(response.data.id);
+    };
+
+    try {
+      await fn();
+    } catch (e) {
+      const { error } = await handleError(e, {
+        onRetry: fn,
+      });
+
+      if (error) {
+        throw error;
+      }
+    }
+  };
+
+  const handleDelete = async () => {
+    const fn = async () => {
+      if (!site?.id || !selectedPage?.id) {
+        throw new Error(`siteId and pageId are required.`);
+      }
+
+      if (!matchedBlock) {
+        throw new Error(
+          `matchedBlock not found for the given index: ${blockIndex}`
+        );
+      }
+
+      await deleteBlock({
+        params: {
+          siteId: site.id,
+          pageId: selectedPage.id,
+          blockId: matchedBlock.id,
+        },
+      });
+
+      if (selected) {
+        closeBlockEditor();
+      }
+
+      await invalidateSiteCache();
+    };
+
+    try {
+      await fn();
+    } catch (e) {
+      const { error } = await handleError(e, {
+        onRetry: fn,
+      });
+
+      if (error) {
+        throw error;
+      }
+    }
+  };
+
+  const handleConfirmDelete = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
+    openDialog(
+      <ConfirmDeleteDialog
+        title="Delete this block?"
+        confirmButtonProps={{
+          isLoading: isDeleting,
+          onClick: () => {
+            handleDelete();
+            closeDialog();
+          },
+        }}
+      />
+    );
+  };
+
+  /**
+   * @useEffect
+   * Open duplicated block in the editor
+   * after some amount of delay
+   * because the site data isn't updated right after duplication success
+   */
+  useEffect(() => {
+    if (duplicatedBlockId) {
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+
+      timer.current = setTimeout(() => {
+        openBlockEditor(duplicatedBlockId);
+        setDuplicatedBlockId(null);
+      }, 100);
+    }
+
+    return () => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+    };
+  }, [duplicatedBlockId, openBlockEditor, timer]);
+
+  /**
+   * @useEffect
+   * Automatically scroll into view when this block is selected
+   */
+  useEffect(() => {
+    if (selected) {
+      blockRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [selected]);
+
   return (
-    <BlockBase onClick={handleClickBlock}>
+    <BlockBase ref={blockRef} onClick={handleClickBlock}>
       {registerdBlock.renderToJsx()}
       <BlockCover selected={selected}>
         <BlockButtons gap={4}>
-          <Tooltip.Root>
+          {/* <Tooltip.Root>
             <Tooltip.Trigger>
               <Button isSquare level="secondary">
                 <Icon size={14}>{IconArrowsMove}</Icon>
               </Button>
             </Tooltip.Trigger>
             <Tooltip.Content>Drag to move</Tooltip.Content>
-          </Tooltip.Root>
+          </Tooltip.Root> */}
+          {(matchedBlock?.order ?? 0) > 0 && (
+            <Tooltip.Root>
+              <Tooltip.Trigger>
+                <Button isSquare level="secondary" onClick={handleMoveUp}>
+                  <Icon size={14}>{IconArrowUp}</Icon>
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>Move up</Tooltip.Content>
+            </Tooltip.Root>
+          )}
+          {(matchedBlock?.order ?? 0) <
+            (selectedPage?.blocks.length ?? 0) - 1 && (
+            <Tooltip.Root>
+              <Tooltip.Trigger>
+                <Button isSquare level="secondary" onClick={handleMoveDown}>
+                  <Icon size={14}>{IconArrowDown}</Icon>
+                </Button>
+              </Tooltip.Trigger>
+              <Tooltip.Content>Move down</Tooltip.Content>
+            </Tooltip.Root>
+          )}
           <Tooltip.Root>
             <Tooltip.Trigger>
-              <Button isSquare level="secondary">
-                <Icon size={14}>{IconArrowUp}</Icon>
-              </Button>
-            </Tooltip.Trigger>
-            <Tooltip.Content>Move up</Tooltip.Content>
-          </Tooltip.Root>
-          <Tooltip.Root>
-            <Tooltip.Trigger>
-              <Button isSquare level="secondary">
-                <Icon size={14}>{IconArrowDown}</Icon>
-              </Button>
-            </Tooltip.Trigger>
-            <Tooltip.Content>Move down</Tooltip.Content>
-          </Tooltip.Root>
-          <Tooltip.Root>
-            <Tooltip.Trigger>
-              <Button isSquare level="secondary">
+              <Button isSquare level="secondary" onClick={handleDuplicate}>
                 <Icon size={14}>{IconCopy}</Icon>
               </Button>
             </Tooltip.Trigger>
             <Tooltip.Content>Duplicate</Tooltip.Content>
           </Tooltip.Root>
-          <Tooltip.Root>
+          {/* <Tooltip.Root>
             <Tooltip.Trigger>
               <Button isSquare level="secondary">
                 <Icon size={14}>{IconBookmark}</Icon>
               </Button>
             </Tooltip.Trigger>
             <Tooltip.Content>Save</Tooltip.Content>
-          </Tooltip.Root>
+          </Tooltip.Root> */}
           <Tooltip.Root>
             <Tooltip.Trigger>
-              <Button isSquare level="secondary">
+              <Button isSquare level="secondary" onClick={handleConfirmDelete}>
                 <Icon size={14}>{IconTrash}</Icon>
               </Button>
             </Tooltip.Trigger>
-            <Tooltip.Content>Remove</Tooltip.Content>
+            <Tooltip.Content>Delete</Tooltip.Content>
           </Tooltip.Root>
         </BlockButtons>
       </BlockCover>

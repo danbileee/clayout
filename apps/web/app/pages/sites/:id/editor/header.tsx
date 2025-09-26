@@ -23,7 +23,7 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   const theme = useTheme();
   const id = useParamsId();
   const navigate = useNavigate();
-  const { site, page } = useSiteContext();
+  const { site, selectedPage } = useSiteContext();
   const { mutateAsync: publish, isPending: isPublishing } = useClientMutation({
     mutationFn: patchSitePublish,
   });
@@ -83,8 +83,8 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
           weight="medium"
           style={{ display: "flex", alignItems: "center" }}
         >
-          <SiteName hasPage={Boolean(page)}>{site?.name}</SiteName>
-          {page && (
+          <SiteName hasPage={Boolean(selectedPage)}>{site?.name}</SiteName>
+          {selectedPage && (
             <>
               <Icon
                 color={theme.colors.slate[500]}
@@ -96,7 +96,7 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
               >
                 {IconSlash}
               </Icon>
-              <span>{page.name}</span>
+              <span>{selectedPage.name}</span>
             </>
           )}
         </Typo.P>

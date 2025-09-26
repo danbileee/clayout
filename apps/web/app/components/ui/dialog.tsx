@@ -1,5 +1,7 @@
 import {
+  cloneElement,
   createContext,
+  isValidElement,
   useCallback,
   useContext,
   useMemo,
@@ -14,6 +16,7 @@ import { Icon } from "./icon";
 import { IconX } from "@tabler/icons-react";
 import { ThemeProvider } from "styled-components";
 import { theme } from "@/themes";
+import { nanoid } from "nanoid";
 
 export function Root({
   ...props
@@ -190,7 +193,11 @@ export function DialogProvider({ children }: Props) {
       <Root open={dialogState.isOpen} onOpenChange={closeDialog}>
         <Portal>
           <ThemeProvider theme={theme}>
-            {dialogState.dialogs.map((dialog) => dialog)}
+            {dialogState.dialogs.map((dialog) =>
+              isValidElement(dialog)
+                ? cloneElement(dialog, { key: nanoid(4) })
+                : null
+            )}
           </ThemeProvider>
         </Portal>
       </Root>

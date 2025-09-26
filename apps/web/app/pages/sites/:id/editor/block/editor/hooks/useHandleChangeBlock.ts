@@ -24,7 +24,7 @@ interface Params<K> {
 export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
   block,
 }: Params<K>) {
-  const { site, page } = useSiteContext();
+  const { site, selectedPageId } = useSiteContext();
   const { mutateAsync } = useClientMutation({
     mutationFn: patchSiteBlocks,
   });
@@ -75,8 +75,8 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
   );
 
   const handleChangeContainerStyle = async (value: BlockContainerStyle) => {
-    if (!site?.id || !page?.id || !block.id) {
-      throw new Error(`siteId, pageId, and blockId are required.`);
+    if (!site?.id || !selectedPageId || !block.id) {
+      throw new Error(`siteId, selectedPageId, and blockId are required.`);
     }
 
     /**
@@ -91,7 +91,7 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
      */
     await mutateBlock.current({
       siteId: site.id,
-      pageId: page.id,
+      pageId: selectedPageId,
       block: {
         id: block.id,
         containerStyle: value,
@@ -100,8 +100,8 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
   };
 
   const handleChangeData = async (value: Partial<BlockDataOf<K>>) => {
-    if (!site?.id || !page?.id || !block.id) {
-      throw new Error(`siteId, pageId, and blockId are required.`);
+    if (!site?.id || !selectedPageId || !block.id) {
+      throw new Error(`siteId, selectedPageId, and blockId are required.`);
     }
 
     /**
@@ -116,7 +116,7 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
      */
     await mutateBlock.current({
       siteId: site.id,
-      pageId: page.id,
+      pageId: selectedPageId,
       block: {
         id: block.id,
         data: value,
@@ -125,8 +125,8 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
   };
 
   const handleChangeStyle = async (value: Partial<BlockStyleOf<K>>) => {
-    if (!site?.id || !page?.id || !block.id) {
-      throw new Error(`siteId, pageId, and blockId are required.`);
+    if (!site?.id || !selectedPageId || !block.id) {
+      throw new Error(`siteId, selectedPageId, and blockId are required.`);
     }
 
     /**
@@ -141,7 +141,7 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
      */
     await mutateBlock.current({
       siteId: site.id,
-      pageId: page.id,
+      pageId: selectedPageId,
       block: {
         id: block.id,
         style: value,

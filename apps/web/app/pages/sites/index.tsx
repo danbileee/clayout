@@ -14,6 +14,7 @@ import {
   type Tables,
 } from "@clayout/interface";
 import { useInfiniteQuery } from "@tanstack/react-query";
+import { nanoid } from "nanoid";
 import { useLoaderData, useNavigate } from "react-router";
 
 const baseQueryKey: Omit<PaginationOptions<Tables<"sites">>, "from"> = {
@@ -72,17 +73,16 @@ export default function Sites() {
   });
 
   const handleCreate = async () => {
-    const now = Date.now();
     const fn = async () =>
       await createSite({
         params: {
-          name: `New site ${now}`,
-          slug: `new-site-${now}`,
+          name: `New site`,
+          slug: `new-site-${nanoid(4)}`,
           category: SiteCategories["Landing Page"],
           status: SiteStatuses.Draft,
           pages: [
             {
-              slug: `new-page-${now}`,
+              slug: `new-page-${nanoid(4)}`,
               name: "New Page",
               category: SitePageCategories.Static,
               isHome: true,
@@ -92,7 +92,7 @@ export default function Sites() {
                 {
                   type: SiteBlockTypes.Image,
                   name: "Image Block",
-                  slug: `image-block-${now}`,
+                  slug: `image-block-${nanoid(4)}`,
                   order: 0,
                   data: {
                     url: "https://i.ytimg.com/vi/fK9CNdJK9lo/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA2y_V7p3K3rc1MT0byoni-LpQoVA",
@@ -110,7 +110,7 @@ export default function Sites() {
                 {
                   type: SiteBlockTypes.Text,
                   name: "Text Block",
-                  slug: `text-block-${now}`,
+                  slug: `text-block-${nanoid(4)}`,
                   order: 1,
                   data: {
                     value:
@@ -132,7 +132,7 @@ export default function Sites() {
                 {
                   type: SiteBlockTypes.Button,
                   name: "Button Block",
-                  slug: `button-block-${now}`,
+                  slug: `button-block-${nanoid(4)}`,
                   order: 2,
                   data: {
                     link: "https://www.youtube.com/@lifeisworship.studio",

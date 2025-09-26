@@ -4,6 +4,7 @@ import { SitePageEntity } from '../entities/site-page.entity';
 import { SiteEntity } from '../entities/site.entity';
 import { SiteDomainEntity } from '../entities/site-domain.entity';
 import { EnvKeys } from 'src/shared/constants/env.const';
+import { BadRequestException } from '@nestjs/common';
 
 interface Options {
   hasFavicon?: boolean;
@@ -61,8 +62,15 @@ export function renderSiteBlocks({
     <main style="width: 100%; max-width: ${maxWidth}; margin: 0 auto;">
       ${page.blocks
         .map((block) => {
-          const parsedBlock = SiteBlockSchema.parse(block);
-          const matchedBlock = new BlockRegistry().find(parsedBlock);
+          const parsed = SiteBlockSchema.safeParse(block);
+
+          if (parsed.error) {
+            throw new BadRequestException(
+              `RENDERING FAILED: Block data is invalid`,
+            );
+          }
+
+          const matchedBlock = new BlockRegistry().find(parsed.data);
 
           return matchedBlock.renderToString();
         })

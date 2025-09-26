@@ -147,7 +147,9 @@ export function Font({ value, onChange }: FontProps) {
               <Select.Content>
                 <Select.Group>
                   {FontSizes.map((size) => (
-                    <Select.Item value={size.toString()}>{size}</Select.Item>
+                    <Select.Item key={size} value={size.toString()}>
+                      {size}
+                    </Select.Item>
                   ))}
                 </Select.Group>
               </Select.Content>
@@ -170,7 +172,9 @@ export function Font({ value, onChange }: FontProps) {
               <Select.Content>
                 <Select.Group>
                   {FontWeights.map((weight) => (
-                    <Select.Item value={weight}>{weight}</Select.Item>
+                    <Select.Item key={weight} value={weight}>
+                      {weight}
+                    </Select.Item>
                   ))}
                 </Select.Group>
               </Select.Content>

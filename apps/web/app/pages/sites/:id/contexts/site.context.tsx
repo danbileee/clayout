@@ -5,8 +5,10 @@ import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
-import { useHydrateBlocksStore } from "@/lib/zustand/editor";
+import { useBlocksStore } from "@/lib/zustand/editor";
+import type { BlocksStore } from "@/lib/zustand/editor";
 import { joinPath, Paths } from "@/routes";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   SiteBlockSchema,
   type SiteBlock,
@@ -20,6 +22,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useCallback,
   type ReactNode,
 } from "react";
 import { useNavigate } from "react-router";
@@ -44,8 +47,8 @@ export type BlockTab = keyof typeof BlockTabs;
 
 interface SiteContextState {
   menu: SiteMenu;
-  page: SitePageWithRelations | null;
-  block: SiteBlock | null;
+  selectedPageId: number | null;
+  selectedBlockId: number | null;
   blockTab: BlockTab;
 }
 
@@ -56,10 +59,10 @@ const SET_PAGE = "SET_PAGE";
 const SET_BLOCK_TAB = "SET_BLOCK_TAB";
 
 type SiteContextAction =
-  | { type: typeof OPEN_BLOCK_EDITOR; block: SiteBlock }
+  | { type: typeof OPEN_BLOCK_EDITOR; blockId: number }
   | { type: typeof CLOSE_BLOCK_EDITOR }
   | { type: typeof SET_MENU; menu: SiteMenu }
-  | { type: typeof SET_PAGE; page: SitePageWithRelations | null }
+  | { type: typeof SET_PAGE; pageId: number | null }
   | { type: typeof SET_BLOCK_TAB; tab: BlockTab };
 
 type SiteContextReducer = (
@@ -69,11 +72,14 @@ type SiteContextReducer = (
 
 interface SiteContextValue extends SiteContextState {
   site?: SiteWithRelations;
+  selectedPage?: SitePageWithRelations;
+  selectedBlock?: SiteBlock;
   refetchSite: Refetcher<typeof getSite>;
-  openBlockEditor: (block: SiteBlock) => void;
+  invalidateSiteCache: () => Promise<void>;
+  openBlockEditor: (blockId: number) => void;
   closeBlockEditor: VoidFunction;
   setMenu: (menu: SiteMenu) => void;
-  setPage: (page: SitePageWithRelations | null) => void;
+  setPage: (pageId: number) => void;
   setBlockTab: (tab: BlockTab) => void;
 }
 
@@ -84,21 +90,21 @@ const reducer: SiteContextReducer = (state, action) => {
     case OPEN_BLOCK_EDITOR:
       return {
         ...state,
-        block: action.block,
+        selectedBlockId: action.blockId,
         blockTab: BlockTabs.Content,
         menu: SiteMenus.Block,
       };
     case CLOSE_BLOCK_EDITOR:
       return {
         ...state,
-        block: null,
+        selectedBlockId: null,
         blockTab: BlockTabs.Content,
         menu: SiteMenus.Blocks,
       };
     case SET_MENU:
-      return { ...state, menu: action.menu, block: null };
+      return { ...state, menu: action.menu, selectedBlockId: null };
     case SET_PAGE:
-      return { ...state, page: action.page, block: null };
+      return { ...state, selectedPageId: action.pageId, selectedBlockId: null };
     case SET_BLOCK_TAB:
       return { ...state, blockTab: action.tab };
     default:
@@ -113,8 +119,11 @@ interface Props {
 export function SiteContextProvider({ children }: Props) {
   const navigate = useNavigate();
   const id = useParamsId();
+  const queryClient = useQueryClient();
+  const queryKey = getSiteQueryKey({ id });
+  const hydrateBlocks = useBlocksStore((s: BlocksStore) => s.hydrate);
   const { data, refetch: refetchSite } = useClientQuery({
-    queryKey: getSiteQueryKey({ id }),
+    queryKey,
     queryFn: async () => {
       const fn = async () => await getSite({ params: { id } });
       const redirect = async () => navigate(joinPath([Paths.login]));
@@ -142,63 +151,78 @@ export function SiteContextProvider({ children }: Props) {
   const firstPage = useMemo(() => data?.data?.site?.pages?.[0] ?? null, [data]);
   const [state, dispatch] = useReducer(reducer, {
     menu: SiteMenus.Pages,
-    page: firstPage,
-    block: null,
+    selectedPageId: firstPage?.id ?? null,
+    selectedBlockId: null,
     blockTab: BlockTabs.Content,
   });
 
   /**
-   * @useMemo
-   * Memoize hydration data to prevent infinite loops
+   * Manual hydration function for when we need to force update the Zustand store
    */
-  const hydrationData = useMemo(
-    () => ({
-      pages:
-        data?.data?.site?.pages?.map((page) => {
-          const blocks = page.blocks.map((block) => {
+  const hydrateBlocksStore = useCallback(() => {
+    if (data?.data?.site?.pages) {
+      const pages = data.data.site.pages.map((page) => {
+        const blocks = page.blocks
+          .map((block) => {
             const parsedBlock = SiteBlockSchema.parse(block);
             const { block: registeredBlock } = new BlockRegistry().find(
               parsedBlock
             );
             return registeredBlock;
-          });
+          })
+          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
-          return {
-            id: page.id,
-            blocks,
-          };
-        }) ?? [],
-    }),
-    [data?.data?.site?.pages]
-  );
+        return {
+          id: page.id,
+          blocks,
+        };
+      });
+
+      hydrateBlocks({ pages });
+    }
+  }, [data?.data?.site?.pages, hydrateBlocks]);
 
   /**
    * @useEffect
-   * Hydrate blocks store data
+   * Hydrate Zustand store whenever site data changes (including after cache invalidation)
    */
-  useHydrateBlocksStore(hydrationData);
+  useEffect(() => {
+    if (data?.data?.site?.pages) {
+      hydrateBlocksStore();
+    }
+  }, [data?.data?.site?.pages, hydrateBlocksStore]);
 
   /**
    * @useEffect
    * Update first page on the realod
    */
   useEffect(() => {
-    if (!state.page && firstPage) {
-      dispatch({ type: SET_PAGE, page: firstPage });
+    if (!state.selectedPageId && firstPage) {
+      dispatch({ type: SET_PAGE, pageId: firstPage.id });
     }
-  }, [firstPage, state.page]);
+  }, [firstPage, state.selectedPageId]);
 
   /**
    * @useMemo
    * Create a memoized context value
    */
-  const contextValue = useMemo<SiteContextValue>(
-    () => ({
+  const contextValue = useMemo<SiteContextValue>(() => {
+    const matchedPage = data?.data?.site?.pages?.find(
+      (p) => p.id === state.selectedPageId
+    );
+    return {
       site: data?.data?.site,
+      selectedPage: matchedPage,
+      selectedBlock: matchedPage?.blocks?.find(
+        (b) => b.id === state.selectedBlockId
+      ),
       refetchSite,
+      invalidateSiteCache: async () => {
+        await queryClient.invalidateQueries({ queryKey });
+      },
       ...state,
-      openBlockEditor: async (block: SiteBlock) => {
-        dispatch({ type: OPEN_BLOCK_EDITOR, block });
+      openBlockEditor: async (blockId: number) => {
+        dispatch({ type: OPEN_BLOCK_EDITOR, blockId });
         await refetchSite();
       },
       closeBlockEditor: async () => {
@@ -209,17 +233,16 @@ export function SiteContextProvider({ children }: Props) {
         dispatch({ type: SET_MENU, menu });
         await refetchSite();
       },
-      setPage: async (page: SitePageWithRelations | null) => {
-        dispatch({ type: SET_PAGE, page });
+      setPage: async (pageId: number | null) => {
+        dispatch({ type: SET_PAGE, pageId });
         await refetchSite();
       },
       setBlockTab: async (tab: BlockTab) => {
         dispatch({ type: SET_BLOCK_TAB, tab });
         await refetchSite();
       },
-    }),
-    [data?.data?.site, refetchSite, state]
-  );
+    };
+  }, [data?.data?.site, refetchSite, state, queryClient, queryKey]);
 
   if (!data) {
     return (

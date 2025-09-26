@@ -68,4 +68,13 @@ export class SiteBlocksController {
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.siteBlocksService.delete(id);
   }
+
+  @Post(':id/duplicate')
+  duplicate(
+    @Param('siteId', ParseIntPipe) siteId: number,
+    @Param('pageId', ParseIntPipe) pageId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.siteBlocksService.duplicate(siteId, pageId, id);
+  }
 }

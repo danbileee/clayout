@@ -7,6 +7,7 @@ import {
   CreateSiteBlockDto,
   ReorderDto,
   SiteBlockErrors,
+  SiteBlockSchema,
   UpdateSiteBlockDto,
 } from '@clayout/interface';
 import {
@@ -46,7 +47,6 @@ export class SiteBlocksService {
       }
     }
 
-    // Determine next order for the page (append to end)
     const existingCount = await this.sitesBlocksRepository.count({
       where: { page: { id: pageId } },
     });
@@ -209,6 +209,41 @@ export class SiteBlocksService {
     await this.sitesBlocksRepository.delete({ id });
 
     return { id };
+  }
+
+  async duplicate(
+    siteId: number,
+    pageId: number,
+    blockId: number,
+  ): Promise<{ id: number }> {
+    const matchedBlock = await this.sitesBlocksRepository.findOne({
+      where: {
+        id: blockId,
+      },
+    });
+    const parsed = SiteBlockSchema.safeParse(matchedBlock);
+
+    if (parsed.error) {
+      throw new BadRequestException(
+        `DUPLICATION FAILED: Block data is invalid`,
+      );
+    }
+
+    const { id, slug, order, ...blockData } = parsed.data;
+    const existingCount = await this.sitesBlocksRepository.count({
+      where: { page: { id: pageId } },
+    });
+    const { block } = await this.create(
+      {
+        ...blockData,
+        slug: `${slug}-1`,
+        order: existingCount,
+      },
+      siteId,
+      pageId,
+    );
+
+    return { id: block.id };
   }
 
   async validateSlug({

@@ -76,7 +76,7 @@ export default function SignUp() {
                     />
                     {fields.username.errors?.length
                       ? fields.username.errors.map((error) => (
-                          <ErrorMessage>{error}</ErrorMessage>
+                          <ErrorMessage key={error}>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
@@ -91,7 +91,7 @@ export default function SignUp() {
                     />
                     {fields.email.errors?.length
                       ? fields.email.errors.map((error) => (
-                          <ErrorMessage>{error}</ErrorMessage>
+                          <ErrorMessage key={error}>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
@@ -107,7 +107,7 @@ export default function SignUp() {
                     />
                     {fields.password.errors?.length
                       ? fields.password.errors.map((error) => (
-                          <ErrorMessage>{error}</ErrorMessage>
+                          <ErrorMessage key={error}>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>
@@ -123,7 +123,7 @@ export default function SignUp() {
                     />
                     {fields.confirm.errors?.length
                       ? fields.confirm.errors.map((error) => (
-                          <ErrorMessage>{error}</ErrorMessage>
+                          <ErrorMessage key={error}>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>

@@ -97,7 +97,7 @@ export default function ForgotPassword() {
                       />
                       {fields.email.errors?.length
                         ? fields.email.errors.map((error) => (
-                            <ErrorMessage>{error}</ErrorMessage>
+                            <ErrorMessage key={error}>{error}</ErrorMessage>
                           ))
                         : null}
                     </div>

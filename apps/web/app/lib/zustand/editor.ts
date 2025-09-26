@@ -40,7 +40,7 @@ type BlocksActions = {
   }) => void;
 };
 
-type BlocksStore = BlocksState & BlocksActions;
+export type BlocksStore = BlocksState & BlocksActions;
 
 const toKey = (id: number) => String(id);
 
@@ -144,7 +144,7 @@ const createBlocksStore = () =>
 
 const blocksStore = createBlocksStore();
 
-const useBlocksStore = <T>(
+export const useBlocksStore = <T>(
   selector: (state: BlocksStore) => T,
   deps: DependencyList = []
 ) => {
