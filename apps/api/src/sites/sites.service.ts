@@ -167,11 +167,20 @@ export class SitesService implements AuthorService {
       }
 
       for (const block of blocks) {
-        if (typeof block.order === 'number') {
+        const { block: matchedBlock } = await this.siteBlocksService.getById({
+          id: block.id,
+        });
+
+        if (
+          matchedBlock &&
+          typeof block.order === 'number' &&
+          block.order !== matchedBlock.order
+        ) {
           throw new BadRequestException(
             'Changing block order via site update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
           );
         }
+
         if (!block.id) {
           throw new BadRequestException(
             `Block id is required to save the block changes.`,

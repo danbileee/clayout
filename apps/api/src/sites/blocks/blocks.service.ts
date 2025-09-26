@@ -113,7 +113,10 @@ export class SiteBlocksService {
     }
 
     // Disallow direct order updates; instruct to use reorder API
-    if (typeof updateSiteBlockDto.order === 'number') {
+    if (
+      typeof updateSiteBlockDto.order === 'number' &&
+      updateSiteBlockDto.order !== matchedSiteBlock.order
+    ) {
       throw new BadRequestException(
         'Changing block order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
       );

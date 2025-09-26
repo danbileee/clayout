@@ -13,6 +13,7 @@ import {
   isPostgresError,
   PostgresErrorCode,
 } from 'src/shared/utils/isPostgresError';
+import { SiteBlocksService } from '../blocks/blocks.service';
 
 @Injectable()
 export class SitePagesService {
@@ -20,6 +21,7 @@ export class SitePagesService {
     @InjectRepository(SitePageEntity)
     private readonly sitesPagesRepository: Repository<SitePageEntity>,
     private readonly reorderService: ReorderService,
+    private readonly siteBlocksService: SiteBlocksService,
   ) {}
 
   async create(
@@ -195,13 +197,22 @@ export class SitePagesService {
       );
     }
 
-    if (
-      Array.isArray(updateSitePageDto.blocks) &&
-      updateSitePageDto.blocks.some((b) => typeof b?.order === 'number')
-    ) {
-      throw new BadRequestException(
-        'Changing block order via page update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
-      );
+    if (Array.isArray(updateSitePageDto.blocks)) {
+      for (const block of updateSitePageDto.blocks) {
+        const { block: matchedBlock } = await this.siteBlocksService.getById({
+          id: block.id,
+        });
+
+        if (
+          matchedBlock &&
+          typeof block.order === 'number' &&
+          block.order !== matchedBlock.order
+        ) {
+          throw new BadRequestException(
+            'Changing block order via page update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
+          );
+        }
+      }
     }
 
     try {
