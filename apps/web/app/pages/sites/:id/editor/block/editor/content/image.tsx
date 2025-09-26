@@ -28,10 +28,12 @@ export function ImageEditorContent({
   block,
 }: BlockEditorProps<z.infer<typeof ImageBlockSchema>>) {
   const theme = useTheme();
-  const { handleChangeData } = useHandleChangeBlock(
-    SiteBlockTypes.Image,
-    block.id
-  );
+  const { handleChangeData } = useHandleChangeBlock({
+    block: {
+      type: SiteBlockTypes.Image,
+      id: block.id,
+    },
+  });
   const validation = schema.safeParse(block.data);
   const { link: linkError, alt: altError } = getErrors(validation);
 

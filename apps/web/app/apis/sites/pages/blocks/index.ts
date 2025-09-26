@@ -154,7 +154,7 @@ interface DeleteResponse {
   id: number;
 }
 
-export async function deleteSitePages(args: {
+export async function deleteSiteBlocks(args: {
   params: DeleteParams;
   request?: Request;
 }) {

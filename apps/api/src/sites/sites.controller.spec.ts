@@ -11,6 +11,8 @@ import { PaginationService } from '../shared/services/pagination.service';
 import { UploaderService } from '../shared/services/uploader.service';
 import { ConfigService } from '@nestjs/config';
 import { AssetsService } from '../assets/assets.service';
+import { SitePagesService } from './pages/pages.service';
+import { SiteBlocksService } from './blocks/blocks.service';
 
 describe('SitesController', () => {
   let controller: SitesController;
@@ -25,6 +27,27 @@ describe('SitesController', () => {
         createMockRepositoryProvider(SiteBlockEntity),
         createMockRepositoryProvider(SiteReleaseEntity),
         createMockRepositoryProvider(SiteDomainEntity),
+        {
+          provide: SitePagesService,
+          useValue: {
+            create: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+            reorder: jest.fn(),
+            getById: jest.fn(),
+          },
+        },
+        {
+          provide: SiteBlocksService,
+          useValue: {
+            create: jest.fn(),
+            update: jest.fn(),
+            delete: jest.fn(),
+            duplicate: jest.fn(),
+            reorder: jest.fn(),
+            getById: jest.fn(),
+          },
+        },
         {
           provide: PaginationService,
           useValue: {

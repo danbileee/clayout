@@ -13,8 +13,10 @@ import { LoginSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { ErrorMessage } from "@/components/ui/typography";
+import { useTimer } from "@/hooks/useTimer";
 
 export default function Login() {
+  const timer = useTimer();
   const { refetchUser, refetchCsrfToken } = useAuthContext();
   const {
     mutateAsync: login,
@@ -42,7 +44,11 @@ export default function Login() {
         await refetchCsrfToken();
 
         // Redirect after a short delay to ensure cookies are set
-        setTimeout(() => {
+        if (timer.current) {
+          clearTimeout(timer.current);
+        }
+
+        timer.current = setTimeout(() => {
           if (window.history.length === 1) {
             window.location.href = `/`;
           } else {
@@ -110,7 +116,7 @@ export default function Login() {
                     />
                     {fields.password.errors?.length
                       ? fields.password.errors.map((error) => (
-                          <ErrorMessage>{error}</ErrorMessage>
+                          <ErrorMessage key={error}>{error}</ErrorMessage>
                         ))
                       : null}
                   </div>

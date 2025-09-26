@@ -1,22 +1,28 @@
 import type { z } from "zod";
 import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
 import type { BlockEditorProps } from "../types";
+import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 import * as BlockEditor from "../styled";
 import * as BoxModel from "../shared/box-model";
 import * as Background from "../shared/background";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
+import { Width } from "../shared/width";
+import { Alignment } from "../shared/align";
 
 export function TextEditorDesign({
   block,
 }: BlockEditorProps<z.infer<typeof TextBlockSchema>>) {
-  const { handleChangeContainerStyle } = useHandleChangeBlock(
-    SiteBlockTypes.Text,
-    block.id
-  );
+  const { handleChangeContainerStyle, handleChangeStyle } =
+    useHandleChangeBlock({
+      block: {
+        type: SiteBlockTypes.Text,
+        id: block.id,
+      },
+    });
 
   if (!block.id) return null;
 
   const {
+    align,
     borderWidth,
     borderColor,
     borderRadius,
@@ -29,9 +35,12 @@ export function TextEditorDesign({
     backgroundRepeat,
     backgroundSize,
   } = block.containerStyle ?? {};
+  const { width: textWidth } = block.style ?? {};
 
   return (
     <BlockEditor.List>
+      <Width value={{ width: textWidth }} onChange={handleChangeStyle} />
+      <Alignment value={{ align }} onChange={handleChangeContainerStyle} />
       <BoxModel.Root>
         <BoxModel.Padding
           value={{ padding }}

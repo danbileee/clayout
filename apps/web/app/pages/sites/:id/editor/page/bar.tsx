@@ -39,7 +39,7 @@ export function PageBar() {
         },
       });
       await refetchSite();
-      setPage(response.data.page);
+      setPage(response.data.page.id);
     };
 
     try {

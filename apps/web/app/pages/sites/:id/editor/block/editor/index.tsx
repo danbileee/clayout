@@ -11,7 +11,7 @@ import { BlockEditorContent } from "./content";
 import { BlockEditorDesign } from "./design";
 
 export function BlockEditor() {
-  const { block, closeBlockEditor } = useSiteContext();
+  const { selectedBlock: block, closeBlockEditor } = useSiteContext();
 
   const handleBack = () => {
     closeBlockEditor();

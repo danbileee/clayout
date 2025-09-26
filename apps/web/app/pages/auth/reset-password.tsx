@@ -17,6 +17,7 @@ import { ResetPasswordSchema } from "@clayout/interface";
 import { handleError } from "@/lib/axios/handleError";
 import { toast } from "sonner";
 import { ErrorMessage } from "@/components/ui/typography";
+import { useTimer } from "@/hooks/useTimer";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
@@ -53,6 +54,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export default function ResetPassword() {
+  const timer = useTimer();
   const navigate = useNavigate();
   const { query } = useLoaderData<typeof loader>();
   const {
@@ -86,7 +88,11 @@ export default function ResetPassword() {
         toast.success(response.data.message);
 
         // Add a little delay for smooth UX
-        setTimeout(() => {
+        if (timer.current) {
+          clearTimeout(timer.current);
+        }
+
+        timer.current = setTimeout(() => {
           navigate("/");
         }, 1000);
       };
@@ -129,7 +135,7 @@ export default function ResetPassword() {
                     />
                     {fields.password.errors?.length
                       ? fields.password.errors.map((error) => (
-                          <ErrorMessage>{error}</ErrorMessage>
+                          <ErrorMessage key={error}>{error}</ErrorMessage>
                         ))
                       : null}
                     {error ? (

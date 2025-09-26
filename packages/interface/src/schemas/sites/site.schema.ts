@@ -1,7 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 import { Constants, Tables } from "../../types";
 import { SitePageSchema } from "./page.schema";
-import { PaginationSchema } from "../pagination";
+import { PaginationSchema } from "../pagination.schema";
 
 export const siteMetaShape = {
   description: z.string().optional(),

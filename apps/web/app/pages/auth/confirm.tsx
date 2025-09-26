@@ -6,6 +6,7 @@ import { postEmailsTrackClick } from "@/apis/emails/track-click";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { useCallback, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
+import { useTimer } from "@/hooks/useTimer";
 
 export async function loader({ request }: LoaderFunctionArgs) {
   const requestUrl = new URL(request.url);
@@ -24,6 +25,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 export default function AuthConfirm() {
   const { data } = useLoaderData<typeof loader>();
+  const timer = useTimer();
   const {
     mutateAsync: confirmRegister,
     error,
@@ -51,10 +53,13 @@ export default function AuthConfirm() {
     });
 
     // Add a little delay for smooth UX
-    setTimeout(() => {
+    if (timer.current) {
+      clearTimeout(timer.current);
+    }
+    timer.current = setTimeout(() => {
       window.location.href = `/`;
     }, 1000);
-  }, [confirmRegister, data, trackClickEmail]);
+  }, [confirmRegister, data, timer, trackClickEmail]);
 
   /**
    * @useEffect
@@ -63,7 +68,12 @@ export default function AuthConfirm() {
    */
   useEffect(() => {
     confirmRegistration();
-  }, [confirmRegistration]);
+    return () => {
+      if (timer.current) {
+        clearTimeout(timer.current);
+      }
+    };
+  }, [confirmRegistration, timer]);
 
   if (isSuccess) {
     return (

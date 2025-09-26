@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SiteBlocksService } from './blocks.service';
 import { createMockRepositoryProvider } from '../../../test/test-utils';
 import { SiteBlockEntity } from '../entities/site-block.entity';
+import { ReorderService } from 'src/shared/services/reorder.service';
 
 describe('BlocksService', () => {
   let service: SiteBlocksService;
@@ -11,6 +12,12 @@ describe('BlocksService', () => {
       providers: [
         SiteBlocksService,
         createMockRepositoryProvider(SiteBlockEntity),
+        {
+          provide: ReorderService,
+          useValue: {
+            reorderWithinScope: jest.fn(),
+          },
+        },
       ],
     }).compile();
 

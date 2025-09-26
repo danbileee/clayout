@@ -2,18 +2,26 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SitePageEntity } from '../entities/site-page.entity';
 import { Repository, Not, In } from 'typeorm';
-import { CreateSitePageDto, UpdateSitePageDto } from '@clayout/interface';
+import { ReorderService } from 'src/shared/services/reorder.service';
+import {
+  CreateSitePageDto,
+  ReorderDto,
+  UpdateSitePageDto,
+} from '@clayout/interface';
 import { SitePageErrors } from '@clayout/interface';
 import {
   isPostgresError,
   PostgresErrorCode,
 } from 'src/shared/utils/isPostgresError';
+import { SiteBlocksService } from '../blocks/blocks.service';
 
 @Injectable()
 export class SitePagesService {
   constructor(
     @InjectRepository(SitePageEntity)
     private readonly sitesPagesRepository: Repository<SitePageEntity>,
+    private readonly reorderService: ReorderService,
+    private readonly siteBlocksService: SiteBlocksService,
   ) {}
 
   async create(
@@ -183,6 +191,30 @@ export class SitePagesService {
       }
     }
 
+    if (typeof updateSitePageDto.order === 'number') {
+      throw new BadRequestException(
+        'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
+      );
+    }
+
+    if (Array.isArray(updateSitePageDto.blocks)) {
+      for (const block of updateSitePageDto.blocks) {
+        const { block: matchedBlock } = await this.siteBlocksService.getById({
+          id: block.id,
+        });
+
+        if (
+          matchedBlock &&
+          typeof block.order === 'number' &&
+          block.order !== matchedBlock.order
+        ) {
+          throw new BadRequestException(
+            'Changing block order via page update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
+          );
+        }
+      }
+    }
+
     try {
       const updatedSitePage = await this.sitesPagesRepository.save({
         ...matchedSitePage,
@@ -263,5 +295,40 @@ export class SitePagesService {
     await this.sitesPagesRepository.delete({ id });
 
     return { id };
+  }
+
+  async reorder({
+    sourceId,
+    targetId,
+  }: ReorderDto): Promise<{ success: true }> {
+    if (sourceId === targetId) {
+      return { success: true };
+    }
+
+    const source = await this.sitesPagesRepository.findOne({
+      where: { id: sourceId },
+      relations: { site: true },
+    });
+    const target = await this.sitesPagesRepository.findOne({
+      where: { id: targetId },
+      relations: { site: true },
+    });
+
+    if (!source || !target) {
+      throw new BadRequestException('Source or target page not found');
+    }
+    if (source.site.id !== target.site.id) {
+      throw new BadRequestException('Pages must belong to the same site');
+    }
+
+    await this.reorderService.reorderWithinScope(
+      this.sitesPagesRepository,
+      SitePageEntity,
+      { site: { id: source.site.id } },
+      sourceId,
+      targetId,
+    );
+
+    return { success: true };
   }
 }

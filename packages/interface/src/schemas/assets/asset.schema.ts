@@ -1,6 +1,6 @@
 import { z, ZodType } from "zod";
 import { Constants, Tables } from "../../types";
-import { PaginationSchema } from "../pagination";
+import { PaginationSchema } from "../pagination.schema";
 
 const assetShape = {
   order: z.number().optional(),

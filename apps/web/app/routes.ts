@@ -32,10 +32,6 @@ export const Paths = {
    * Editor
    */
   editor: "editor",
-  /**
-   * Counter (dummy)
-   */
-  counter: "counter",
 } as const;
 
 export type Path = keyof typeof Paths;
@@ -120,9 +116,4 @@ export default [
       ]),
     ]),
   ]),
-
-  /**
-   * Counter (dummy)
-   */
-  route(Paths.counter, getIndexEntry([Paths.counter])),
 ] satisfies RouteConfig;

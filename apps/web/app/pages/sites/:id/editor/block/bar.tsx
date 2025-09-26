@@ -17,33 +17,33 @@ import { nanoid } from "nanoid";
 import { BlockIcons, BlockNames } from "../constants";
 
 export function BlockBar() {
-  const { site, page, refetchSite } = useSiteContext();
+  const { site, selectedPageId, refetchSite } = useSiteContext();
   const { mutateAsync: addBlock } = useClientMutation({
     mutationFn: postSiteBlocks,
   });
 
   const handleClickBlockButton = async (data: CreateSiteBlockDto) => {
     const fn = async () => {
-      if (!site?.id || !page) return;
+      if (!site?.id || !selectedPageId) return;
 
       const { data: isSlugDuplicated } = await getSiteBlockSlugValidation({
-        params: { siteId: site.id, pageId: page.id, slug: data.slug ?? "" },
+        params: {
+          siteId: site.id,
+          pageId: selectedPageId,
+          slug: data.slug ?? "",
+        },
       });
-      const dataWithOrder: CreateSiteBlockDto = {
-        ...data,
-        order: page.blocks.length,
-      };
 
       await addBlock({
         params: {
           siteId: site.id,
-          pageId: page.id,
+          pageId: selectedPageId,
           block: isSlugDuplicated
             ? {
-                ...dataWithOrder,
-                slug: `${dataWithOrder.slug}-${nanoid(4)}`,
+                ...data,
+                slug: `${data.slug}-${nanoid(4)}`,
               }
-            : dataWithOrder,
+            : data,
         },
       });
       await refetchSite();

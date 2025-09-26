@@ -11,10 +11,12 @@ import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 export function TextEditorContent({
   block,
 }: BlockEditorProps<z.infer<typeof TextBlockSchema>>) {
-  const { handleChangeData } = useHandleChangeBlock(
-    SiteBlockTypes.Text,
-    block.id
-  );
+  const { handleChangeData } = useHandleChangeBlock({
+    block: {
+      type: SiteBlockTypes.Text,
+      id: block.id,
+    },
+  });
 
   if (!block.id) return null;
 

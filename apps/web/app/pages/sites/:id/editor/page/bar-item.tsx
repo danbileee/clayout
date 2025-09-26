@@ -39,7 +39,7 @@ interface Props {
 
 export function PageBarItem({ page }: Props) {
   const theme = useTheme();
-  const { site, refetchSite, page: selectedPage, setPage } = useSiteContext();
+  const { site, refetchSite, selectedPage, setPage } = useSiteContext();
   const { openDialog, closeDialog } = useDialog();
   const [hovering, setHovering] = useState(false);
   const [editing, setEditing] = useState(false);
@@ -53,7 +53,7 @@ export function PageBarItem({ page }: Props) {
   const handleClick = (e: MouseEvent<HTMLLIElement>) => {
     if (e.detail > 1) return;
 
-    setPage(page);
+    setPage(page.id);
   };
 
   const handleDoubleClick = (e: MouseEvent<HTMLLIElement>) => {
@@ -238,7 +238,7 @@ export function PageBarItem({ page }: Props) {
         )}
         {page.isHome && (
           <Button isSquare variant="ghost" size="sm" onClick={handleToggleHome}>
-            <Icon size={14} color={theme.colors.indigo[500]}>
+            <Icon size={14} color={theme.colors.blue[700]}>
               {IconHome}
             </Icon>
           </Button>
@@ -280,10 +280,10 @@ const PageItem = styled.li.withConfig({
 
     ${selected &&
     css`
-      background-color: ${theme.colors.indigo[100]};
+      background-color: ${theme.colors.blue[50]};
 
       &:hover {
-        background-color: ${theme.colors.indigo[100]};
+        background-color: ${theme.colors.blue[50]};
       }
 
       &:has(:hover) {

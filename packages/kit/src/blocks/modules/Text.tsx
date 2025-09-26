@@ -4,6 +4,7 @@ import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
 import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
 import { getComposedStyleObject } from "../utils/getComposedStyleObject";
+import { getAlignStyle } from "../utils/getAlignStyle";
 
 export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   static readonly type = SiteBlockTypes.Text;
@@ -11,10 +12,12 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   renderToJsx() {
     const {
       width: cWidth,
+      align,
       margin = "0px 0px 0px 0px",
       ...containerStyle
     } = this.block.containerStyle ?? {};
     const containerWidth = cWidth ?? getMaxWidth("100%", margin);
+    const alignStyle = getAlignStyle({ align });
 
     return (
       <div
@@ -26,6 +29,7 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
         <div
           style={{
             ...getComposedStyleObject(containerStyle),
+            ...alignStyle,
             width: "100%",
           }}
         >
@@ -40,11 +44,14 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   renderToString(): string {
     const {
       width: cWidth,
+      align,
       margin = "0px 0px 0px 0px",
       ...restContainerStyle
     } = this.block.containerStyle ?? {};
+    const alignStyle = getAlignStyle({ align });
     const containerStyle = getComposedStyleString({
       ...restContainerStyle,
+      ...alignStyle,
       width: "100%",
     });
     const textStyle = getComposedStyleString({
@@ -62,6 +69,7 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   renderToTable(): string {
     const {
       width: cWidth,
+      align,
       margin = "0px 0px 0px 0px",
       ...restContainerStyle
     } = this.block.containerStyle ?? {};
@@ -81,7 +89,7 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
     <table border="0" cellpadding="0" cellspacing="0" style="${containerStyle}">
       <tbody>
         <tr>
-          <td align="left" valign="top" style="${textStyle}" class="text">
+          <td align="${align}" valign="top" style="${textStyle}" class="text">
             <p>
               ${this.block.data?.value}
             </p>

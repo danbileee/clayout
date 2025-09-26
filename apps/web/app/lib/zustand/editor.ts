@@ -33,14 +33,14 @@ type BlocksActions = {
     ): void;
   };
   removeBlock: (pageId: number, blockId: number) => void;
-  reorderBlock: (pageId: number, blockId: number, newIndex: number) => void;
+  reorderBlock: (pageId: number, blockId: number, targetId: number) => void;
   reorderBlocks: (pageId: number, blockIds: string[]) => void;
   hydrate: (data: {
     pages: Array<{ id: number; blocks: BlockSchema[] }>;
   }) => void;
 };
 
-type BlocksStore = BlocksState & BlocksActions;
+export type BlocksStore = BlocksState & BlocksActions;
 
 const toKey = (id: number) => String(id);
 
@@ -106,9 +106,14 @@ const createBlocksStore = () =>
         removeBlockFromState(state, toKey(pageId), toKey(blockId))
       ),
 
-    reorderBlock: (pageId, blockId, newIndex) =>
+    reorderBlock: (pageId, blockId, targetId) =>
       set((state) =>
-        reorderBlockInState(state, toKey(pageId), toKey(blockId), newIndex)
+        reorderBlockInState(
+          state,
+          toKey(pageId),
+          toKey(blockId),
+          toKey(targetId)
+        )
       ),
 
     reorderBlocks: (pageId, blockIds) =>
@@ -144,7 +149,7 @@ const createBlocksStore = () =>
 
 const blocksStore = createBlocksStore();
 
-const useBlocksStore = <T>(
+export const useBlocksStore = <T>(
   selector: (state: BlocksStore) => T,
   deps: DependencyList = []
 ) => {
@@ -181,6 +186,10 @@ export const useBlockIdsForPage = (pageId?: number) =>
   );
 
 export const useUpdateBlock = () => useBlocksStore((s) => s.updateBlock, []);
+
+export const useReorderBlock = () => useBlocksStore((s) => s.reorderBlock, []);
+
+export const useRemoveBlock = () => useBlocksStore((s) => s.removeBlock, []);
 
 export const useBlockOrder = (pageId: number) =>
   useBlocksStore(
@@ -246,16 +255,17 @@ function reorderBlockInState(
   state: BlocksState,
   pageKey: string,
   blockKey: string,
-  newIndex: number
+  targetKey: string
 ): BlocksState {
   const currentIds = state.idsByPageId[pageKey] ?? [];
   const currentIndex = currentIds.indexOf(blockKey);
+  const targetIndex = currentIds.indexOf(targetKey);
 
-  if (currentIndex === -1 || currentIndex === newIndex) return state;
+  if (currentIndex === -1 || currentIndex === targetIndex) return state;
 
   const newIds = [...currentIds];
   newIds.splice(currentIndex, 1);
-  newIds.splice(newIndex, 0, blockKey);
+  newIds.splice(targetIndex, 0, blockKey);
 
   return {
     ...state,

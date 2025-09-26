@@ -94,7 +94,10 @@ export function Width({ value, onChange }: Props) {
             <Select.Group>
               <Select.Label>Units</Select.Label>
               {Object.entries(Units).map(([key, value]) => (
-                <Select.Item value={value}>{`${value} (${key})`}</Select.Item>
+                <Select.Item
+                  key={key}
+                  value={value}
+                >{`${value} (${key})`}</Select.Item>
               ))}
             </Select.Group>
           </Select.Content>

@@ -16,8 +16,6 @@ import { Repository } from 'typeorm';
 import { AuthorService } from 'src/shared/services/author.service';
 import { PaginationService } from 'src/shared/services/pagination.service';
 import { SiteEntity } from './entities/site.entity';
-import { SitePageEntity } from './entities/site-page.entity';
-import { SiteBlockEntity } from './entities/site-block.entity';
 import { UserEntity } from 'src/users/entities/user.entity';
 import { UploaderService } from 'src/shared/services/uploader.service';
 import { generateSiteFiles } from './utils/generateSiteFiles';
@@ -27,7 +25,8 @@ import { SiteReleaseEntity } from './entities/site-release.entity';
 import { randomBytes } from 'crypto';
 import { SiteFile } from './interfaces/site.interface';
 import { SiteDomainEntity } from './entities/site-domain.entity';
-import { AssetsService } from 'src/assets/assets.service';
+import { SitePagesService } from './pages/pages.service';
+import { SiteBlocksService } from './blocks/blocks.service';
 
 @Injectable()
 export class SitesService implements AuthorService {
@@ -35,13 +34,10 @@ export class SitesService implements AuthorService {
     private readonly paginationService: PaginationService,
     private readonly uploaderService: UploaderService,
     private readonly configService: ConfigService,
-    private readonly assetsService: AssetsService,
+    private readonly sitePagesService: SitePagesService,
+    private readonly siteBlocksService: SiteBlocksService,
     @InjectRepository(SiteEntity)
     private readonly sitesRepository: Repository<SiteEntity>,
-    @InjectRepository(SitePageEntity)
-    private readonly sitesPagesRepository: Repository<SitePageEntity>,
-    @InjectRepository(SiteBlockEntity)
-    private readonly sitesBlocksRepository: Repository<SiteBlockEntity>,
     @InjectRepository(SiteReleaseEntity)
     private readonly sitesReleasesRepository: Repository<SiteReleaseEntity>,
     @InjectRepository(SiteDomainEntity)
@@ -62,19 +58,17 @@ export class SitesService implements AuthorService {
 
     for (const page of pages) {
       const { blocks, ...restPage } = page;
-      const createdPage = this.sitesPagesRepository.create({
-        ...restPage,
-        site: createdSite,
-      });
-      await this.sitesPagesRepository.save(createdPage);
+      const { page: createdPage } = await this.sitePagesService.create(
+        restPage,
+        createdSite.id,
+      );
 
       for (const block of blocks) {
-        const createdBlock = this.sitesBlocksRepository.create({
-          ...block,
-          site: createdSite,
-          page: createdPage,
-        });
-        await this.sitesBlocksRepository.save(createdBlock);
+        await this.siteBlocksService.create(
+          block,
+          createdSite.id,
+          createdPage.id,
+        );
       }
     }
 
@@ -92,6 +86,14 @@ export class SitesService implements AuthorService {
         author: true,
         pages: {
           blocks: true,
+        },
+      },
+      order: {
+        pages: {
+          order: 'ASC',
+          blocks: {
+            order: 'ASC',
+          },
         },
       },
     });
@@ -131,6 +133,14 @@ export class SitesService implements AuthorService {
           blocks: true,
         },
       },
+      order: {
+        pages: {
+          order: 'ASC',
+          blocks: {
+            order: 'ASC',
+          },
+        },
+      },
     });
 
     if (!site) throw new NotFoundException(`Site not found`);
@@ -157,33 +167,36 @@ export class SitesService implements AuthorService {
       }
 
       for (const block of blocks) {
+        const { block: matchedBlock } = await this.siteBlocksService.getById({
+          id: block.id,
+        });
+
+        if (
+          matchedBlock &&
+          typeof block.order === 'number' &&
+          block.order !== matchedBlock.order
+        ) {
+          throw new BadRequestException(
+            'Changing block order via site update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
+          );
+        }
+
         if (!block.id) {
           throw new BadRequestException(
             `Block id is required to save the block changes.`,
           );
         }
 
-        const matchedBlock = await this.sitesBlocksRepository.findOne({
-          where: {
-            id: block.id,
-          },
-        });
-        await this.sitesBlocksRepository.save({
-          ...matchedBlock,
-          ...block,
-        });
+        await this.siteBlocksService.update(block.id, block);
       }
 
-      const matchedPage = await this.sitesPagesRepository.findOne({
-        where: {
-          id: page.id,
-        },
-      });
+      if (typeof restPage.order === 'number') {
+        throw new BadRequestException(
+          'Changing page order via site update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
+        );
+      }
 
-      await this.sitesPagesRepository.save({
-        ...matchedPage,
-        ...restPage,
-      });
+      await this.sitePagesService.update(page.id, restPage);
     }
 
     const newSite: SiteEntity = await this.sitesRepository.save({
@@ -200,6 +213,14 @@ export class SitesService implements AuthorService {
         author: true,
         pages: {
           blocks: true,
+        },
+      },
+      order: {
+        pages: {
+          order: 'ASC',
+          blocks: {
+            order: 'ASC',
+          },
         },
       },
     });
@@ -224,6 +245,14 @@ export class SitesService implements AuthorService {
           blocks: true,
         },
         domains: true,
+      },
+      order: {
+        pages: {
+          order: 'ASC',
+          blocks: {
+            order: 'ASC',
+          },
+        },
       },
     });
 

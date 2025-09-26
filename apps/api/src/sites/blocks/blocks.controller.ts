@@ -15,6 +15,8 @@ import { UserRoleWeights } from 'src/users/constants/role.const';
 import { ZodValidationPipe } from 'src/shared/pipes/zod.pipe';
 import {
   CreateSiteBlockDto,
+  ReorderDto,
+  ReorderSchema,
   SiteBlockSchema,
   UpdateSiteBlockDto,
 } from '@clayout/interface';
@@ -44,6 +46,11 @@ export class SiteBlocksController {
     return this.siteBlocksService.validateSlug({ siteId, pageId, slug });
   }
 
+  @Post('reorder')
+  reorder(@Body(new ZodValidationPipe(ReorderSchema)) reorderDto: ReorderDto) {
+    return this.siteBlocksService.reorder(reorderDto);
+  }
+
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.siteBlocksService.getById({ id });
@@ -60,5 +67,14 @@ export class SiteBlocksController {
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.siteBlocksService.delete(id);
+  }
+
+  @Post(':id/duplicate')
+  duplicate(
+    @Param('siteId', ParseIntPipe) siteId: number,
+    @Param('pageId', ParseIntPipe) pageId: number,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
+    return this.siteBlocksService.duplicate(siteId, pageId, id);
   }
 }

@@ -193,8 +193,8 @@ export function Manual({ value, onChange, options }: Props) {
                     import.meta.env.VITE_ASSETS_HOST
                   }/${asset.path}`;
                   return asset ? (
-                    <ImageCardWrapper>
-                      <ImageCard key={asset.id} src={backgroundImage} />
+                    <ImageCardWrapper key={asset.id}>
+                      <ImageCard src={backgroundImage} />
                       <ButtonsWrapper gap={8}>
                         <Tooltip.Root>
                           <Tooltip.Trigger>

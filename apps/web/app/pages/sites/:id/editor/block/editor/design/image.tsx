@@ -12,7 +12,12 @@ export function ImageEditorDesign({
   block,
 }: BlockEditorProps<z.infer<typeof ImageBlockSchema>>) {
   const { handleChangeContainerStyle, handleChangeStyle } =
-    useHandleChangeBlock(SiteBlockTypes.Image, block.id);
+    useHandleChangeBlock({
+      block: {
+        type: SiteBlockTypes.Image,
+        id: block.id,
+      },
+    });
 
   if (!block.id) return null;
 

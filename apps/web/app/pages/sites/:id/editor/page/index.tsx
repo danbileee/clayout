@@ -4,19 +4,20 @@ import { useSiteContext } from "../../contexts/site.context";
 import { useBlockIdsForPage } from "@/lib/zustand/editor";
 
 export function Page() {
-  const { page } = useSiteContext();
-  const blockIds = useBlockIdsForPage(page?.id);
+  const { selectedPage } = useSiteContext();
+  const blockIds = useBlockIdsForPage(selectedPage?.id);
 
-  if (!page) {
+  /** TODO: Empty UI */
+  if (!selectedPage) {
     return null;
   }
 
-  const { pageFit = "md" } = page.meta ?? {};
+  const { pageFit = "md" } = selectedPage.meta ?? {};
 
   return (
     <div style={{ width: "100%", maxWidth: SitePageFitWidth[pageFit] }}>
-      {blockIds.map((blockId) => (
-        <Block key={blockId} blockId={blockId} />
+      {blockIds.map((blockId, blockIndex) => (
+        <Block key={blockId} blockId={blockId} blockIndex={blockIndex} />
       ))}
     </div>
   );
