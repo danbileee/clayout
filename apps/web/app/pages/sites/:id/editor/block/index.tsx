@@ -54,13 +54,6 @@ export function Block({ blockId, blockIndex }: Props) {
   const blockSchema = useBlockById(blockId);
   const reorderBlocksLocally = useReorderBlock();
   const removeBlocksLocally = useRemoveBlock();
-  const matchedBlock = selectedPage?.blocks.find(
-    (b) => b.id === blockSchema.id
-  );
-  const parsedBlock = SiteBlockSchema.parse(blockSchema);
-  const registerdBlock = new BlockRegistry().find(parsedBlock);
-  const selected = selectedBlock === matchedBlock;
-
   const { mutateAsync: reorderBlocks } = useClientMutation({
     mutationFn: postSiteBlockReorder,
   });
@@ -72,6 +65,13 @@ export function Block({ blockId, blockIndex }: Props) {
       mutationFn: deleteSiteBlocks,
     }
   );
+
+  const matchedBlock = selectedPage?.blocks.find(
+    (b) => b.id === blockSchema.id
+  );
+  const parsedBlock = SiteBlockSchema.parse(blockSchema);
+  const registerdBlock = new BlockRegistry().find(parsedBlock);
+  const selected = selectedBlock === matchedBlock;
 
   const handleClickBlock = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
@@ -209,6 +209,7 @@ export function Block({ blockId, blockIndex }: Props) {
         );
       }
 
+      closeBlockEditor();
       removeBlocksLocally(selectedPage.id, matchedBlock.id);
 
       await deleteBlock({
