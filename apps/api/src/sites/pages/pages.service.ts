@@ -8,7 +8,7 @@ import {
   ReorderDto,
   UpdateSitePageDto,
 } from '@clayout/interface';
-import { SitePageErrors } from '@clayout/interface';
+import { SiteErrors } from '@clayout/interface';
 import {
   isPostgresError,
   PostgresErrorCode,
@@ -40,9 +40,7 @@ export class SitePagesService {
       });
 
       if (slugExists) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
+        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
       }
     }
 
@@ -57,7 +55,7 @@ export class SitePagesService {
 
         if (homeExists) {
           throw new BadRequestException(
-            SitePageErrors['site-page.existing-homepage'],
+            SiteErrors['site-page.existing-homepage'],
           );
         }
       }
@@ -71,7 +69,7 @@ export class SitePagesService {
       createSitePageDto.isVisible === false
     ) {
       throw new BadRequestException(
-        SitePageErrors['site-page.home-should-be-visible'],
+        SiteErrors['site-page.home-should-be-visible'],
       );
     }
 
@@ -91,9 +89,7 @@ export class SitePagesService {
         isPostgresError(error) &&
         error.driverError.code === PostgresErrorCode.UniqueViolation
       ) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
+        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
       }
       throw error;
     }
@@ -124,12 +120,7 @@ export class SitePagesService {
   async update(
     id: number,
     dto: UpdateSitePageDto,
-    options?: {
-      replace?: boolean;
-    },
   ): Promise<{ page: SitePageEntity }> {
-    const { replace = false } = options ?? {};
-
     const matchedSitePage = await this.sitesPagesRepository.findOne({
       where: {
         id,
@@ -153,9 +144,7 @@ export class SitePagesService {
         },
       });
       if (slugExists) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
+        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
       }
     }
 
@@ -173,7 +162,7 @@ export class SitePagesService {
 
       if (dto.isHome === true && existingHomePage) {
         throw new BadRequestException(
-          SitePageErrors['site-page.existing-homepage'],
+          SiteErrors['site-page.existing-homepage'],
         );
       }
       if (
@@ -181,7 +170,7 @@ export class SitePagesService {
         matchedSitePage.isHome === true &&
         !existingHomePage
       ) {
-        throw new BadRequestException(SitePageErrors['site-page.no-homepage']);
+        throw new BadRequestException(SiteErrors['site-page.no-homepage']);
       }
     }
 
@@ -191,51 +180,29 @@ export class SitePagesService {
     if (typeof dto.isVisible === 'boolean') {
       if (dto.isVisible === false && matchedSitePage.isHome) {
         throw new BadRequestException(
-          SitePageErrors['site-page.home-should-be-visible'],
+          SiteErrors['site-page.home-should-be-visible'],
         );
       }
     }
 
     /**
-     * Do not allow reordering if this is not replace action
+     * Do not allow reordering stealthily
      */
-    if (!replace) {
-      if (
-        typeof dto.order === 'number' &&
-        dto.order !== matchedSitePage.order
-      ) {
-        throw new BadRequestException(
-          'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
-        );
-      }
-
-      for (const block of dto.blocks) {
-        const { block: matchedBlock } = await this.siteBlocksService.getById({
-          id: block.id,
-        });
-
-        if (
-          matchedBlock &&
-          typeof block.order === 'number' &&
-          block.order !== matchedBlock.order
-        ) {
-          throw new BadRequestException(
-            'Changing block order via page update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
-          );
-        }
-      }
+    if (typeof dto.order === 'number' && dto.order !== matchedSitePage.order) {
+      throw new BadRequestException(
+        'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
+      );
     }
 
     const { blocks, ...updateSitePageDto } = dto;
 
-    for (const block of blocks) {
-      if (!block.id) {
-        throw new BadRequestException(
-          `Block id is required to save the block changes.`,
-        );
-      }
-
-      await this.siteBlocksService.update(block.id, block, { replace });
+    /**
+     * Do not allow block update through page API
+     */
+    if (blocks.length) {
+      throw new BadRequestException(
+        'Changing blocks via page update is not allowed. Use the block API: PATCH /sites/:siteId/pages/:pageId/blocks/:blockId',
+      );
     }
 
     try {
@@ -253,9 +220,7 @@ export class SitePagesService {
         isPostgresError(error) &&
         error.driverError.code === PostgresErrorCode.UniqueViolation
       ) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
+        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
       }
       throw error;
     }

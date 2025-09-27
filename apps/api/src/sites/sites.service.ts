@@ -12,7 +12,7 @@ import {
   SiteDomainStatuses,
 } from '@clayout/interface';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { AuthorService } from 'src/shared/services/author.service';
 import { PaginationService } from 'src/shared/services/pagination.service';
 import { SiteEntity } from './entities/site.entity';
@@ -27,6 +27,11 @@ import { SiteFile } from './interfaces/site.interface';
 import { SiteDomainEntity } from './entities/site-domain.entity';
 import { SitePagesService } from './pages/pages.service';
 import { SiteBlocksService } from './blocks/blocks.service';
+import { SiteErrors } from '@clayout/interface';
+import {
+  isPostgresError,
+  PostgresErrorCode,
+} from 'src/shared/utils/isPostgresError';
 
 @Injectable()
 export class SitesService implements AuthorService {
@@ -155,90 +160,74 @@ export class SitesService implements AuthorService {
       },
     });
 
-    const { pages, ...updateSiteDto } = dto;
-
-    for (const page of pages) {
-      const { blocks, ...restPage } = page;
-
-      if (!page.id) {
-        throw new BadRequestException(
-          `Page id is required to save the page changes.`,
-        );
-      }
-
-      const { page: matchedSitePage } = await this.sitePagesService.getById({
-        id: page.id,
-      });
-
-      if (
-        typeof page.order === 'number' &&
-        page.order !== matchedSitePage.order
-      ) {
-        throw new BadRequestException(
-          'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
-        );
-      }
-
-      for (const block of blocks) {
-        const { block: matchedBlock } = await this.siteBlocksService.getById({
-          id: block.id,
-        });
-
-        if (
-          matchedBlock &&
-          typeof block.order === 'number' &&
-          block.order !== matchedBlock.order
-        ) {
-          throw new BadRequestException(
-            'Changing block order via site update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
-          );
-        }
-
-        if (!block.id) {
-          throw new BadRequestException(
-            `Block id is required to save the block changes.`,
-          );
-        }
-
-        await this.siteBlocksService.update(block.id, block);
-      }
-
-      if (typeof restPage.order === 'number') {
-        throw new BadRequestException(
-          'Changing page order via site update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
-        );
-      }
-
-      await this.sitePagesService.update(page.id, restPage);
+    if (!matchedSite) {
+      throw new BadRequestException(`Site not found`);
     }
 
-    const updatedSite: SiteEntity = await this.sitesRepository.save({
-      ...matchedSite,
-      ...updateSiteDto,
-      meta: updateSiteDto.meta
-        ? { ...matchedSite.meta, ...updateSiteDto.meta }
-        : matchedSite.meta,
-      id,
-    });
-    const finalSite = await this.sitesRepository.findOne({
-      where: { id: updatedSite.id },
-      relations: {
-        author: true,
-        pages: {
-          blocks: true,
+    /**
+     * slug
+     */
+    if (dto.slug) {
+      const slugExists = await this.sitesRepository.exists({
+        where: {
+          slug: dto.slug,
+          id: Not(id),
         },
-      },
-      order: {
-        pages: {
-          order: 'ASC',
-          blocks: {
-            order: 'ASC',
+      });
+
+      if (slugExists) {
+        throw new BadRequestException(SiteErrors['site.duplicate-slug']);
+      }
+    }
+
+    const { pages, ...updateSiteDto } = dto;
+
+    /**
+     * Do not allow page update through site API
+     */
+    if (pages.length) {
+      throw new BadRequestException(
+        'Changing pages via site update is not allowed. Use the page API: PATCH /sites/:siteId/pages/:pageId',
+      );
+    }
+
+    try {
+      const updatedSite: SiteEntity = await this.sitesRepository.save({
+        ...matchedSite,
+        ...updateSiteDto,
+        meta: updateSiteDto.meta
+          ? { ...matchedSite.meta, ...updateSiteDto.meta }
+          : matchedSite.meta,
+        id,
+      });
+      const finalSite = await this.sitesRepository.findOne({
+        where: { id: updatedSite.id },
+        relations: {
+          author: true,
+          pages: {
+            blocks: true,
           },
         },
-      },
-    });
+        order: {
+          pages: {
+            order: 'ASC',
+            blocks: {
+              order: 'ASC',
+            },
+          },
+        },
+      });
 
-    return { site: finalSite };
+      return { site: finalSite };
+    } catch (error: unknown) {
+      if (
+        isPostgresError(error) &&
+        error.driverError.code === PostgresErrorCode.UniqueViolation
+      ) {
+        throw new BadRequestException(SiteErrors['site.duplicate-slug']);
+      }
+      throw error;
+    }
   }
 
   async delete(id: number): Promise<{ id: number }> {

@@ -6,16 +6,37 @@ import { nanoid } from "nanoid";
 // Command Types and Interfaces
 // ----------------------------------------------------------------------------
 
-const CommandTypes = {
+export const CommandTypes = {
   UPDATE_BLOCK: "UPDATE_BLOCK",
   REMOVE_BLOCK: "REMOVE_BLOCK",
   ADD_BLOCK: "ADD_BLOCK",
   REORDER_BLOCK: "REORDER_BLOCK",
   REORDER_BLOCKS: "REORDER_BLOCKS",
-  DUPLICATE_BLOCK: "DUPLICATE_BLOCK",
 } as const;
 
-type CommandType = keyof typeof CommandTypes;
+export type CommandType = keyof typeof CommandTypes;
+
+export type CommandResult =
+  | {
+      type: typeof CommandTypes.UPDATE_BLOCK;
+      params: { pageId: number; blockId: number; block: BlockSchema };
+    }
+  | {
+      type: typeof CommandTypes.REMOVE_BLOCK;
+      params: { pageId: number; blockId: number };
+    }
+  | {
+      type: typeof CommandTypes.ADD_BLOCK;
+      params: { pageId: number; block: BlockSchema; index: number };
+    }
+  | {
+      type: typeof CommandTypes.REORDER_BLOCK;
+      params: { pageId: number; sourceBlockId: number; targetBlockId: number };
+    }
+  | {
+      type: typeof CommandTypes.REORDER_BLOCKS;
+      params: { pageId: number; blockIds: string[] };
+    };
 
 interface Command {
   readonly id: string;
@@ -23,8 +44,8 @@ interface Command {
   readonly timestamp: number;
   readonly type: CommandType;
 
-  execute(): void;
-  undo(): void;
+  execute(): CommandResult;
+  undo(): CommandResult;
 
   getAffectedBlocks(): number[];
   getAffectedPages(): number[];
@@ -94,10 +115,10 @@ export function createHistoryManager() {
    * @execute
    * Execute a command and add it to history
    */
-  function execute(command: Command, pageId: number): void {
+  function execute(command: Command, pageId: number): CommandResult | null {
     if (isExecuting) {
       // Cannot execute command while another command is executing
-      return;
+      return null;
     }
 
     isExecuting = true;
@@ -119,7 +140,7 @@ export function createHistoryManager() {
       }
 
       // Execute the command
-      command.execute();
+      const result = command.execute();
 
       // Add to history
       historyByPage[pageId].push(command);
@@ -130,6 +151,8 @@ export function createHistoryManager() {
         historyByPage[pageId].shift();
         currentIndexByPage[pageId]--;
       }
+
+      return result;
     } finally {
       isExecuting = false;
     }
@@ -139,10 +162,7 @@ export function createHistoryManager() {
    * @undo
    * Undo the last executed command for the specified page
    */
-  function undo(
-    pageId: number,
-    getBlocksForPage: (pageId: number) => BlockSchema[]
-  ): BlockSchema[] | null {
+  function undo(pageId: number): CommandResult | null {
     if (!canUndo(pageId)) {
       return null;
     }
@@ -153,9 +173,9 @@ export function createHistoryManager() {
       const history = historyByPage[pageId];
       const currentIndex = currentIndexByPage[pageId];
       const command = history[currentIndex];
-      command.undo();
+      const result = command.undo();
       currentIndexByPage[pageId] = currentIndex - 1;
-      return getBlocksForPage(pageId);
+      return result;
     } finally {
       isExecuting = false;
     }
@@ -165,10 +185,7 @@ export function createHistoryManager() {
    * @redo
    * Redo the next command in history for the specified page
    */
-  function redo(
-    pageId: number,
-    getBlocksForPage: (pageId: number) => BlockSchema[]
-  ): BlockSchema[] | null {
+  function redo(pageId: number): CommandResult | null {
     if (!canRedo(pageId)) {
       return null;
     }
@@ -179,8 +196,8 @@ export function createHistoryManager() {
       const currentIndex = currentIndexByPage[pageId];
       currentIndexByPage[pageId] = currentIndex + 1;
       const command = historyByPage[pageId][currentIndexByPage[pageId]];
-      command.execute();
-      return getBlocksForPage(pageId);
+      const result = command.execute();
+      return result;
     } finally {
       isExecuting = false;
     }
@@ -261,11 +278,19 @@ export function createUpdateBlockCommand(
       if (newBlock.type) {
         updateBlockFn(blockId, newBlock.type, newBlock);
       }
+      return {
+        type: CommandTypes.UPDATE_BLOCK,
+        params: { pageId, blockId, block: newBlock },
+      };
     },
     undo: () => {
       if (oldBlock.type) {
         updateBlockFn(blockId, oldBlock.type, oldBlock);
       }
+      return {
+        type: CommandTypes.UPDATE_BLOCK,
+        params: { pageId, blockId, block: oldBlock },
+      };
     },
     getAffectedBlocks: () => [blockId],
     getAffectedPages: () => [pageId],
@@ -284,10 +309,18 @@ export function createRemoveBlockCommand(
     ...createBaseCommand(CommandTypes.REMOVE_BLOCK, `Remove block ${blockId}`),
     execute: () => {
       removeBlockFn(pageId, blockId);
+      return {
+        type: CommandTypes.REMOVE_BLOCK,
+        params: { pageId, blockId },
+      };
     },
     undo: () => {
       // Restore the block at its original position
       addBlockFn(pageId, removedBlock, blockIndex);
+      return {
+        type: CommandTypes.ADD_BLOCK,
+        params: { pageId, block: removedBlock, index: blockIndex },
+      };
     },
     getAffectedBlocks: () => [blockId],
     getAffectedPages: () => [pageId],
@@ -295,6 +328,44 @@ export function createRemoveBlockCommand(
 }
 
 export function createReorderBlockCommand(
+  pageId: number,
+  sourceBlockId: number,
+  targetBlockId: number,
+  reorderBlockFn: (
+    pageId: number,
+    sourceBlockId: number,
+    targetBlockId: number
+  ) => void
+): Command {
+  return {
+    ...createBaseCommand(
+      CommandTypes.REORDER_BLOCK,
+      `Reorder block ${sourceBlockId} to ${targetBlockId}`
+    ),
+    execute: () => {
+      reorderBlockFn(pageId, sourceBlockId, targetBlockId);
+      return {
+        type: CommandTypes.REORDER_BLOCK,
+        params: { pageId, sourceBlockId, targetBlockId },
+      };
+    },
+    undo: () => {
+      reorderBlockFn(pageId, sourceBlockId, targetBlockId);
+      return {
+        type: CommandTypes.REORDER_BLOCK,
+        params: {
+          pageId,
+          sourceBlockId: targetBlockId,
+          targetBlockId: sourceBlockId,
+        },
+      };
+    },
+    getAffectedBlocks: () => [sourceBlockId, targetBlockId],
+    getAffectedPages: () => [pageId],
+  };
+}
+
+export function createReorderBlocksCommand(
   pageId: number,
   oldBlockIds: string[],
   newBlockIds: string[],
@@ -307,10 +378,18 @@ export function createReorderBlockCommand(
     ),
     execute: () => {
       reorderBlocksFn(pageId, newBlockIds);
+      return {
+        type: CommandTypes.REORDER_BLOCKS,
+        params: { pageId, blockIds: newBlockIds },
+      };
     },
     undo: () => {
       // Restore the original order
       reorderBlocksFn(pageId, oldBlockIds);
+      return {
+        type: CommandTypes.REORDER_BLOCKS,
+        params: { pageId, blockIds: oldBlockIds },
+      };
     },
     getAffectedBlocks: () => {
       // Get all unique block IDs from both arrays
@@ -332,11 +411,19 @@ export function createAddBlockCommand(
     ...createBaseCommand(CommandTypes.ADD_BLOCK, `Add block ${block.id}`),
     execute: () => {
       addBlockFn(pageId, block, blockIndex);
+      return {
+        type: CommandTypes.ADD_BLOCK,
+        params: { pageId, block, index: blockIndex },
+      };
     },
     undo: () => {
       if (block.id) {
         removeBlockFn(pageId, block.id);
       }
+      return {
+        type: CommandTypes.REMOVE_BLOCK,
+        params: { pageId, blockId: block.id! },
+      };
     },
     getAffectedBlocks: () => (block.id ? [block.id] : []),
     getAffectedPages: () => [pageId],

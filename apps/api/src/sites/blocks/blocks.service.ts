@@ -101,12 +101,7 @@ export class SiteBlocksService {
   async update(
     id: number,
     updateSiteBlockDto: UpdateSiteBlockDto,
-    options?: {
-      replace?: boolean;
-    },
   ): Promise<{ block: SiteBlockEntity }> {
-    const { replace = false } = options ?? {};
-
     const matchedSiteBlock = await this.sitesBlocksRepository.findOne({
       where: {
         id,
@@ -120,7 +115,6 @@ export class SiteBlocksService {
 
     // Disallow direct order updates; instruct to use reorder API
     if (
-      !replace &&
       typeof updateSiteBlockDto.order === 'number' &&
       updateSiteBlockDto.order !== matchedSiteBlock.order
     ) {

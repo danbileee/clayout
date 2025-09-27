@@ -121,41 +121,6 @@ export async function patchSitePages(args: {
 }
 
 /**
- * PUT
- */
-
-interface PutEndpointParams {
-  siteId: number;
-  pageId: number;
-}
-
-interface PutQueryParams {}
-
-interface PutBody extends UpdateSitePageDto {}
-
-interface PutParams extends PutEndpointParams, PutQueryParams, PutBody {}
-
-interface PutResponse {
-  page: SitePageWithRelations;
-}
-
-export async function putSitePages(args: {
-  params: PutParams;
-  request?: Request;
-}) {
-  const {
-    params: { siteId, pageId, ...params },
-    request,
-  } = args;
-  const axios = createAxiosInstance(request);
-  return await axios.put<
-    PutResponse,
-    AxiosResponse<PutResponse, PutBody>,
-    PutBody
-  >(`/sites/${siteId}/pages/${pageId}`, params);
-}
-
-/**
  * DELETE
  */
 

@@ -53,10 +53,10 @@ export function Block({ blockId, blockIndex }: Props) {
     invalidateSiteCache,
   } = useSiteContext();
   const blockSchema = useBlockById(blockId);
-  const reorderBlocksLocally = useReorderBlock();
-  const removeBlocksLocally = useRemoveBlock();
-  const addBlocksLocally = useAddBlock();
-  const { mutateAsync: reorderBlocks } = useClientMutation({
+  const reorderBlockLocally = useReorderBlock();
+  const removeBlockLocally = useRemoveBlock();
+  const addBlockLocally = useAddBlock();
+  const { mutateAsync: reorderBlock } = useClientMutation({
     mutationFn: postSiteBlockReorder,
   });
   const { mutateAsync: duplicateBlock } = useClientMutation({
@@ -92,9 +92,9 @@ export function Block({ blockId, blockIndex }: Props) {
         throw new Error(`siteId and pageId are required.`);
       }
 
-      reorderBlocksLocally(selectedPage.id, matchedBlock.id, targetBlock.id);
+      reorderBlockLocally(selectedPage.id, matchedBlock.id, targetBlock.id);
 
-      await reorderBlocks({
+      await reorderBlock({
         params: {
           siteId: site.id,
           pageId: selectedPage.id,
@@ -185,7 +185,7 @@ export function Block({ blockId, blockIndex }: Props) {
       const parsed = SiteBlockSchema.safeParse(response.data.block);
 
       if (parsed.success) {
-        addBlocksLocally(selectedPage.id, parsed.data);
+        addBlockLocally(selectedPage.id, parsed.data);
       }
 
       await invalidateSiteCache();
@@ -219,7 +219,7 @@ export function Block({ blockId, blockIndex }: Props) {
       }
 
       closeBlockEditor();
-      removeBlocksLocally(selectedPage.id, matchedBlock.id);
+      removeBlockLocally(selectedPage.id, matchedBlock.id);
 
       await deleteBlock({
         params: {

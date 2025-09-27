@@ -28,9 +28,9 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
   const { mutateAsync } = useClientMutation({
     mutationFn: patchSiteBlocks,
   });
-  const updateBlock = useUpdateBlock();
+  const updateBlockLocally = useUpdateBlock();
 
-  const mutateBlock = useRef(
+  const updateDB = useRef(
     debounce(
       async (params: {
         siteId: number;
@@ -82,14 +82,14 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
     /**
      * real-time UI update (w/ zustand)
      */
-    updateBlock(block.id, block.type, {
+    updateBlockLocally(block.id, block.type, {
       containerStyle: value,
     });
 
     /**
      * debounced DB update (w/ API request)
      */
-    await mutateBlock.current({
+    await updateDB.current({
       siteId: site.id,
       pageId: selectedPageId,
       block: {
@@ -107,14 +107,14 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
     /**
      * real-time UI update (w/ zustand)
      */
-    updateBlock(block.id, block.type, {
+    updateBlockLocally(block.id, block.type, {
       data: value,
     });
 
     /**
      * debounced DB update (w/ API request)
      */
-    await mutateBlock.current({
+    await updateDB.current({
       siteId: site.id,
       pageId: selectedPageId,
       block: {
@@ -132,14 +132,14 @@ export function useHandleChangeBlock<K extends keyof typeof BlockSchemaByType>({
     /**
      * real-time UI update (w/ zustand)
      */
-    updateBlock(block.id, block.type, {
+    updateBlockLocally(block.id, block.type, {
       style: value,
     });
 
     /**
      * debounced DB update (w/ API request)
      */
-    await mutateBlock.current({
+    await updateDB.current({
       siteId: site.id,
       pageId: selectedPageId,
       block: {

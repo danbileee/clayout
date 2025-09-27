@@ -7,10 +7,12 @@ import type { DependencyList } from "react";
 import { deepMerge } from "@/utils/deepMerge";
 import {
   type HistoryManager,
+  type CommandResult,
   createHistoryManager,
   createUpdateBlockCommand,
   createRemoveBlockCommand,
   createReorderBlockCommand,
+  createReorderBlocksCommand,
   createAddBlockCommand,
 } from "./commands";
 
@@ -50,8 +52,8 @@ type BlocksActions = {
 
   // History management actions
   history: HistoryManager;
-  undo: (pageId: number) => BlockSchema[] | null;
-  redo: (pageId: number) => BlockSchema[] | null;
+  undo: (pageId: number) => CommandResult | null;
+  redo: (pageId: number) => CommandResult | null;
   canUndo: (pageId: number) => boolean;
   canRedo: (pageId: number) => boolean;
   getHistoryState: (pageId: number) => {
@@ -77,232 +79,210 @@ const toKey = (id: number) => String(id);
 const createBlocksStore = () => {
   const historyManager = createHistoryManager();
 
-  return createStore<BlocksStore>()((set, get) => {
-    const getBlocksForPage = (pageId: number) => {
+  return createStore<BlocksStore>()((set, get) => ({
+    byId: {},
+    idsByPageId: {},
+
+    upsertBlocks: (pageId, blocks) =>
+      set((state) => {
+        const pageKey = toKey(pageId);
+        const newById = { ...state.byId };
+        const blockIds: string[] = [];
+
+        for (const block of blocks) {
+          const key = toKey(block.id!);
+          newById[key] = block;
+          blockIds.push(key);
+        }
+
+        return {
+          byId: newById,
+          idsByPageId: { ...state.idsByPageId, [pageKey]: blockIds },
+        };
+      }),
+
+    upsertBlock: (pageId, block) =>
+      set((state) => {
+        const pageKey = toKey(pageId);
+        const blockKey = toKey(block.id!);
+        const existing = state.idsByPageId[pageKey] ?? [];
+        const hasId = existing.includes(blockKey);
+        return {
+          byId: { ...state.byId, [blockKey]: block },
+          idsByPageId: {
+            ...state.idsByPageId,
+            [pageKey]: hasId ? existing : [...existing, blockKey],
+          },
+        };
+      }),
+
+    updateBlock: (
+      blockId: number,
+      _type: keyof typeof BlockSchemaByType,
+      third:
+        | Partial<BlockSchema>
+        | ((prev: BlockSchema) => Partial<BlockSchema>)
+    ) => {
+      const state = get();
+      const blockKey = toKey(blockId);
+      const oldBlock = state.byId[blockKey];
+
+      if (!oldBlock) return;
+
+      // Calculate new block data
+      const partial = typeof third === "function" ? third(oldBlock) : third;
+
+      if (!partial || partial === oldBlock) return;
+
+      const newBlock = deepMerge(oldBlock, partial);
+
+      if (newBlock === oldBlock) return;
+
+      // Find the page ID for this block
+      const pageId = Object.entries(state.idsByPageId).find(([, blockIds]) =>
+        blockIds.includes(blockKey)
+      )?.[0];
+
+      if (!pageId) return;
+
+      const updateFn = createUpdateFunction(set);
+
+      const command = createUpdateBlockCommand(
+        blockId,
+        parseInt(pageId),
+        oldBlock,
+        newBlock,
+        updateFn
+      );
+
+      historyManager.execute(command, parseInt(pageId));
+    },
+
+    addBlock: (pageId, block) => {
+      if (!block) return;
+
       const state = get();
       const pageKey = toKey(pageId);
-      const ids = state.idsByPageId[pageKey] ?? EMPTY_STRING_ARRAY;
-      const blocks: BlockSchema[] = [];
-      for (const id of ids) {
-        const block = state.byId[id];
-        if (block) {
-          blocks.push(block);
-        }
-      }
-      return blocks;
-    };
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const addFn = createAddFunction(set);
+      const removeFn = createRemoveFunction(set);
 
-    return {
-      byId: {},
-      idsByPageId: {},
+      const command = createAddBlockCommand(
+        pageId,
+        block,
+        blockIds.length,
+        addFn,
+        removeFn
+      );
 
-      upsertBlocks: (pageId, blocks) =>
-        set((state) => {
-          const pageKey = toKey(pageId);
-          const newById = { ...state.byId };
+      historyManager.execute(command, pageId);
+    },
+
+    removeBlock: (pageId, blockId) => {
+      const state = get();
+      const pageKey = toKey(pageId);
+      const blockKey = toKey(blockId);
+      const block = state.byId[blockKey];
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const blockIndex = blockIds.indexOf(blockKey);
+
+      if (!block || blockIndex === -1) return;
+
+      const removeFn = createRemoveFunction(set);
+      const addFn = createAddFunction(set);
+
+      const command = createRemoveBlockCommand(
+        pageId,
+        blockId,
+        block,
+        blockIndex,
+        removeFn,
+        addFn
+      );
+
+      historyManager.execute(command, pageId);
+    },
+
+    reorderBlock: (pageId, blockId, targetId) => {
+      const state = get();
+      const pageKey = toKey(pageId);
+      const blockKey = toKey(blockId);
+      const targetKey = toKey(targetId);
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const oldIndex = blockIds.indexOf(blockKey);
+      const newIndex = blockIds.indexOf(targetKey);
+
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      // Only create a command if the order actually changed
+      if (oldIndex === newIndex) return;
+
+      const reorderBlockFn = createReorderBlockFunction(set);
+
+      const command = createReorderBlockCommand(
+        pageId,
+        blockId,
+        targetId,
+        reorderBlockFn
+      );
+
+      historyManager.execute(command, pageId);
+    },
+
+    reorderBlocks: (pageId, blockIds) => {
+      const state = get();
+      const pageKey = toKey(pageId);
+      const oldBlockIds = state.idsByPageId[pageKey] ?? [];
+
+      // Only create a command if the order actually changed
+      if (JSON.stringify(oldBlockIds) === JSON.stringify(blockIds)) return;
+
+      const reorderBlocksFn = createReorderBlocksFunction(set);
+
+      const command = createReorderBlocksCommand(
+        pageId,
+        oldBlockIds,
+        blockIds,
+        reorderBlocksFn
+      );
+
+      historyManager.execute(command, pageId);
+    },
+
+    hydrate: (data) =>
+      set((state) => {
+        const newById = { ...state.byId };
+        const newIdsByPageId = { ...state.idsByPageId };
+
+        for (const page of data.pages) {
+          const pageKey = toKey(page.id);
           const blockIds: string[] = [];
 
-          for (const block of blocks) {
-            const key = toKey(block.id!);
-            newById[key] = block;
-            blockIds.push(key);
+          for (const block of page.blocks) {
+            const blockKey = toKey(block.id!);
+            newById[blockKey] = block;
+            blockIds.push(blockKey);
           }
 
-          return {
-            byId: newById,
-            idsByPageId: { ...state.idsByPageId, [pageKey]: blockIds },
-          };
-        }),
+          newIdsByPageId[pageKey] = blockIds;
+        }
 
-      upsertBlock: (pageId, block) =>
-        set((state) => {
-          const pageKey = toKey(pageId);
-          const blockKey = toKey(block.id!);
-          const existing = state.idsByPageId[pageKey] ?? [];
-          const hasId = existing.includes(blockKey);
-          return {
-            byId: { ...state.byId, [blockKey]: block },
-            idsByPageId: {
-              ...state.idsByPageId,
-              [pageKey]: hasId ? existing : [...existing, blockKey],
-            },
-          };
-        }),
+        return {
+          byId: newById,
+          idsByPageId: newIdsByPageId,
+        };
+      }),
 
-      updateBlock: (
-        blockId: number,
-        _type: keyof typeof BlockSchemaByType,
-        third:
-          | Partial<BlockSchema>
-          | ((prev: BlockSchema) => Partial<BlockSchema>)
-      ) => {
-        const state = get();
-        const blockKey = toKey(blockId);
-        const oldBlock = state.byId[blockKey];
-
-        if (!oldBlock) return;
-
-        // Calculate new block data
-        const partial = typeof third === "function" ? third(oldBlock) : third;
-
-        if (!partial || partial === oldBlock) return;
-
-        const newBlock = deepMerge(oldBlock, partial);
-
-        if (newBlock === oldBlock) return;
-
-        // Find the page ID for this block
-        const pageId = Object.entries(state.idsByPageId).find(([, blockIds]) =>
-          blockIds.includes(blockKey)
-        )?.[0];
-
-        if (!pageId) return;
-
-        const updateFn = createUpdateFunction(set);
-
-        const command = createUpdateBlockCommand(
-          blockId,
-          parseInt(pageId),
-          oldBlock,
-          newBlock,
-          updateFn
-        );
-
-        historyManager.execute(command, parseInt(pageId));
-      },
-
-      addBlock: (pageId, block) => {
-        if (!block) return;
-
-        const state = get();
-        const pageKey = toKey(pageId);
-        const blockIds = state.idsByPageId[pageKey] ?? [];
-        const addFn = createAddFunction(set);
-        const removeFn = createRemoveFunction(set);
-
-        const command = createAddBlockCommand(
-          pageId,
-          block,
-          blockIds.length,
-          addFn,
-          removeFn
-        );
-
-        historyManager.execute(command, pageId);
-      },
-
-      removeBlock: (pageId, blockId) => {
-        const state = get();
-        const pageKey = toKey(pageId);
-        const blockKey = toKey(blockId);
-        const block = state.byId[blockKey];
-        const blockIds = state.idsByPageId[pageKey] ?? [];
-        const blockIndex = blockIds.indexOf(blockKey);
-
-        if (!block || blockIndex === -1) return;
-
-        const removeFn = createRemoveFunction(set);
-        const addFn = createAddFunction(set);
-
-        const command = createRemoveBlockCommand(
-          pageId,
-          blockId,
-          block,
-          blockIndex,
-          removeFn,
-          addFn
-        );
-
-        historyManager.execute(command, pageId);
-      },
-
-      reorderBlock: (pageId, blockId, targetId) => {
-        const state = get();
-        const pageKey = toKey(pageId);
-        const blockKey = toKey(blockId);
-        const targetKey = toKey(targetId);
-        const blockIds = state.idsByPageId[pageKey] ?? [];
-        const oldIndex = blockIds.indexOf(blockKey);
-        const newIndex = blockIds.indexOf(targetKey);
-
-        if (oldIndex === -1 || newIndex === -1) return;
-
-        // Create the new order by moving the block
-        const newBlockIds = [...blockIds];
-        newBlockIds.splice(oldIndex, 1);
-        newBlockIds.splice(newIndex, 0, blockKey);
-
-        // Only create a command if the order actually changed
-        if (JSON.stringify(blockIds) === JSON.stringify(newBlockIds)) return;
-
-        const reorderBlocksFn = createReorderBlocksFunction(set);
-
-        const command = createReorderBlockCommand(
-          pageId,
-          blockIds,
-          newBlockIds,
-          reorderBlocksFn
-        );
-
-        historyManager.execute(command, pageId);
-      },
-
-      reorderBlocks: (pageId, blockIds) => {
-        const state = get();
-        const pageKey = toKey(pageId);
-        const oldBlockIds = state.idsByPageId[pageKey] ?? [];
-
-        // Only create a command if the order actually changed
-        if (JSON.stringify(oldBlockIds) === JSON.stringify(blockIds)) return;
-
-        const reorderBlocksFn = createReorderBlocksFunction(set);
-
-        const command = createReorderBlockCommand(
-          pageId,
-          oldBlockIds,
-          blockIds,
-          reorderBlocksFn
-        );
-
-        historyManager.execute(command, pageId);
-      },
-
-      hydrate: (data) =>
-        set((state) => {
-          const newById = { ...state.byId };
-          const newIdsByPageId = { ...state.idsByPageId };
-
-          for (const page of data.pages) {
-            const pageKey = toKey(page.id);
-            const blockIds: string[] = [];
-
-            for (const block of page.blocks) {
-              const blockKey = toKey(block.id!);
-              newById[blockKey] = block;
-              blockIds.push(blockKey);
-            }
-
-            newIdsByPageId[pageKey] = blockIds;
-          }
-
-          return {
-            byId: newById,
-            idsByPageId: newIdsByPageId,
-          };
-        }),
-
-      // History management actions
-      history: historyManager,
-      undo: (pageId: number) => historyManager.undo(pageId, getBlocksForPage),
-      redo: (pageId: number) => historyManager.redo(pageId, getBlocksForPage),
-      canUndo: (pageId: number) => historyManager.canUndo(pageId),
-      canRedo: (pageId: number) => historyManager.canRedo(pageId),
-      getHistoryState: (pageId: number) =>
-        historyManager.getHistoryState(pageId),
-      clearHistory: () => historyManager.clear(),
-      clearPageHistory: (pageId: number) => historyManager.clearPage(pageId),
-    };
-  });
+    // History management actions
+    history: historyManager,
+    undo: (pageId: number) => historyManager.undo(pageId),
+    redo: (pageId: number) => historyManager.redo(pageId),
+    canUndo: (pageId: number) => historyManager.canUndo(pageId),
+    canRedo: (pageId: number) => historyManager.canRedo(pageId),
+    getHistoryState: (pageId: number) => historyManager.getHistoryState(pageId),
+    clearHistory: () => historyManager.clear(),
+    clearPageHistory: (pageId: number) => historyManager.clearPage(pageId),
+  }));
 };
 
 const blocksStore = createBlocksStore();
@@ -442,6 +422,31 @@ const createAddFunction =
 
       return {
         byId: newById,
+        idsByPageId: { ...state.idsByPageId, [pageKey]: newBlockIds },
+      };
+    });
+  };
+
+const createReorderBlockFunction =
+  (set: (fn: (state: BlocksState) => BlocksState) => void) =>
+  (pageId: number, sourceBlockId: number, targetBlockId: number) => {
+    set((state: BlocksState) => {
+      const pageKey = toKey(pageId);
+      const sourceKey = toKey(sourceBlockId);
+      const targetKey = toKey(targetBlockId);
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const sourceIndex = blockIds.indexOf(sourceKey);
+      const targetIndex = blockIds.indexOf(targetKey);
+
+      if (sourceIndex === -1 || targetIndex === -1) return state;
+
+      // Create the new order by moving the source block to target position
+      const newBlockIds = [...blockIds];
+      newBlockIds.splice(sourceIndex, 1);
+      newBlockIds.splice(targetIndex, 0, sourceKey);
+
+      return {
+        ...state,
         idsByPageId: { ...state.idsByPageId, [pageKey]: newBlockIds },
       };
     });

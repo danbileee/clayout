@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import * as Typo from "@/components/ui/typography";
 import * as Tooltip from "@/components/ui/tooltip";
-import { forwardRef, useEffect, useRef } from "react";
+import { forwardRef, useEffect } from "react";
 import { css, styled, useTheme } from "styled-components";
 import { SIDEBAR_WIDTH } from "./constants";
 import { rem } from "@/utils/rem";
@@ -20,11 +20,9 @@ import { useNavigate } from "react-router";
 import { joinPath, Paths } from "@/routes";
 import { useParamsId } from "@/hooks/useParamsId";
 import { HFlexBox } from "@/components/ui/box";
-import { useSiteContext } from "../contexts/site.context";
 import { toast } from "sonner";
-import { useUndo, useRedo, useCanUndo, useCanRedo } from "@/lib/zustand/editor";
-import { putSitePages } from "@/apis/sites/pages";
-import type { BlockSchema } from "@clayout/interface";
+import { useEditorHistory } from "./block/editor/hooks/useEditorHistory";
+import { useSiteContext } from "../contexts/site.context";
 
 export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   _props,
@@ -34,68 +32,22 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   const id = useParamsId();
   const navigate = useNavigate();
   const { site, selectedPage, selectedPageId } = useSiteContext();
-  const undo = useUndo();
-  const redo = useRedo();
-  const canUndo = useCanUndo(selectedPageId || 0);
-  const canRedo = useCanRedo(selectedPageId || 0);
-  const { mutateAsync: replacePage } = useClientMutation({
-    mutationFn: putSitePages,
-  });
   const { mutateAsync: publish, isPending: isPublishing } = useClientMutation({
     mutationFn: patchSitePublish,
   });
-  const mutatePage = useRef(async (blocks: BlockSchema[], pageId: number) =>
-    toast.promise(
-      async () => {
-        const fn = async () => {
-          if (!site?.id) {
-            throw new Error("siteId is required.");
-          }
-
-          await replacePage({
-            params: {
-              siteId: site.id,
-              pageId,
-              blocks,
-            },
-          });
-        };
-
-        try {
-          await fn();
-        } catch (e) {
-          const { error } = await handleError(e, {
-            onRetry: fn,
-          });
-
-          if (error) {
-            throw error;
-          }
-        }
-      },
-      {
-        loading: "Saving changes...",
-        success: "Saved",
-        error: "Failed to save",
-      }
-    )
-  );
+  const { undo, redo, canUndo, canRedo, updateDB } = useEditorHistory();
 
   const handleUndo = async () => {
     if (selectedPageId) {
-      const resultBlocks = undo(selectedPageId);
-      if (resultBlocks) {
-        await mutatePage.current(resultBlocks, selectedPageId);
-      }
+      const result = undo(selectedPageId);
+      await updateDB.current(result);
     }
   };
 
   const handleRedo = async () => {
     if (selectedPageId) {
-      const resultBlocks = redo(selectedPageId);
-      if (resultBlocks) {
-        await mutatePage.current(resultBlocks, selectedPageId);
-      }
+      const result = redo(selectedPageId);
+      await updateDB.current(result);
     }
   };
 
@@ -166,18 +118,14 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
 
       // Undo: Cmd/Ctrl + Z (without Shift)
       if (event.key === "z" && !event.shiftKey) {
-        const resultBlocks = undo(selectedPageId);
-        if (resultBlocks) {
-          await mutatePage.current(resultBlocks, selectedPageId);
-        }
+        const result = undo(selectedPageId);
+        await updateDB.current(result);
       }
 
       // Redo: Cmd/Ctrl + Shift + Z or Cmd/Ctrl + Y
       if ((event.key === "z" && event.shiftKey) || event.key === "y") {
-        const resultBlocks = redo(selectedPageId);
-        if (resultBlocks) {
-          await mutatePage.current(resultBlocks, selectedPageId);
-        }
+        const result = redo(selectedPageId);
+        await updateDB.current(result);
       }
     };
 
@@ -186,7 +134,7 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
     };
-  }, [undo, redo, selectedPageId]);
+  }, [undo, redo, selectedPageId, updateDB]);
 
   return (
     <HeaderBase ref={ref}>
