@@ -31,7 +31,7 @@ import { PexelsModule } from './pexels/pexels.module';
         return {
           type: 'postgres',
           url: config.get<string>(EnvKeys.DATABASE_URL),
-          ...(isProduction ? { ssl: { rejectUnauthorized: false } } : {}),
+          ...(isProduction ? { ssl: { rejectUnauthorized: true } } : {}),
           autoLoadEntities: true,
           synchronize: !isProduction,
           entities: [__dirname + '/**/*.entity.{js,ts}'],

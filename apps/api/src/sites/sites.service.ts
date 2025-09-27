@@ -166,6 +166,19 @@ export class SitesService implements AuthorService {
         );
       }
 
+      const { page: matchedSitePage } = await this.sitePagesService.getById({
+        id: page.id,
+      });
+
+      if (
+        typeof page.order === 'number' &&
+        page.order !== matchedSitePage.order
+      ) {
+        throw new BadRequestException(
+          'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
+        );
+      }
+
       for (const block of blocks) {
         const { block: matchedBlock } = await this.siteBlocksService.getById({
           id: block.id,
@@ -199,16 +212,16 @@ export class SitesService implements AuthorService {
       await this.sitePagesService.update(page.id, restPage);
     }
 
-    const newSite: SiteEntity = await this.sitesRepository.save({
-      id,
+    const updatedSite: SiteEntity = await this.sitesRepository.save({
       ...matchedSite,
       ...updateSiteDto,
       meta: updateSiteDto.meta
         ? { ...matchedSite.meta, ...updateSiteDto.meta }
         : matchedSite.meta,
+      id,
     });
     const finalSite = await this.sitesRepository.findOne({
-      where: { id: newSite.id },
+      where: { id: updatedSite.id },
       relations: {
         author: true,
         pages: {

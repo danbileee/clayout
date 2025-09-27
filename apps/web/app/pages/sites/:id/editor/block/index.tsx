@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { BlockRegistry } from "@clayout/kit";
 import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
 import {
+  useAddBlock,
   useBlockById,
   useRemoveBlock,
   useReorderBlock,
@@ -54,6 +55,7 @@ export function Block({ blockId, blockIndex }: Props) {
   const blockSchema = useBlockById(blockId);
   const reorderBlocksLocally = useReorderBlock();
   const removeBlocksLocally = useRemoveBlock();
+  const addBlocksLocally = useAddBlock();
   const { mutateAsync: reorderBlocks } = useClientMutation({
     mutationFn: postSiteBlockReorder,
   });
@@ -179,9 +181,16 @@ export function Block({ blockId, blockIndex }: Props) {
           blockId: matchedBlock.id,
         },
       });
+
+      const parsed = SiteBlockSchema.safeParse(response.data.block);
+
+      if (parsed.success) {
+        addBlocksLocally(selectedPage.id, parsed.data);
+      }
+
       await invalidateSiteCache();
 
-      setDuplicatedBlockId(response.data.id);
+      setDuplicatedBlockId(response.data.block.id);
     };
 
     try {
@@ -260,8 +269,7 @@ export function Block({ blockId, blockIndex }: Props) {
 
   /**
    * @useEffect
-   * Open duplicated block in the editor
-   * after some amount of delay
+   * Open duplicated block in the editor after some amount of delay
    * because the site data isn't updated right after duplication success
    */
   useEffect(() => {

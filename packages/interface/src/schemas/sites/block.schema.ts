@@ -21,7 +21,7 @@ const siteBlockShapeBase = {
   id: z.number().optional(),
   slug: z.string(),
   name: z.string().optional(),
-  order: z.number(),
+  order: z.number().optional(),
 } satisfies Pick<BlockSchemaObject, "id" | "slug" | "name" | "order">;
 
 const BlockAligns = {

@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { SitePagesService } from './pages.service';
 import { Roles } from 'src/users/decorators/role.decorator';
@@ -52,6 +53,17 @@ export class SitePagesController {
     updateSitePageDto: UpdateSitePageDto,
   ) {
     return this.sitePagesService.update(id, updateSitePageDto);
+  }
+
+  @Put(':id')
+  replace(
+    @Param('id', ParseIntPipe) id: number,
+    @Body(new ZodValidationPipe(SitePageSchema.partial()))
+    updateSitePageDto: UpdateSitePageDto,
+  ) {
+    return this.sitePagesService.update(id, updateSitePageDto, {
+      replace: true,
+    });
   }
 
   @Delete(':id')

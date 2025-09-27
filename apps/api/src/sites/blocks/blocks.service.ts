@@ -14,6 +14,7 @@ import {
   isPostgresError,
   PostgresErrorCode,
 } from 'src/shared/utils/isPostgresError';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class SiteBlocksService {
@@ -100,7 +101,12 @@ export class SiteBlocksService {
   async update(
     id: number,
     updateSiteBlockDto: UpdateSiteBlockDto,
+    options?: {
+      replace?: boolean;
+    },
   ): Promise<{ block: SiteBlockEntity }> {
+    const { replace = false } = options ?? {};
+
     const matchedSiteBlock = await this.sitesBlocksRepository.findOne({
       where: {
         id,
@@ -114,6 +120,7 @@ export class SiteBlocksService {
 
     // Disallow direct order updates; instruct to use reorder API
     if (
+      !replace &&
       typeof updateSiteBlockDto.order === 'number' &&
       updateSiteBlockDto.order !== matchedSiteBlock.order
     ) {
@@ -134,6 +141,7 @@ export class SiteBlocksService {
         },
       });
       if (slugExists) {
+        console.log('catched! dto slug');
         throw new BadRequestException(
           SiteBlockErrors['site-block.duplicate-slug'],
         );
@@ -156,6 +164,7 @@ export class SiteBlocksService {
               ...updateSiteBlockDto.containerStyle,
             }
           : matchedSiteBlock.containerStyle,
+        id,
       });
       return { block: updatedSiteBlock };
     } catch (error: unknown) {
@@ -163,6 +172,7 @@ export class SiteBlocksService {
         isPostgresError(error) &&
         error.driverError.code === PostgresErrorCode.UniqueViolation
       ) {
+        console.log('catched! postgres error');
         throw new BadRequestException(
           SiteBlockErrors['site-block.duplicate-slug'],
         );
@@ -218,7 +228,7 @@ export class SiteBlocksService {
     siteId: number,
     pageId: number,
     blockId: number,
-  ): Promise<{ id: number }> {
+  ): Promise<{ block: SiteBlockEntity }> {
     const matchedBlock = await this.sitesBlocksRepository.findOne({
       where: {
         id: blockId,
@@ -239,14 +249,14 @@ export class SiteBlocksService {
     const { block } = await this.create(
       {
         ...blockData,
-        slug: `${slug}-1`,
+        slug: `${slug}-${randomBytes(4).toString('hex')}`,
         order: existingCount,
       },
       siteId,
       pageId,
     );
 
-    return { id: block.id };
+    return { block };
   }
 
   async validateSlug({

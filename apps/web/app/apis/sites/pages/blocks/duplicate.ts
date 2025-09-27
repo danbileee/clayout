@@ -1,4 +1,5 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
+import type { SiteBlock } from "@clayout/interface";
 import type { AxiosResponse } from "axios";
 
 interface PostEndpointParams {
@@ -14,7 +15,7 @@ interface PostBody {}
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
 interface PostResponse {
-  id: number;
+  block: SiteBlock;
 }
 
 export async function postSiteBlockDuplicate(args: {

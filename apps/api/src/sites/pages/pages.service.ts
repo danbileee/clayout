@@ -123,8 +123,13 @@ export class SitePagesService {
 
   async update(
     id: number,
-    updateSitePageDto: UpdateSitePageDto,
+    dto: UpdateSitePageDto,
+    options?: {
+      replace?: boolean;
+    },
   ): Promise<{ page: SitePageEntity }> {
+    const { replace = false } = options ?? {};
+
     const matchedSitePage = await this.sitesPagesRepository.findOne({
       where: {
         id,
@@ -139,10 +144,10 @@ export class SitePagesService {
     /**
      * slug
      */
-    if (updateSitePageDto.slug) {
+    if (dto.slug) {
       const slugExists = await this.sitesPagesRepository.exists({
         where: {
-          slug: updateSitePageDto.slug,
+          slug: dto.slug,
           site: { id: matchedSitePage.site.id },
           id: Not(id),
         },
@@ -157,7 +162,7 @@ export class SitePagesService {
     /**
      * isHome
      */
-    if (typeof updateSitePageDto.isHome === 'boolean') {
+    if (typeof dto.isHome === 'boolean') {
       const existingHomePage = await this.sitesPagesRepository.findOne({
         where: {
           isHome: true,
@@ -166,13 +171,13 @@ export class SitePagesService {
         },
       });
 
-      if (updateSitePageDto.isHome === true && existingHomePage) {
+      if (dto.isHome === true && existingHomePage) {
         throw new BadRequestException(
           SitePageErrors['site-page.existing-homepage'],
         );
       }
       if (
-        updateSitePageDto.isHome === false &&
+        dto.isHome === false &&
         matchedSitePage.isHome === true &&
         !existingHomePage
       ) {
@@ -183,22 +188,28 @@ export class SitePagesService {
     /**
      * isVisible
      */
-    if (typeof updateSitePageDto.isVisible === 'boolean') {
-      if (updateSitePageDto.isVisible === false && matchedSitePage.isHome) {
+    if (typeof dto.isVisible === 'boolean') {
+      if (dto.isVisible === false && matchedSitePage.isHome) {
         throw new BadRequestException(
           SitePageErrors['site-page.home-should-be-visible'],
         );
       }
     }
 
-    if (typeof updateSitePageDto.order === 'number') {
-      throw new BadRequestException(
-        'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
-      );
-    }
+    /**
+     * Do not allow reordering if this is not replace action
+     */
+    if (!replace) {
+      if (
+        typeof dto.order === 'number' &&
+        dto.order !== matchedSitePage.order
+      ) {
+        throw new BadRequestException(
+          'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
+        );
+      }
 
-    if (Array.isArray(updateSitePageDto.blocks)) {
-      for (const block of updateSitePageDto.blocks) {
+      for (const block of dto.blocks) {
         const { block: matchedBlock } = await this.siteBlocksService.getById({
           id: block.id,
         });
@@ -215,6 +226,18 @@ export class SitePagesService {
       }
     }
 
+    const { blocks, ...updateSitePageDto } = dto;
+
+    for (const block of blocks) {
+      if (!block.id) {
+        throw new BadRequestException(
+          `Block id is required to save the block changes.`,
+        );
+      }
+
+      await this.siteBlocksService.update(block.id, block, { replace });
+    }
+
     try {
       const updatedSitePage = await this.sitesPagesRepository.save({
         ...matchedSitePage,
@@ -222,6 +245,7 @@ export class SitePagesService {
         meta: updateSitePageDto.meta
           ? { ...matchedSitePage.meta, ...updateSitePageDto.meta }
           : matchedSitePage.meta,
+        id,
       });
       return { page: updatedSitePage };
     } catch (error: unknown) {
