@@ -347,7 +347,7 @@ export class SitesService implements AuthorService {
     const release = this.sitesReleasesRepository.create({
       htmlSnapshot,
       dataSnapshot: site,
-      version: randomBytes(6).toString('hex'),
+      version: randomBytes(4).toString('hex'),
       site,
     });
 

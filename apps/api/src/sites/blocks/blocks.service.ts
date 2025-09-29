@@ -224,7 +224,7 @@ export class SiteBlocksService {
     const { block } = await this.create(
       {
         ...blockData,
-        slug: `${slug}-${randomBytes(4).toString('hex')}`,
+        slug: `${slug}-${randomBytes(2).toString('hex')}`,
         order: existingCount,
       },
       siteId,
