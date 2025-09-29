@@ -1,3 +1,4 @@
+import fs from 'fs';
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -34,10 +35,9 @@ import { PexelsModule } from './pexels/pexels.module';
           ...(isProduction
             ? {
                 ssl: {
-                  ca: Buffer.from(
-                    config.get<string>(EnvKeys.DB_CA_CERT_BASE64),
-                    'base64',
-                  ).toString('utf-8'),
+                  ca: fs
+                    .readFileSync(config.get<string>(EnvKeys.DB_CA_PATH))
+                    .toString(),
                   rejectUnauthorized: true,
                 },
               }
