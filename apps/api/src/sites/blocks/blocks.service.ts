@@ -29,25 +29,6 @@ export class SiteBlocksService {
     siteId: number,
     pageId: number,
   ): Promise<{ block: SiteBlockEntity }> {
-    /**
-     * slug
-     */
-    if (createSiteBlockDto.slug) {
-      const slugExists = await this.sitesBlocksRepository.exists({
-        where: {
-          slug: createSiteBlockDto.slug,
-          site: { id: siteId },
-          page: { id: pageId },
-        },
-      });
-
-      if (slugExists) {
-        throw new BadRequestException(
-          SiteBlockErrors['site-block.duplicate-slug'],
-        );
-      }
-    }
-
     const existingCount = await this.sitesBlocksRepository.count({
       where: { page: { id: pageId } },
     });

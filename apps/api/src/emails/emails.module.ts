@@ -35,7 +35,7 @@ import { EmailOpenEventEntity } from './entities/email-open-event.entity';
           },
         },
         defaults: {
-          from: config.get(EnvKeys.SMTP_FROM_EMAIL),
+          from: `${config.get(EnvKeys.SMTP_FROM_NAME)} <${config.get(EnvKeys.SMTP_FROM_EMAIL)}>`,
         },
         template: {
           dir: join(process.cwd(), 'dist', 'emails', 'templates'),

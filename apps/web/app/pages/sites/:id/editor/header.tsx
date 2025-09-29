@@ -38,17 +38,17 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   const { undo, redo, canUndo, canRedo, updateDB } = useEditorHistory();
 
   const handleUndo = async () => {
-    if (selectedPageId) {
-      const result = undo(selectedPageId);
-      await updateDB.current(result);
-    }
+    if (!selectedPageId) return;
+
+    const result = undo(selectedPageId);
+    await updateDB.current(result);
   };
 
   const handleRedo = async () => {
-    if (selectedPageId) {
-      const result = redo(selectedPageId);
-      await updateDB.current(result);
-    }
+    if (!selectedPageId) return;
+
+    const result = redo(selectedPageId);
+    await updateDB.current(result);
   };
 
   const handleBack = () => {

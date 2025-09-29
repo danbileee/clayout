@@ -93,15 +93,6 @@ describe('EmailsService', () => {
         subject: mockEmail.subject,
         template: mockEmail.template,
         context: mockEmail.context,
-        headers: {
-          'X-SMTPAPI': JSON.stringify({
-            filters: {
-              clicktrack: { settings: { enable: 0 } },
-              opentrack: { settings: { enable: 0 } },
-            },
-          }),
-          'X-SendGrid-Bypass-Link-Management': 'true',
-        },
       });
       expect(emailsRepository.save).toHaveBeenCalledWith({
         ...mockEmail,

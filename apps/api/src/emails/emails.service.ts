@@ -34,27 +34,7 @@ export class EmailsService {
 
     try {
       // Use raw nodemailer options to bypass SendGrid tracking
-      await this.mailerService.sendMail({
-        ...sendEmailDto,
-        headers: {
-          'X-SMTPAPI': JSON.stringify({
-            filters: {
-              clicktrack: {
-                settings: {
-                  enable: 0,
-                },
-              },
-              opentrack: {
-                settings: {
-                  enable: 0,
-                },
-              },
-            },
-          }),
-          // Bypass link management
-          'X-SendGrid-Bypass-Link-Management': 'true',
-        },
-      });
+      await this.mailerService.sendMail(sendEmailDto);
 
       const updatedEmail: EmailEntity = {
         ...email,

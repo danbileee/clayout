@@ -13,7 +13,7 @@ import {
 import { postSiteBlockReorder } from "@/apis/sites/pages/blocks/reorder";
 
 export function useEditorHistory() {
-  const { site, selectedPageId } = useSiteContext();
+  const { site, selectedPageId, invalidateSiteCache } = useSiteContext();
   const undo = useUndo();
   const redo = useRedo();
   const canUndo = useCanUndo(selectedPageId || 0);
@@ -84,6 +84,8 @@ export function useEditorHistory() {
             default:
               break;
           }
+
+          await invalidateSiteCache();
         };
 
         try {

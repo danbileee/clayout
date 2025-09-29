@@ -29,22 +29,6 @@ export class SitePagesService {
     siteId: number,
   ): Promise<{ page: SitePageEntity }> {
     /**
-     * slug
-     */
-    if (createSitePageDto.slug) {
-      const slugExists = await this.sitesPagesRepository.exists({
-        where: {
-          slug: createSitePageDto.slug,
-          site: { id: siteId },
-        },
-      });
-
-      if (slugExists) {
-        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
-      }
-    }
-
-    /**
      * isHome
      */
     if (typeof createSitePageDto.isHome === 'boolean') {

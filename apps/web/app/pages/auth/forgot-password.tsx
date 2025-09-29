@@ -13,8 +13,13 @@ import { useMutation } from "@tanstack/react-query";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import { toast } from "sonner";
 import { ErrorMessage } from "@/components/ui/typography";
+import { useClientMutation } from "@/lib/react-query/useClientMutation";
+import { postAuthResendEmail } from "@/apis/auth/resend-email";
 
 export default function ForgotPassword() {
+  const { mutateAsync: resendEmail } = useClientMutation({
+    mutationFn: postAuthResendEmail,
+  });
   const {
     mutateAsync: forgotPassword,
     isPending,
@@ -53,6 +58,28 @@ export default function ForgotPassword() {
     },
   });
 
+  const handleResendEmail = async () => {
+    const fn = async () => {
+      await resendEmail({
+        params: {
+          key: "reset-password",
+        },
+      });
+    };
+
+    try {
+      await fn();
+    } catch (e) {
+      const { error } = await handleError(e, {
+        onRetry: fn,
+      });
+
+      if (error) {
+        throw error;
+      }
+    }
+  };
+
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
@@ -66,10 +93,17 @@ export default function ForgotPassword() {
                 </Card.Description>
               </Card.Header>
               <Card.Content>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-muted-foreground mb-2">
                   If you registered using your email and password, you will
-                  receive a password reset email.
+                  receive a password reset email. If it doesn't arrive within 5
+                  minutes, check your spam folder or resend it.
                 </p>
+                <button
+                  className="underline underline-offset-4 text-left"
+                  onClick={handleResendEmail}
+                >
+                  Resend email
+                </button>
               </Card.Content>
             </Card.Root>
           ) : (
