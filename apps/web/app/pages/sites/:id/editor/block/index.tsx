@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { BlockRegistry } from "@clayout/kit";
 import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
 import {
+  useAddBlock,
   useBlockById,
   useRemoveBlock,
   useReorderBlock,
@@ -52,9 +53,10 @@ export function Block({ blockId, blockIndex }: Props) {
     invalidateSiteCache,
   } = useSiteContext();
   const blockSchema = useBlockById(blockId);
-  const reorderBlocksLocally = useReorderBlock();
-  const removeBlocksLocally = useRemoveBlock();
-  const { mutateAsync: reorderBlocks } = useClientMutation({
+  const reorderBlockLocally = useReorderBlock();
+  const removeBlockLocally = useRemoveBlock();
+  const addBlockLocally = useAddBlock();
+  const { mutateAsync: reorderBlock } = useClientMutation({
     mutationFn: postSiteBlockReorder,
   });
   const { mutateAsync: duplicateBlock } = useClientMutation({
@@ -90,9 +92,9 @@ export function Block({ blockId, blockIndex }: Props) {
         throw new Error(`siteId and pageId are required.`);
       }
 
-      reorderBlocksLocally(selectedPage.id, matchedBlock.id, targetBlock.id);
+      reorderBlockLocally(selectedPage.id, matchedBlock.id, targetBlock.id);
 
-      await reorderBlocks({
+      await reorderBlock({
         params: {
           siteId: site.id,
           pageId: selectedPage.id,
@@ -179,9 +181,16 @@ export function Block({ blockId, blockIndex }: Props) {
           blockId: matchedBlock.id,
         },
       });
+
+      const parsed = SiteBlockSchema.safeParse(response.data.block);
+
+      if (parsed.success) {
+        addBlockLocally(selectedPage.id, parsed.data);
+      }
+
       await invalidateSiteCache();
 
-      setDuplicatedBlockId(response.data.id);
+      setDuplicatedBlockId(response.data.block.id);
     };
 
     try {
@@ -210,7 +219,7 @@ export function Block({ blockId, blockIndex }: Props) {
       }
 
       closeBlockEditor();
-      removeBlocksLocally(selectedPage.id, matchedBlock.id);
+      removeBlockLocally(selectedPage.id, matchedBlock.id);
 
       await deleteBlock({
         params: {
@@ -260,8 +269,7 @@ export function Block({ blockId, blockIndex }: Props) {
 
   /**
    * @useEffect
-   * Open duplicated block in the editor
-   * after some amount of delay
+   * Open duplicated block in the editor after some amount of delay
    * because the site data isn't updated right after duplication success
    */
   useEffect(() => {

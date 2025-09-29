@@ -1,29 +1,29 @@
 import { createAxiosInstance } from "@/lib/axios/instance";
-import type { SiteBlock } from "@clayout/interface";
-import type { AxiosResponse } from "axios";
+import type { ResendAuthEmailDto } from "@clayout/interface";
+import { type AxiosResponse } from "axios";
 
-interface PostEndpointParams {
-  siteId: number;
-  pageId: number;
-  blockId: number;
-}
+/**
+ * POST
+ */
+
+interface PostEndpointParams {}
 
 interface PostQueryParams {}
 
-interface PostBody {}
+interface PostBody extends ResendAuthEmailDto {}
 
 interface PostParams extends PostEndpointParams, PostQueryParams, PostBody {}
 
 interface PostResponse {
-  block: SiteBlock;
+  message: string;
 }
 
-export async function postSiteBlockDuplicate(args: {
+export async function postAuthResendEmail(args: {
   params: PostParams;
   request?: Request;
 }) {
   const {
-    params: { siteId, pageId, blockId },
+    params: { key },
     request,
   } = args;
   const axios = createAxiosInstance(request);
@@ -31,5 +31,5 @@ export async function postSiteBlockDuplicate(args: {
     PostResponse,
     AxiosResponse<PostResponse, PostParams>,
     PostParams
-  >(`/sites/${siteId}/pages/${pageId}/blocks/${blockId}/duplicate`);
+  >(`/auth/resend-email`, { key });
 }

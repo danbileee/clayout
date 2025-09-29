@@ -5,6 +5,16 @@ import { BlockSchemaByType } from "@clayout/interface";
 import type { BlockSchema, BlockOf } from "@clayout/interface";
 import type { DependencyList } from "react";
 import { deepMerge } from "@/utils/deepMerge";
+import {
+  type HistoryManager,
+  type CommandResult,
+  createHistoryManager,
+  createUpdateBlockCommand,
+  createRemoveBlockCommand,
+  createReorderBlockCommand,
+  createReorderBlocksCommand,
+  createAddBlockCommand,
+} from "./commands";
 
 const EMPTY_STRING_ARRAY: string[] = [];
 
@@ -32,20 +42,44 @@ type BlocksActions = {
       updater: (prev: BlockOf<K>) => Partial<BlockOf<K>>
     ): void;
   };
+  addBlock: (pageId: number, block: BlockSchema) => void;
   removeBlock: (pageId: number, blockId: number) => void;
   reorderBlock: (pageId: number, blockId: number, targetId: number) => void;
   reorderBlocks: (pageId: number, blockIds: string[]) => void;
   hydrate: (data: {
     pages: Array<{ id: number; blocks: BlockSchema[] }>;
   }) => void;
+
+  // History management actions
+  history: HistoryManager;
+  undo: (pageId: number) => CommandResult | null;
+  redo: (pageId: number) => CommandResult | null;
+  canUndo: (pageId: number) => boolean;
+  canRedo: (pageId: number) => boolean;
+  getHistoryState: (pageId: number) => {
+    totalCommands: number;
+    currentIndex: number;
+    canUndo: boolean;
+    canRedo: boolean;
+    recentCommands: Array<{
+      id: string;
+      type: string;
+      description: string;
+      timestamp: number;
+    }>;
+  };
+  clearHistory: () => void;
+  clearPageHistory: (pageId: number) => void;
 };
 
 export type BlocksStore = BlocksState & BlocksActions;
 
 const toKey = (id: number) => String(id);
 
-const createBlocksStore = () =>
-  createStore<BlocksStore>()((set) => ({
+const createBlocksStore = () => {
+  const historyManager = createHistoryManager();
+
+  return createStore<BlocksStore>()((set, get) => ({
     byId: {},
     idsByPageId: {},
 
@@ -82,45 +116,138 @@ const createBlocksStore = () =>
         };
       }),
 
-    updateBlock: ((
+    updateBlock: (
       blockId: number,
-      type: keyof typeof BlockSchemaByType,
+      _type: keyof typeof BlockSchemaByType,
       third:
         | Partial<BlockSchema>
         | ((prev: BlockSchema) => Partial<BlockSchema>)
     ) => {
-      set((state) =>
-        updateBlockData(
-          state,
-          toKey(blockId),
-          type,
-          third as
-            | Partial<BlockSchema>
-            | ((prev: BlockSchema) => Partial<BlockSchema>)
-        )
+      const state = get();
+      const blockKey = toKey(blockId);
+      const oldBlock = state.byId[blockKey];
+
+      if (!oldBlock) return;
+
+      // Calculate new block data
+      const partial = typeof third === "function" ? third(oldBlock) : third;
+
+      if (!partial || partial === oldBlock) return;
+
+      const newBlock = deepMerge(oldBlock, partial);
+
+      if (newBlock === oldBlock) return;
+
+      // Find the page ID for this block
+      const pageId = Object.entries(state.idsByPageId).find(([, blockIds]) =>
+        blockIds.includes(blockKey)
+      )?.[0];
+
+      if (!pageId) return;
+
+      const updateFn = createUpdateFunction(set);
+
+      const command = createUpdateBlockCommand(
+        blockId,
+        parseInt(pageId),
+        oldBlock,
+        newBlock,
+        updateFn
       );
-    }) as BlocksActions["updateBlock"],
 
-    removeBlock: (pageId, blockId) =>
-      set((state) =>
-        removeBlockFromState(state, toKey(pageId), toKey(blockId))
-      ),
+      historyManager.execute(command, parseInt(pageId));
+    },
 
-    reorderBlock: (pageId, blockId, targetId) =>
-      set((state) =>
-        reorderBlockInState(
-          state,
-          toKey(pageId),
-          toKey(blockId),
-          toKey(targetId)
-        )
-      ),
+    addBlock: (pageId, block) => {
+      if (!block) return;
 
-    reorderBlocks: (pageId, blockIds) =>
-      set((state) => ({
-        ...state,
-        idsByPageId: { ...state.idsByPageId, [toKey(pageId)]: blockIds },
-      })),
+      const state = get();
+      const pageKey = toKey(pageId);
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const addFn = createAddFunction(set);
+      const removeFn = createRemoveFunction(set);
+
+      const command = createAddBlockCommand(
+        pageId,
+        block,
+        blockIds.length,
+        addFn,
+        removeFn
+      );
+
+      historyManager.execute(command, pageId);
+    },
+
+    removeBlock: (pageId, blockId) => {
+      const state = get();
+      const pageKey = toKey(pageId);
+      const blockKey = toKey(blockId);
+      const block = state.byId[blockKey];
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const blockIndex = blockIds.indexOf(blockKey);
+
+      if (!block || blockIndex === -1) return;
+
+      const removeFn = createRemoveFunction(set);
+      const addFn = createAddFunction(set);
+
+      const command = createRemoveBlockCommand(
+        pageId,
+        blockId,
+        block,
+        blockIndex,
+        removeFn,
+        addFn
+      );
+
+      historyManager.execute(command, pageId);
+    },
+
+    reorderBlock: (pageId, blockId, targetId) => {
+      const state = get();
+      const pageKey = toKey(pageId);
+      const blockKey = toKey(blockId);
+      const targetKey = toKey(targetId);
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const oldIndex = blockIds.indexOf(blockKey);
+      const newIndex = blockIds.indexOf(targetKey);
+
+      if (oldIndex === -1 || newIndex === -1) return;
+
+      // Only create a command if the order actually changed
+      if (oldIndex === newIndex) return;
+
+      const reorderBlockFn = createReorderBlockFunction(set);
+
+      const command = createReorderBlockCommand(
+        pageId,
+        blockId,
+        targetId,
+        reorderBlockFn
+      );
+
+      historyManager.execute(command, pageId);
+    },
+
+    reorderBlocks: (pageId, blockIds) => {
+      const state = get();
+      const pageKey = toKey(pageId);
+      const oldBlockIds = state.idsByPageId[pageKey] ?? [];
+
+      // Only create a command if the order actually changed
+      if (JSON.stringify(oldBlockIds) === JSON.stringify(blockIds)) return;
+
+      const reorderBlocksFn = createReorderBlocksFunction(set);
+
+      const command = createReorderBlocksCommand(
+        pageId,
+        oldBlockIds,
+        blockIds,
+        reorderBlocksFn
+      );
+
+      historyManager.execute(command, pageId);
+    },
 
     hydrate: (data) =>
       set((state) => {
@@ -145,7 +272,18 @@ const createBlocksStore = () =>
           idsByPageId: newIdsByPageId,
         };
       }),
+
+    // History management actions
+    history: historyManager,
+    undo: (pageId: number) => historyManager.undo(pageId),
+    redo: (pageId: number) => historyManager.redo(pageId),
+    canUndo: (pageId: number) => historyManager.canUndo(pageId),
+    canRedo: (pageId: number) => historyManager.canRedo(pageId),
+    getHistoryState: (pageId: number) => historyManager.getHistoryState(pageId),
+    clearHistory: () => historyManager.clear(),
+    clearPageHistory: (pageId: number) => historyManager.clearPage(pageId),
   }));
+};
 
 const blocksStore = createBlocksStore();
 
@@ -191,6 +329,8 @@ export const useReorderBlock = () => useBlocksStore((s) => s.reorderBlock, []);
 
 export const useRemoveBlock = () => useBlocksStore((s) => s.removeBlock, []);
 
+export const useAddBlock = () => useBlocksStore((s) => s.addBlock, []);
+
 export const useBlockOrder = (pageId: number) =>
   useBlocksStore(
     (s) => s.idsByPageId[toKey(pageId)] ?? EMPTY_STRING_ARRAY,
@@ -206,121 +346,117 @@ export const useBlockIndex = (pageId: number, blockId: number) =>
     [pageId, blockId]
   );
 
+export const useUndo = () => useBlocksStore((s) => s.undo, []);
+
+export const useRedo = () => useBlocksStore((s) => s.redo, []);
+
+export const useCanUndo = (pageId: number) =>
+  useBlocksStore((s) => (pageId > 0 ? s.canUndo(pageId) : false), [pageId]);
+
+export const useCanRedo = (pageId: number) =>
+  useBlocksStore((s) => (pageId > 0 ? s.canRedo(pageId) : false), [pageId]);
+
+export const useHistoryState = () =>
+  useBlocksStore((s) => s.getHistoryState, []);
+
+export const useClearHistory = () => useBlocksStore((s) => s.clearHistory, []);
+
+export const useClearPageHistory = () =>
+  useBlocksStore((s) => s.clearPageHistory, []);
+
 // ----------------------------------------------------------------------------
 // Helpers (pure) to keep lints and nesting low
 // ----------------------------------------------------------------------------
 
-function updateBlockData<K extends keyof typeof BlockSchemaByType>(
-  state: BlocksState,
-  key: string,
-  type: K,
-  updatesOrUpdater:
-    | Partial<BlockOf<K>>
-    | ((prev: BlockOf<K>) => Partial<BlockOf<K>>)
-): BlocksState {
-  const prev = state.byId[key];
-  if (!prev || prev.type !== type) return state;
+const createUpdateFunction =
+  (set: (fn: (state: BlocksState) => BlocksState) => void) =>
+  <K extends keyof typeof BlockSchemaByType>(
+    id: number,
+    blockType: K,
+    updates: Partial<BlockOf<K>> | ((prev: BlockOf<K>) => Partial<BlockOf<K>>)
+  ) => {
+    set((prevState: BlocksState) => {
+      const key = toKey(id);
+      const prev = prevState.byId[key];
+      if (!prev || prev.type !== blockType) return prevState;
 
-  const partial =
-    typeof updatesOrUpdater === "function"
-      ? (updatesOrUpdater as (prev: BlockOf<K>) => Partial<BlockOf<K>>)(prev)
-      : (updatesOrUpdater as Partial<BlockOf<K>>);
+      const partial = typeof updates === "function" ? updates(prev) : updates;
 
-  if (!partial || partial === prev) return state;
+      if (!partial || partial === prev) return prevState;
 
-  const next = deepMerge(prev, partial as BlockOf<K>);
+      const next = deepMerge(prev, partial);
 
-  if (next === prev) return state;
+      if (next === prev) return prevState;
 
-  return { ...state, byId: { ...state.byId, [key]: next } };
-}
-
-function removeBlockFromState(
-  state: BlocksState,
-  pageKey: string,
-  blockKey: string
-): BlocksState {
-  const rest = { ...state.byId };
-  delete rest[blockKey];
-  const filtered = (state.idsByPageId[pageKey] ?? []).filter(
-    (id) => id !== blockKey
-  );
-  return {
-    byId: rest,
-    idsByPageId: { ...state.idsByPageId, [pageKey]: filtered },
+      return { ...prevState, byId: { ...prevState.byId, [key]: next } };
+    });
   };
-}
 
-function reorderBlockInState(
-  state: BlocksState,
-  pageKey: string,
-  blockKey: string,
-  targetKey: string
-): BlocksState {
-  const currentIds = state.idsByPageId[pageKey] ?? [];
-  const currentIndex = currentIds.indexOf(blockKey);
-  const targetIndex = currentIds.indexOf(targetKey);
-
-  if (currentIndex === -1 || currentIndex === targetIndex) return state;
-
-  const newIds = [...currentIds];
-  newIds.splice(currentIndex, 1);
-  newIds.splice(targetIndex, 0, blockKey);
-
-  return {
-    ...state,
-    idsByPageId: { ...state.idsByPageId, [pageKey]: newIds },
+const createRemoveFunction =
+  (set: (fn: (state: BlocksState) => BlocksState) => void) =>
+  (pageId: number, blockId: number) => {
+    set((state: BlocksState) => {
+      const pageKey = toKey(pageId);
+      const blockKey = toKey(blockId);
+      const rest = { ...state.byId };
+      delete rest[blockKey];
+      const filtered = (state.idsByPageId[pageKey] ?? []).filter(
+        (id) => id !== blockKey
+      );
+      return {
+        byId: rest,
+        idsByPageId: { ...state.idsByPageId, [pageKey]: filtered },
+      };
+    });
   };
-}
 
-// ----------------------------------------------------------------------------
-// Editor Status Store
-// ----------------------------------------------------------------------------
+const createAddFunction =
+  (set: (fn: (state: BlocksState) => BlocksState) => void) =>
+  (pageId: number, block: BlockSchema, index: number) => {
+    set((state: BlocksState) => {
+      const pageKey = toKey(pageId);
+      const blockKey = toKey(block.id!);
+      const newById = { ...state.byId, [blockKey]: block };
+      const newBlockIds = [...(state.idsByPageId[pageKey] ?? [])];
+      newBlockIds.splice(index, 0, blockKey);
 
-type SaveStatus = "idle" | "saving" | "saved" | "error";
-type AuthStatus = "loading" | "authenticated" | "unauthenticated";
+      return {
+        byId: newById,
+        idsByPageId: { ...state.idsByPageId, [pageKey]: newBlockIds },
+      };
+    });
+  };
 
-type EditorStatusState = {
-  save: SaveStatus;
-  auth: AuthStatus;
-};
+const createReorderBlockFunction =
+  (set: (fn: (state: BlocksState) => BlocksState) => void) =>
+  (pageId: number, sourceBlockId: number, targetBlockId: number) => {
+    set((state: BlocksState) => {
+      const pageKey = toKey(pageId);
+      const sourceKey = toKey(sourceBlockId);
+      const targetKey = toKey(targetBlockId);
+      const blockIds = state.idsByPageId[pageKey] ?? [];
+      const sourceIndex = blockIds.indexOf(sourceKey);
+      const targetIndex = blockIds.indexOf(targetKey);
 
-type EditorStatusActions = {
-  setSave: (status: SaveStatus) => void;
-  setAuth: (status: AuthStatus) => void;
-  hydrate: (state: EditorStatusState) => void;
-};
+      if (sourceIndex === -1 || targetIndex === -1) return state;
 
-type EditorStatusStore = EditorStatusState & EditorStatusActions;
+      // Create the new order by moving the source block to target position
+      const newBlockIds = [...blockIds];
+      newBlockIds.splice(sourceIndex, 1);
+      newBlockIds.splice(targetIndex, 0, sourceKey);
 
-const createEditorStatusStore = () =>
-  createStore<EditorStatusStore>()((set) => ({
-    save: "idle",
-    auth: "loading",
-    setSave: (status) => set(() => ({ save: status })),
-    setAuth: (status) => set(() => ({ auth: status })),
-    hydrate: (state) => set(() => state),
-  }));
+      return {
+        ...state,
+        idsByPageId: { ...state.idsByPageId, [pageKey]: newBlockIds },
+      };
+    });
+  };
 
-const editorStatusStore = createEditorStatusStore();
-
-const useEditorStatusStore = <T>(
-  selector: (state: EditorStatusStore) => T,
-  deps: DependencyList = []
-) => {
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const memoizedSelector = useCallback(selector, deps);
-  return useStore(editorStatusStore, memoizedSelector);
-};
-
-export const useEditorSaveStatus = () =>
-  useEditorStatusStore((s) => s.save, []);
-
-export const useEditorAuthStatus = () =>
-  useEditorStatusStore((s) => s.auth, []);
-
-export const useUpdateEditorSaveStatus = () =>
-  useEditorStatusStore((s) => s.setSave, []);
-
-export const useUpdateEditorAuthStatus = () =>
-  useEditorStatusStore((s) => s.setAuth, []);
+const createReorderBlocksFunction =
+  (set: (fn: (state: BlocksState) => BlocksState) => void) =>
+  (pageId: number, blockIds: string[]) => {
+    set((state: BlocksState) => ({
+      ...state,
+      idsByPageId: { ...state.idsByPageId, [toKey(pageId)]: blockIds },
+    }));
+  };

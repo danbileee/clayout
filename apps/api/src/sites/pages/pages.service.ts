@@ -8,7 +8,7 @@ import {
   ReorderDto,
   UpdateSitePageDto,
 } from '@clayout/interface';
-import { SitePageErrors } from '@clayout/interface';
+import { SiteErrors } from '@clayout/interface';
 import {
   isPostgresError,
   PostgresErrorCode,
@@ -29,24 +29,6 @@ export class SitePagesService {
     siteId: number,
   ): Promise<{ page: SitePageEntity }> {
     /**
-     * slug
-     */
-    if (createSitePageDto.slug) {
-      const slugExists = await this.sitesPagesRepository.exists({
-        where: {
-          slug: createSitePageDto.slug,
-          site: { id: siteId },
-        },
-      });
-
-      if (slugExists) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
-      }
-    }
-
-    /**
      * isHome
      */
     if (typeof createSitePageDto.isHome === 'boolean') {
@@ -57,7 +39,7 @@ export class SitePagesService {
 
         if (homeExists) {
           throw new BadRequestException(
-            SitePageErrors['site-page.existing-homepage'],
+            SiteErrors['site-page.existing-homepage'],
           );
         }
       }
@@ -71,7 +53,7 @@ export class SitePagesService {
       createSitePageDto.isVisible === false
     ) {
       throw new BadRequestException(
-        SitePageErrors['site-page.home-should-be-visible'],
+        SiteErrors['site-page.home-should-be-visible'],
       );
     }
 
@@ -91,9 +73,7 @@ export class SitePagesService {
         isPostgresError(error) &&
         error.driverError.code === PostgresErrorCode.UniqueViolation
       ) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
+        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
       }
       throw error;
     }
@@ -123,7 +103,7 @@ export class SitePagesService {
 
   async update(
     id: number,
-    updateSitePageDto: UpdateSitePageDto,
+    dto: UpdateSitePageDto,
   ): Promise<{ page: SitePageEntity }> {
     const matchedSitePage = await this.sitesPagesRepository.findOne({
       where: {
@@ -139,25 +119,23 @@ export class SitePagesService {
     /**
      * slug
      */
-    if (updateSitePageDto.slug) {
+    if (dto.slug) {
       const slugExists = await this.sitesPagesRepository.exists({
         where: {
-          slug: updateSitePageDto.slug,
+          slug: dto.slug,
           site: { id: matchedSitePage.site.id },
           id: Not(id),
         },
       });
       if (slugExists) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
+        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
       }
     }
 
     /**
      * isHome
      */
-    if (typeof updateSitePageDto.isHome === 'boolean') {
+    if (typeof dto.isHome === 'boolean') {
       const existingHomePage = await this.sitesPagesRepository.findOne({
         where: {
           isHome: true,
@@ -166,53 +144,49 @@ export class SitePagesService {
         },
       });
 
-      if (updateSitePageDto.isHome === true && existingHomePage) {
+      if (dto.isHome === true && existingHomePage) {
         throw new BadRequestException(
-          SitePageErrors['site-page.existing-homepage'],
+          SiteErrors['site-page.existing-homepage'],
         );
       }
       if (
-        updateSitePageDto.isHome === false &&
+        dto.isHome === false &&
         matchedSitePage.isHome === true &&
         !existingHomePage
       ) {
-        throw new BadRequestException(SitePageErrors['site-page.no-homepage']);
+        throw new BadRequestException(SiteErrors['site-page.no-homepage']);
       }
     }
 
     /**
      * isVisible
      */
-    if (typeof updateSitePageDto.isVisible === 'boolean') {
-      if (updateSitePageDto.isVisible === false && matchedSitePage.isHome) {
+    if (typeof dto.isVisible === 'boolean') {
+      if (dto.isVisible === false && matchedSitePage.isHome) {
         throw new BadRequestException(
-          SitePageErrors['site-page.home-should-be-visible'],
+          SiteErrors['site-page.home-should-be-visible'],
         );
       }
     }
 
-    if (typeof updateSitePageDto.order === 'number') {
+    /**
+     * Do not allow reordering stealthily
+     */
+    if (typeof dto.order === 'number' && dto.order !== matchedSitePage.order) {
       throw new BadRequestException(
         'Changing page order via update is not allowed. Use the reorder API: POST /sites/:siteId/pages/reorder',
       );
     }
 
-    if (Array.isArray(updateSitePageDto.blocks)) {
-      for (const block of updateSitePageDto.blocks) {
-        const { block: matchedBlock } = await this.siteBlocksService.getById({
-          id: block.id,
-        });
+    const { blocks, ...updateSitePageDto } = dto;
 
-        if (
-          matchedBlock &&
-          typeof block.order === 'number' &&
-          block.order !== matchedBlock.order
-        ) {
-          throw new BadRequestException(
-            'Changing block order via page update is not allowed. Use the reorder API: POST /sites/:siteId/pages/:pageId/blocks/reorder',
-          );
-        }
-      }
+    /**
+     * Do not allow block update through page API
+     */
+    if (blocks.length) {
+      throw new BadRequestException(
+        'Changing blocks via page update is not allowed. Use the block API: PATCH /sites/:siteId/pages/:pageId/blocks/:blockId',
+      );
     }
 
     try {
@@ -222,6 +196,7 @@ export class SitePagesService {
         meta: updateSitePageDto.meta
           ? { ...matchedSitePage.meta, ...updateSitePageDto.meta }
           : matchedSitePage.meta,
+        id,
       });
       return { page: updatedSitePage };
     } catch (error: unknown) {
@@ -229,9 +204,7 @@ export class SitePagesService {
         isPostgresError(error) &&
         error.driverError.code === PostgresErrorCode.UniqueViolation
       ) {
-        throw new BadRequestException(
-          SitePageErrors['site-page.duplicate-slug'],
-        );
+        throw new BadRequestException(SiteErrors['site-page.duplicate-slug']);
       }
       throw error;
     }

@@ -20,9 +20,11 @@ import {
   LoginSchema,
   RegisterDto,
   RegisterSchema,
+  ResendAuthEmailDto,
 } from '@clayout/interface';
 import { ConfigService } from '@nestjs/config';
 import { EnvKeys } from 'src/shared/constants/env.const';
+import { User } from 'src/users/decorators/user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -268,6 +270,39 @@ export class AuthController {
 
     return {
       message: `Your password has been reset successfully! Redirecting to home...`,
+    };
+  }
+
+  @Post('resend-email')
+  @PublicRoute()
+  @UseGuards(BasicTokenGuard)
+  async postResendEmail(
+    @User() user: UserEntity,
+    @Body() { key }: ResendAuthEmailDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    let token: string = '';
+
+    if (key === 'verify') {
+      const { basicToken } = await this.authService.sendVerifyMail(user);
+
+      token = basicToken;
+    }
+
+    if (key === 'reset-password') {
+      const { basicToken } = await this.authService.sendResetPasswordMail(user);
+
+      token = basicToken;
+    }
+
+    res.cookie('basicToken', token, {
+      httpOnly: true,
+      secure: this.isProduction,
+      sameSite: this.isProduction ? 'none' : 'lax',
+    });
+
+    return {
+      message: `We've sent you the mail again. Please check your inbox!`,
     };
   }
 }

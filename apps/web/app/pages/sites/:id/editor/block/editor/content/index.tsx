@@ -9,11 +9,16 @@ import type { BlockEditorProps } from "../types";
 import type { z } from "zod";
 
 export function BlockEditorContent() {
-  const { selectedBlock: block, selectedBlockId } = useSiteContext();
+  const {
+    selectedBlock: block,
+    selectedBlockId,
+    closeBlockEditor,
+  } = useSiteContext();
   const blockSchema = useBlockById(selectedBlockId?.toString() ?? "");
 
   if (!blockSchema || !block) {
-    throw new Error(`blockSchema or block context value not found.`);
+    closeBlockEditor();
+    return null;
   }
 
   const parsedBlock = SiteBlockSchema.parse(blockSchema);

@@ -7,3 +7,4 @@ export * from "./asset.type";
 export * from "./base.type";
 export * from "./pexels.type";
 export * from "./reorder.type";
+export * from "./auth.type";

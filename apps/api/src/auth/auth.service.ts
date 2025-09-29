@@ -182,36 +182,8 @@ export class AuthService {
       password: hash,
       role: UserRoles.Registrant,
     });
-    const createdEmail = await this.emailsService.createEmail({
-      user: createdUser,
-      to: createdUser.email,
-      subject: `Verify your account`,
-      template: 'verify-email',
-    });
 
-    const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
-    const basicToken = this.generateToken(createdUser, {
-      tokenType: TokenTypes.basic,
-      expiresIn: 3600,
-    });
-    const queryString = qs.stringify(
-      {
-        token: basicToken,
-        emailId: createdEmail.id,
-        buttonText: `Verify email`,
-      },
-      { addQueryPrefix: true },
-    );
-    const ctaLink = `${this.configService.get(EnvKeys.WEB_HOST)}/auth/confirm${queryString}`;
-
-    await this.emailsService.sendEmail({
-      ...createdEmail,
-      context: {
-        name: createdUser.username,
-        openLink,
-        ctaLink,
-      },
-    });
+    const { basicToken } = await this.sendVerifyMail(createdUser);
 
     return { basicToken };
   }
@@ -250,36 +222,7 @@ export class AuthService {
       throw new UnauthorizedException(`The user doesn't exist.`);
     }
 
-    const createdEmail = await this.emailsService.createEmail({
-      user: matchedUser,
-      to: matchedUser.email,
-      subject: `Reset your password`,
-      template: 'reset-password',
-    });
-
-    const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
-    const basicToken = this.generateToken(matchedUser, {
-      tokenType: TokenTypes.basic,
-      expiresIn: 60 * 15,
-    });
-    const queryString = qs.stringify(
-      {
-        token: basicToken,
-        emailId: createdEmail.id,
-        buttonText: `Reset password`,
-      },
-      { addQueryPrefix: true },
-    );
-    const ctaLink = `${this.configService.get(EnvKeys.WEB_HOST)}/reset-password${queryString}`;
-
-    await this.emailsService.sendEmail({
-      ...createdEmail,
-      context: {
-        name: matchedUser.username,
-        openLink,
-        ctaLink,
-      },
-    });
+    const { basicToken } = await this.sendResetPasswordMail(matchedUser);
 
     return { basicToken };
   }
@@ -312,5 +255,77 @@ export class AuthService {
     });
 
     return this.generateTokens(updatedUser);
+  }
+
+  async sendVerifyMail(user: UserEntity): Promise<{ basicToken: string }> {
+    const createdEmail = await this.emailsService.createEmail({
+      user: user,
+      to: user.email,
+      subject: `Verify your account`,
+      template: 'verify-email',
+    });
+
+    const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
+    const basicToken = this.generateToken(user, {
+      tokenType: TokenTypes.basic,
+      expiresIn: 3600,
+    });
+    const queryString = qs.stringify(
+      {
+        token: basicToken,
+        emailId: createdEmail.id,
+        buttonText: `Verify email`,
+      },
+      { addQueryPrefix: true },
+    );
+    const ctaLink = `${this.configService.get(EnvKeys.WEB_HOST)}/auth/confirm${queryString}`;
+
+    await this.emailsService.sendEmail({
+      ...createdEmail,
+      context: {
+        name: user.username,
+        openLink,
+        ctaLink,
+      },
+    });
+
+    return { basicToken };
+  }
+
+  async sendResetPasswordMail(
+    user: UserEntity,
+  ): Promise<{ basicToken: string }> {
+    const createdEmail = await this.emailsService.createEmail({
+      user: user,
+      to: user.email,
+      subject: `Reset your password`,
+      template: 'reset-password',
+    });
+
+    const openLink = `${this.configService.get(EnvKeys.API_HOST)}/emails/${createdEmail.id}/track-open`;
+    const basicToken = this.generateToken(user, {
+      tokenType: TokenTypes.basic,
+      expiresIn: 60 * 15,
+    });
+    const queryString = qs.stringify(
+      {
+        token: basicToken,
+        emailId: createdEmail.id,
+        buttonText: `Reset password`,
+      },
+      { addQueryPrefix: true },
+    );
+    const ctaLink = `${this.configService.get(EnvKeys.WEB_HOST)}/reset-password${queryString}`;
+
+    await this.emailsService.sendEmail({
+      ...createdEmail,
+      context: {
+        name: user.username,
+        openLink,
+        ctaLink,
+      },
+    });
+
+    return { basicToken };
   }
 }

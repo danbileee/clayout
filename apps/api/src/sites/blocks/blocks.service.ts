@@ -14,6 +14,7 @@ import {
   isPostgresError,
   PostgresErrorCode,
 } from 'src/shared/utils/isPostgresError';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class SiteBlocksService {
@@ -28,25 +29,6 @@ export class SiteBlocksService {
     siteId: number,
     pageId: number,
   ): Promise<{ block: SiteBlockEntity }> {
-    /**
-     * slug
-     */
-    if (createSiteBlockDto.slug) {
-      const slugExists = await this.sitesBlocksRepository.exists({
-        where: {
-          slug: createSiteBlockDto.slug,
-          site: { id: siteId },
-          page: { id: pageId },
-        },
-      });
-
-      if (slugExists) {
-        throw new BadRequestException(
-          SiteBlockErrors['site-block.duplicate-slug'],
-        );
-      }
-    }
-
     const existingCount = await this.sitesBlocksRepository.count({
       where: { page: { id: pageId } },
     });
@@ -134,6 +116,7 @@ export class SiteBlocksService {
         },
       });
       if (slugExists) {
+        console.log('catched! dto slug');
         throw new BadRequestException(
           SiteBlockErrors['site-block.duplicate-slug'],
         );
@@ -156,6 +139,7 @@ export class SiteBlocksService {
               ...updateSiteBlockDto.containerStyle,
             }
           : matchedSiteBlock.containerStyle,
+        id,
       });
       return { block: updatedSiteBlock };
     } catch (error: unknown) {
@@ -163,6 +147,7 @@ export class SiteBlocksService {
         isPostgresError(error) &&
         error.driverError.code === PostgresErrorCode.UniqueViolation
       ) {
+        console.log('catched! postgres error');
         throw new BadRequestException(
           SiteBlockErrors['site-block.duplicate-slug'],
         );
@@ -218,7 +203,7 @@ export class SiteBlocksService {
     siteId: number,
     pageId: number,
     blockId: number,
-  ): Promise<{ id: number }> {
+  ): Promise<{ block: SiteBlockEntity }> {
     const matchedBlock = await this.sitesBlocksRepository.findOne({
       where: {
         id: blockId,
@@ -239,14 +224,14 @@ export class SiteBlocksService {
     const { block } = await this.create(
       {
         ...blockData,
-        slug: `${slug}-1`,
+        slug: `${slug}-${randomBytes(2).toString('hex')}`,
         order: existingCount,
       },
       siteId,
       pageId,
     );
 
-    return { id: block.id };
+    return { block };
   }
 
   async validateSlug({

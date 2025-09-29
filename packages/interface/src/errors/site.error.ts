@@ -1,3 +1,9 @@
+export const SiteErrors = {
+  "site-page.slug": "site-page.duplicate-slug",
+} as const;
+
+export type SiteError = keyof typeof SiteErrors;
+
 export const SitePageErrors = {
   "site-page.existing-homepage": "site-page.existing-homepage",
   "site-page.no-homepage": "site-page.no-homepage",

@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import * as Typo from "@/components/ui/typography";
-import { forwardRef } from "react";
+import * as Tooltip from "@/components/ui/tooltip";
+import { forwardRef, useEffect } from "react";
 import { css, styled, useTheme } from "styled-components";
 import { SIDEBAR_WIDTH } from "./constants";
 import { rem } from "@/utils/rem";
@@ -8,25 +9,47 @@ import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePublish } from "@/apis/sites/publish";
 import { handleError } from "@/lib/axios/handleError";
 import { Icon } from "@/components/ui/icon";
-import { IconChevronLeft, IconShare, IconSlash } from "@tabler/icons-react";
+import {
+  IconArrowBackUp,
+  IconArrowForwardUp,
+  IconChevronLeft,
+  IconShare,
+  IconSlash,
+} from "@tabler/icons-react";
 import { useNavigate } from "react-router";
 import { joinPath, Paths } from "@/routes";
 import { useParamsId } from "@/hooks/useParamsId";
 import { HFlexBox } from "@/components/ui/box";
-import { useSiteContext } from "../contexts/site.context";
 import { toast } from "sonner";
+import { useEditorHistory } from "./block/editor/hooks/useEditorHistory";
+import { useSiteContext } from "../contexts/site.context";
 
 export const Header = forwardRef<HTMLDivElement, {}>(function Header(
-  props,
+  _props,
   ref
 ) {
   const theme = useTheme();
   const id = useParamsId();
   const navigate = useNavigate();
-  const { site, selectedPage } = useSiteContext();
+  const { site, selectedPage, selectedPageId } = useSiteContext();
   const { mutateAsync: publish, isPending: isPublishing } = useClientMutation({
     mutationFn: patchSitePublish,
   });
+  const { undo, redo, canUndo, canRedo, updateDB } = useEditorHistory();
+
+  const handleUndo = async () => {
+    if (!selectedPageId) return;
+
+    const result = undo(selectedPageId);
+    await updateDB.current(result);
+  };
+
+  const handleRedo = async () => {
+    if (!selectedPageId) return;
+
+    const result = redo(selectedPageId);
+    await updateDB.current(result);
+  };
 
   const handleBack = () => {
     if (window.history.length <= 1) {
@@ -55,7 +78,10 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
 
   const handlePublish = async () => {
     const fn = async () => {
-      if (!site?.id) return;
+      if (!site?.id) {
+        throw new Error("siteId is required.");
+      }
+
       await publish({ params: { id: site.id } });
       toast.success("Published sucessfully! 🚀");
     };
@@ -72,6 +98,43 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
       }
     }
   };
+
+  /**
+   * @useEffect
+   * Add keyboard shortcuts for undo/redo functionality
+   * - Cmd/Ctrl + Z: Undo
+   * - Cmd/Ctrl + Shift + Z: Redo
+   * - Cmd/Ctrl + Y: Redo (alternative)
+   */
+  useEffect(() => {
+    const handleKeyDown = async (event: KeyboardEvent) => {
+      const isModifierPressed = event.metaKey || event.ctrlKey;
+
+      if (!isModifierPressed || !selectedPageId) return;
+
+      if (event.key === "z" || event.key === "y") {
+        event.preventDefault();
+      }
+
+      // Undo: Cmd/Ctrl + Z (without Shift)
+      if (event.key === "z" && !event.shiftKey) {
+        const result = undo(selectedPageId);
+        await updateDB.current(result);
+      }
+
+      // Redo: Cmd/Ctrl + Shift + Z or Cmd/Ctrl + Y
+      if ((event.key === "z" && event.shiftKey) || event.key === "y") {
+        const result = redo(selectedPageId);
+        await updateDB.current(result);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [undo, redo, selectedPageId, updateDB]);
 
   return (
     <HeaderBase ref={ref}>
@@ -102,6 +165,34 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
         </Typo.P>
       </HFlexBox>
       <HFlexBox gap={12}>
+        <HFlexBox gap={4}>
+          <Tooltip.Root>
+            <Tooltip.Trigger>
+              <Button
+                isSquare
+                variant="ghost"
+                onClick={handleUndo}
+                disabled={!selectedPageId || !canUndo}
+              >
+                <Icon>{IconArrowBackUp}</Icon>
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>Undo</Tooltip.Content>
+          </Tooltip.Root>
+          <Tooltip.Root>
+            <Tooltip.Trigger>
+              <Button
+                isSquare
+                variant="ghost"
+                onClick={handleRedo}
+                disabled={!selectedPageId || !canRedo}
+              >
+                <Icon>{IconArrowForwardUp}</Icon>
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>Redo</Tooltip.Content>
+          </Tooltip.Root>
+        </HFlexBox>
         <Button size="lg" variant="ghost">
           Preview
         </Button>
