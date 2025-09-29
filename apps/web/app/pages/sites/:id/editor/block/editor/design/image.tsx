@@ -1,11 +1,11 @@
 import { z } from "zod";
 import { SiteBlockTypes, type ImageBlockSchema } from "@clayout/interface";
+import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import type { BlockEditorProps } from "../types";
 import * as BlockEditor from "../styled";
 import * as BoxModel from "../shared/box-model";
 import * as Background from "../shared/background";
 import { Width } from "../shared/width";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 import { Alignment } from "../shared/align";
 
 export function ImageEditorDesign({

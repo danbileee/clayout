@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { SiteBlockTypes, ImageBlockSchema } from "@clayout/interface";
+import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import * as Typo from "@/components/ui/typography";
 import { IconAlt, IconPhoto } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
@@ -11,7 +12,6 @@ import { HelpButton } from "@/components/shared/buttons/help";
 import { useTheme } from "styled-components";
 import { VFlexBox } from "@/components/ui/box";
 import { getErrors } from "@/lib/zod/getErrors";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 import { Link } from "../shared/link";
 
 /**

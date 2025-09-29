@@ -1,11 +1,11 @@
 import type { z } from "zod";
 import { SiteBlockTypes, type ButtonBlockSchema } from "@clayout/interface";
+import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import * as BoxModel from "../shared/box-model";
 import * as Background from "../shared/background";
 import * as ButtonStyle from "../shared/button-style";
 import { Alignment } from "../shared/align";
 import type { BlockEditorProps } from "../types";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 import * as BlockEditor from "../styled";
 import { Width } from "../shared/width";
 

@@ -21,7 +21,7 @@ import { joinPath, Paths } from "@/routes";
 import { useParamsId } from "@/hooks/useParamsId";
 import { HFlexBox } from "@/components/ui/box";
 import { toast } from "sonner";
-import { useEditorHistory } from "./block/editor/hooks/useEditorHistory";
+import { useEditorHistory } from "./hooks/useEditorHistory";
 import { useSiteContext } from "../contexts/site.context";
 
 export const Header = forwardRef<HTMLDivElement, {}>(function Header(
@@ -108,9 +108,11 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
    */
   useEffect(() => {
     const handleKeyDown = async (event: KeyboardEvent) => {
+      if (!selectedPageId) return;
+
       const isModifierPressed = event.metaKey || event.ctrlKey;
 
-      if (!isModifierPressed || !selectedPageId) return;
+      if (!isModifierPressed) return;
 
       if (event.key === "z" || event.key === "y") {
         event.preventDefault();

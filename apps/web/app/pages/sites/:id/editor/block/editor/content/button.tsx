@@ -2,6 +2,7 @@ import { z } from "zod";
 import { useTheme } from "styled-components";
 import { getErrors } from "@/lib/zod/getErrors";
 import { SiteBlockTypes, type ButtonBlockSchema } from "@clayout/interface";
+import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import { Icon } from "@/components/ui/icon";
 import { IconTxt } from "@tabler/icons-react";
 import { VFlexBox } from "@/components/ui/box";
@@ -9,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import * as Typo from "@/components/ui/typography";
 import * as BlockEditor from "../styled";
 import type { BlockEditorProps } from "../types";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 import { Link } from "../shared/link";
 
 /**
