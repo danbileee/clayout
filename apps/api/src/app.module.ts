@@ -1,8 +1,8 @@
-import fs from 'fs';
+import * as fs from 'fs';
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
@@ -28,20 +28,18 @@ import { PexelsModule } from './pexels/pexels.module';
       imports: [ConfigModule],
       useFactory: (config: ConfigService) => {
         const isProduction = process.env.NODE_ENV === 'production';
+        const caPath = config.get<string>(EnvKeys.DB_CA_PATH);
+        const ssl = caPath
+          ? {
+              ca: fs.readFileSync(caPath).toString(),
+              rejectUnauthorized: true,
+            }
+          : { rejectUnauthorized: false };
 
         return {
           type: 'postgres',
           url: config.get<string>(EnvKeys.DATABASE_URL),
-          ...(isProduction
-            ? {
-                ssl: {
-                  ca: fs
-                    .readFileSync(config.get<string>(EnvKeys.DB_CA_PATH))
-                    .toString(),
-                  rejectUnauthorized: true,
-                },
-              }
-            : {}),
+          ...(isProduction ? { ssl } : {}),
           autoLoadEntities: true,
           synchronize: !isProduction,
           entities: [__dirname + '/**/*.entity.{js,ts}'],
