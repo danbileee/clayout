@@ -14,6 +14,7 @@ import {
   type SiteBlock,
   type SitePageWithRelations,
   type SiteWithRelations,
+  type Tables,
 } from "@clayout/interface";
 import { BlockRegistry } from "@clayout/kit";
 import {
@@ -72,6 +73,7 @@ type SiteContextReducer = (
 
 interface SiteContextValue extends SiteContextState {
   site?: SiteWithRelations;
+  primaryDomain?: Tables<"site_domains">;
   selectedPage?: SitePageWithRelations;
   selectedBlock?: SiteBlock;
   refetchSite: Refetcher<typeof getSite>;
@@ -212,6 +214,9 @@ export function SiteContextProvider({ children }: Props) {
     );
     return {
       site: data?.data?.site,
+      primaryDomain: data?.data?.site?.domains?.find(
+        (domain) => domain.isPrimary
+      ),
       selectedPage: matchedPage,
       selectedBlock: matchedPage?.blocks?.find(
         (b) => b.id === state.selectedBlockId

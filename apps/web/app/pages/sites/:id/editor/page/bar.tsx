@@ -14,12 +14,14 @@ import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
 import { SitePageCategories } from "@clayout/interface";
+import { useState } from "react";
 
 export function PageBar() {
   const { site, refetchSite, setPage } = useSiteContext();
   const { mutateAsync: createPage } = useClientMutation({
     mutationFn: postSitePages,
   });
+  const [freshPageId, setFreshPageId] = useState<number | null>(null);
 
   const handleAddPage = async () => {
     const fn = async () => {
@@ -39,6 +41,7 @@ export function PageBar() {
         },
       });
       await refetchSite();
+      setFreshPageId(response.data.page.id);
       setPage(response.data.page.id);
     };
 
@@ -72,7 +75,14 @@ export function PageBar() {
       </HFlexBox>
       <PageBarList>
         {site ? (
-          site.pages.map((page) => <PageBarItem key={page.id} page={page} />)
+          site.pages.map((page) => (
+            <PageBarItem
+              key={page.id}
+              page={page}
+              freshPageId={freshPageId}
+              setFreshPageId={setFreshPageId}
+            />
+          ))
         ) : (
           <></>
         )}

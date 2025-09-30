@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import * as Typo from "@/components/ui/typography";
 import * as Tooltip from "@/components/ui/tooltip";
 import { forwardRef, useEffect } from "react";
-import { css, styled, useTheme } from "styled-components";
+import { css, styled } from "styled-components";
 import { SIDEBAR_WIDTH } from "./constants";
 import { rem } from "@/utils/rem";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
@@ -14,7 +14,6 @@ import {
   IconArrowForwardUp,
   IconChevronLeft,
   IconShare,
-  IconSlash,
 } from "@tabler/icons-react";
 import { useNavigate } from "react-router";
 import { joinPath, Paths } from "@/routes";
@@ -28,10 +27,10 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   _props,
   ref
 ) {
-  const theme = useTheme();
   const id = useParamsId();
   const navigate = useNavigate();
-  const { site, selectedPage, selectedPageId } = useSiteContext();
+  const { site, primaryDomain, selectedPage, selectedPageId } =
+    useSiteContext();
   const { mutateAsync: publish, isPending: isPublishing } = useClientMutation({
     mutationFn: patchSitePublish,
   });
@@ -148,20 +147,17 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
           weight="medium"
           style={{ display: "flex", alignItems: "center" }}
         >
-          <SiteName hasPage={Boolean(selectedPage)}>{site?.name}</SiteName>
+          {primaryDomain && (
+            <SiteName hasPage={Boolean(selectedPage)}>
+              {primaryDomain.hostname}
+            </SiteName>
+          )}
           {selectedPage && (
             <>
-              <Icon
-                color={theme.colors.slate[500]}
-                style={{
-                  display: "inline-block",
-                  marginLeft: rem(6),
-                  marginRight: rem(6),
-                }}
-              >
-                {IconSlash}
-              </Icon>
-              <span>{selectedPage.name}</span>
+              <span style={{ paddingLeft: rem(4), paddingRight: rem(6) }}>
+                /
+              </span>
+              <span>{selectedPage.slug}</span>
             </>
           )}
         </Typo.P>

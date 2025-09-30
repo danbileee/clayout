@@ -30,6 +30,7 @@ export type SiteWithRelations = Omit<Tables<"sites">, "authorId" | "meta"> & {
   author: Tables<"users">;
   meta: SiteMeta;
   pages: SitePageWithRelations[];
+  domains: Tables<"site_domains">[];
 };
 
 export type SitesWithRelations = Omit<Tables<"sites">, "authorId"> & {

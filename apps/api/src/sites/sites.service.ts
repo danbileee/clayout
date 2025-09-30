@@ -137,6 +137,7 @@ export class SitesService implements AuthorService {
         pages: {
           blocks: true,
         },
+        domains: true,
       },
       order: {
         pages: {

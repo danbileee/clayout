@@ -183,7 +183,7 @@ export class SitePagesService {
     /**
      * Do not allow block update through page API
      */
-    if (blocks.length) {
+    if (blocks?.length) {
       throw new BadRequestException(
         'Changing blocks via page update is not allowed. Use the block API: PATCH /sites/:siteId/pages/:pageId/blocks/:blockId',
       );
