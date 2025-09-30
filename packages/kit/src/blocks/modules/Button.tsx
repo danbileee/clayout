@@ -153,7 +153,7 @@ export const ButtonBlockData: z.infer<typeof ButtonBlockSchema> = {
     color: "#ffffff",
     fontFamily: basicFontFamily,
     fontSize: "16px",
-    fontWeight: "medium",
+    fontWeight: "normal",
     borderWidth: "0px",
     borderStyle: "solid",
     borderColor: "transparent",
@@ -163,7 +163,12 @@ export const ButtonBlockData: z.infer<typeof ButtonBlockSchema> = {
   },
   containerStyle: {
     padding: "16px 16px 16px 16px",
+    margin: "0px 0px 0px 0px",
     backgroundColor: "transparent",
     align: "center",
+    borderWidth: "0px",
+    borderStyle: "solid",
+    borderColor: "transparent",
+    borderRadius: "0px",
   },
 };

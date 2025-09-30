@@ -200,7 +200,12 @@ export const ImageBlockData: z.infer<typeof ImageBlockSchema> = {
   },
   containerStyle: {
     padding: "16px 16px 16px 16px",
+    margin: "0px 0px 0px 0px",
     backgroundColor: "transparent",
     align: "left",
+    borderWidth: "0px",
+    borderStyle: "solid",
+    borderColor: "transparent",
+    borderRadius: "0px",
   },
 };

@@ -117,12 +117,17 @@ export const TextBlockData: z.infer<typeof TextBlockSchema> = {
     fontFamily: basicFontFamily,
     fontSize: "16px",
     lineHeight: "1.4",
-    fontWeight: "medium",
+    fontWeight: "normal",
     margin: "2px 0px 2px 0px",
   },
   containerStyle: {
     padding: "16px 16px 16px 16px",
+    margin: "0px 0px 0px 0px",
     backgroundColor: "transparent",
     align: "center",
+    borderWidth: "0px",
+    borderStyle: "solid",
+    borderColor: "transparent",
+    borderRadius: "0px",
   },
 };
