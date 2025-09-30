@@ -144,7 +144,7 @@ export const ButtonBlockData: z.infer<typeof ButtonBlockSchema> = {
   slug: "sample-button",
   data: {
     link: "https://clayout.app",
-    text: "Visit website",
+    text: "Submit",
   },
   style: {
     width: "auto",
