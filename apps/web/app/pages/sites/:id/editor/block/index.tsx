@@ -3,6 +3,7 @@ import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { BlockRegistry } from "@clayout/kit";
 import { SiteBlockSchema, type SiteBlock } from "@clayout/interface";
 import {
+  useAddBlock,
   useBlockById,
   useRemoveBlock,
   useReorderBlock,
@@ -52,6 +53,7 @@ export function Block({ blockId, blockIndex }: Props) {
   } = useSiteContext();
   const blockSchema = useBlockById(blockId);
   const reorderBlockLocally = useReorderBlock();
+  const addBlockLocally = useAddBlock();
   const removeBlockLocally = useRemoveBlock();
   const { mutateAsync: reorderBlock } = useClientMutation({
     mutationFn: postSiteBlockReorder,
@@ -180,6 +182,12 @@ export function Block({ blockId, blockIndex }: Props) {
       });
 
       await invalidateSiteCache();
+
+      const parsed = SiteBlockSchema.safeParse(response.data.block);
+
+      if (parsed.success) {
+        addBlockLocally(selectedPage.id, parsed.data);
+      }
 
       setDuplicatedBlockId(response.data.block.id);
     };

@@ -5,6 +5,7 @@ import { rem } from "@/utils/rem";
 import { BarBase } from "../styled";
 import { BlockData } from "@clayout/kit";
 import {
+  SiteBlockSchema,
   type CreateSiteBlockDto,
   type SiteBlockType,
 } from "@clayout/interface";
@@ -17,6 +18,7 @@ import { getSiteBlockSlugValidation } from "@/apis/sites/pages/blocks/slug-dupli
 import { generateSlugTail } from "@/utils/generateSlugTail";
 import { BlockIcons, BlockNames } from "../constants";
 import { useAsyncOpenBlockEditor } from "../hooks/useAsyncOpenBlockEditor";
+import { useAddBlock } from "@/lib/zustand/editor";
 
 export function BlockBar() {
   const { site, selectedPageId, refetchSite } = useSiteContext();
@@ -24,6 +26,7 @@ export function BlockBar() {
     mutationFn: postSiteBlocks,
   });
   const [createdBlockId, setCreatedBlockId] = useState<number | null>(null);
+  const addBlockLocally = useAddBlock();
 
   const handleClickBlockButton = async (data: CreateSiteBlockDto) => {
     const fn = async () => {
@@ -51,6 +54,12 @@ export function BlockBar() {
       });
 
       await refetchSite();
+
+      const parsed = SiteBlockSchema.safeParse(response.data.block);
+
+      if (parsed.success) {
+        addBlockLocally(selectedPageId, parsed.data);
+      }
 
       setCreatedBlockId(response.data.block.id);
     };
