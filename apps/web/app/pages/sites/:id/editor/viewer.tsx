@@ -20,9 +20,7 @@ export function EditorViewer() {
     <Wrapper>
       <Header ref={headerRef} />
       <Main $headerHeight={headerHeight} onClick={handleMainClick}>
-        <Canvas>
-          <Page />
-        </Canvas>
+        <Page />
       </Main>
     </Wrapper>
   );
@@ -38,17 +36,10 @@ const Wrapper = styled.div`
 const Main = styled.main<{ $headerHeight: number }>`
   ${({ $headerHeight }) => css`
     width: 100%;
+    height: 100%;
     max-height: calc(100svh - ${rem($headerHeight)});
     padding: ${rem(40)} 0;
     margin-top: ${rem($headerHeight)};
     overflow-y: auto;
   `}
-`;
-
-const Canvas = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: auto;
-  margin: 0 auto;
 `;

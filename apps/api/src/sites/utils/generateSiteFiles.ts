@@ -86,6 +86,7 @@ const cssBase = `
     margin: 0;
   }
 
+  a,
   button {
     cursor: pointer;
   }

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import * as Card from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router";
 import { postAuthForgotPassword } from "@/apis/auth/forgot-password";
@@ -122,7 +122,7 @@ export default function ForgotPassword() {
                   <div className="flex flex-col gap-6">
                     <div className="grid gap-2">
                       <Label htmlFor={fields.email.id}>Email</Label>
-                      <Input
+                      <TextInput
                         id={fields.email.id}
                         name={fields.email.name}
                         type="email"

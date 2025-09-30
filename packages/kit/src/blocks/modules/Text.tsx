@@ -5,6 +5,7 @@ import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
 import { getComposedStyleObject } from "../utils/getComposedStyleObject";
 import { getAlignStyle } from "../utils/getAlignStyle";
+import { basicFontFamily } from "../constants";
 
 export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
   static readonly type = SiteBlockTypes.Text;
@@ -104,22 +105,29 @@ export class TextBlock extends Block<z.infer<typeof TextBlockSchema>> {
 
 export const TextBlockData: z.infer<typeof TextBlockSchema> = {
   type: SiteBlockTypes.Text,
-  name: "Text Block",
-  slug: "text-block",
+  name: "Sample Text Block",
+  slug: "sample-text",
   data: {
     value:
-      "Everyone has the right to freedom of thought, conscience and religion; this right includes freedom to change his religion or belief, and freedom, either alone or in community with others and in public or private, to manifest his religion or belief in teaching, practice, worship and observance. Everyone has the right to freedom of opinion and expression; this right includes freedom to hold opinions without interference and to seek, receive and impart information and ideas through any media and regardless of frontiers. Everyone has the right to rest and leisure, including reasonable limitation of working hours and periodic holidays with pay.",
+      "Clayout is clarity in structure, simplicity in touch. Where ideas take shape — instantly, intuitively. Build without code. Share without effort. Design it. Shape it. Send it.",
   },
   style: {
+    width: "auto",
     color: "#1C2024",
-    fontFamily: `-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol"`,
+    fontFamily: basicFontFamily,
     fontSize: "16px",
     lineHeight: "1.4",
-    fontWeight: "medium",
+    fontWeight: "normal",
     margin: "2px 0px 2px 0px",
   },
   containerStyle: {
     padding: "16px 16px 16px 16px",
-    backgroundColor: "white",
+    margin: "0px 0px 0px 0px",
+    backgroundColor: "transparent",
+    align: "center",
+    borderWidth: "0px",
+    borderStyle: "solid",
+    borderColor: "transparent",
+    borderRadius: "0px",
   },
 };

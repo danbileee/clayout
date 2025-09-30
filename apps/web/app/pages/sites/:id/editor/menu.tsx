@@ -1,11 +1,7 @@
 import { rem } from "@/utils/rem";
 import { css, styled } from "styled-components";
-import { MENU_WIDTH } from "./constants";
-import {
-  SiteMenus,
-  useSiteContext,
-  type SiteMenu,
-} from "../contexts/site.context";
+import { useNavigate } from "react-router";
+import { useParamsId } from "@/hooks/useParamsId";
 import {
   IconBookmark,
   IconClipboardText,
@@ -14,6 +10,14 @@ import {
 } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
 import * as Tooltip from "@/components/ui/tooltip";
+import gem from "public/gem.png";
+import { MENU_WIDTH } from "./constants";
+import {
+  SiteMenus,
+  useSiteContext,
+  type SiteMenu,
+} from "../contexts/site.context";
+import { joinPath, Paths } from "@/routes";
 
 const MenuIcons: Record<SiteMenu, TablerIcon> = {
   Pages: IconClipboardText,
@@ -25,10 +29,50 @@ const MenuIcons: Record<SiteMenu, TablerIcon> = {
 } as const;
 
 export function Menu() {
+  const id = useParamsId();
+  const navigate = useNavigate();
   const { menu, setMenu } = useSiteContext();
+
+  const handleBack = () => {
+    if (window.history.length <= 1) {
+      navigate(
+        joinPath([Paths.sites, ":id"], {
+          ids: [
+            {
+              key: ":id",
+              value: id,
+            },
+          ],
+        })
+      );
+      return;
+    }
+
+    const referrer = document.referrer;
+    const loginPath = `/${Paths.login}`;
+
+    if (referrer.includes(loginPath)) {
+      navigate(-2);
+    } else {
+      navigate(-1);
+    }
+  };
 
   return (
     <MenuBase>
+      <Tooltip.Root>
+        <Tooltip.Trigger>
+          <DashboardButton
+            src={gem}
+            width={30}
+            height={30}
+            onClick={handleBack}
+          />
+        </Tooltip.Trigger>
+        <Tooltip.Content side="right" sideOffset={16}>
+          Back to dashboard
+        </Tooltip.Content>
+      </Tooltip.Root>
       {Object.values(SiteMenus)
         .filter((m) =>
           (
@@ -69,6 +113,16 @@ const MenuBase = styled.div`
     border-right: 1px solid ${theme.colors.slate[200]};
     padding: ${rem(20)} ${rem(12)};
   `}
+`;
+
+const DashboardButton = styled.img`
+  cursor: pointer;
+  transform: translateY(0) rotate(0);
+  transition: transform ease-in-out 150ms;
+
+  &:hover {
+    transform: translateY(${rem(-2)}) rotate(4deg);
+  }
 `;
 
 type MenuButtonProps = {

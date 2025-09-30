@@ -9,10 +9,10 @@ export function LoadingPlaceholder({ color }: Props) {
   const theme = useTheme();
 
   return (
-    <main className="flex items-center justify-center w-full h-full">
+    <div className="flex items-center justify-center w-full h-full">
       <div className="text-center">
         <SpinnerIcon color={color ?? theme.colors.slate[900]} />
       </div>
-    </main>
+    </div>
   );
 }

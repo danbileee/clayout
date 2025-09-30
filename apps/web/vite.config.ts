@@ -31,6 +31,7 @@ export default defineConfig((config) => {
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./app"),
+        public: path.resolve(__dirname, "./public"),
       },
     },
     ssr: {

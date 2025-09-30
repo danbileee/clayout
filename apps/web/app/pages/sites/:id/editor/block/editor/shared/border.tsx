@@ -9,7 +9,7 @@ import { IconBorderSides } from "@tabler/icons-react";
 import { TriggerIndicator } from "@/icons/trigger-indicator";
 import { HFlexBox, VFlexBox } from "@/components/ui/box";
 import { PickColorPopover } from "@/components/shared/popovers/pick-color";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/input";
 import { rem } from "@/utils/rem";
 
 type BorderProperties = Pick<
@@ -23,7 +23,12 @@ interface BorderProps {
 }
 
 export function Border({
-  value: { borderColor, borderRadius = "", borderStyle, borderWidth = "" },
+  value: {
+    borderColor = "transparent",
+    borderRadius = "",
+    borderStyle,
+    borderWidth = "",
+  },
   onChange,
 }: BorderProps) {
   const theme = useTheme();
@@ -56,10 +61,7 @@ export function Border({
           <VFlexBox gap={8}>
             <Typo.Small color={theme.colors.slate[600]}>Width</Typo.Small>
             <HFlexBox gap={8}>
-              <Input
-                id="border-width"
-                type="tel"
-                placeholder="Enter a number value"
+              <NumberInput
                 value={borderWidth.replace("px", "")}
                 onChange={(e) =>
                   onChange({ borderWidth: `${e.target.value}px` })
@@ -72,9 +74,7 @@ export function Border({
           <VFlexBox gap={8}>
             <Typo.Small color={theme.colors.slate[600]}>Radius</Typo.Small>
             <HFlexBox gap={8}>
-              <Input
-                type="tel"
-                placeholder="Enter a number value"
+              <NumberInput
                 value={borderRadius.replace("px", "")}
                 onChange={(e) =>
                   onChange({ borderRadius: `${e.target.value}px` })

@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { SiteBlockTypes, ImageBlockSchema } from "@clayout/interface";
+import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import * as Typo from "@/components/ui/typography";
 import { IconAlt, IconPhoto } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import type { BlockEditorProps } from "../types";
 import * as BlockEditor from "../styled";
 import { ImageManager } from "../shared/image-manager";
@@ -11,7 +12,6 @@ import { HelpButton } from "@/components/shared/buttons/help";
 import { useTheme } from "styled-components";
 import { VFlexBox } from "@/components/ui/box";
 import { getErrors } from "@/lib/zod/getErrors";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 import { Link } from "../shared/link";
 
 /**
@@ -72,7 +72,7 @@ export function ImageEditorContent({
           <HelpButton>{`Displayed when the image is unavailable.`}</HelpButton>
         </BlockEditor.Header>
         <VFlexBox gap={6}>
-          <Input
+          <TextInput
             id={`${block.id.toString()}-alt`}
             value={block.data?.alt}
             onChange={(e) =>

@@ -1,12 +1,12 @@
 import type { z } from "zod";
 import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
-import type { BlockEditorProps } from "../types";
-import * as BlockEditor from "../styled";
+import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import * as Typo from "@/components/ui/typography";
 import { Icon } from "@/components/ui/icon";
 import { IconMessage } from "@tabler/icons-react";
 import { Textarea } from "@/components/ui/textarea";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
+import type { BlockEditorProps } from "../types";
+import * as BlockEditor from "../styled";
 
 export function TextEditorContent({
   block,

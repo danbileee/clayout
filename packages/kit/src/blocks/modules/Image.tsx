@@ -188,18 +188,24 @@ export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
 
 export const ImageBlockData: z.infer<typeof ImageBlockSchema> = {
   type: SiteBlockTypes.Image,
-  name: "Image Block",
-  slug: "image-block",
+  name: "Sample Image Block",
+  slug: "sample-image",
   data: {
-    url: "https://i.ytimg.com/vi/fK9CNdJK9lo/hq720.jpg?sqp=-oaymwEnCNAFEJQDSFryq4qpAxkIARUAAIhCGAHYAQHiAQoIGBACGAY4AUAB&rs=AOn4CLA2y_V7p3K3rc1MT0byoni-LpQoVA",
-    link: "https://youtu.be/CGC0BhQwnik?si=XGgxXwxqDl2dsJAy",
-    alt: "Blackberry Creme Brulee",
+    url: "https://images.pexels.com/photos/311458/pexels-photo-311458.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1",
+    link: "https://clayout.app",
+    alt: "Five Assorted-color Cacti",
   },
   style: {
     width: "100%",
   },
   containerStyle: {
-    padding: "20px 20px 20px 20px",
-    backgroundColor: "black",
+    padding: "16px 16px 16px 16px",
+    margin: "0px 0px 0px 0px",
+    backgroundColor: "transparent",
+    align: "left",
+    borderWidth: "0px",
+    borderStyle: "solid",
+    borderColor: "transparent",
+    borderRadius: "0px",
   },
 };

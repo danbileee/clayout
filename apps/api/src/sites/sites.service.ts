@@ -32,6 +32,8 @@ import {
   isPostgresError,
   PostgresErrorCode,
 } from 'src/shared/utils/isPostgresError';
+import { mkdir, writeFile } from 'fs/promises';
+import { join } from 'path';
 
 @Injectable()
 export class SitesService implements AuthorService {
@@ -137,6 +139,7 @@ export class SitesService implements AuthorService {
         pages: {
           blocks: true,
         },
+        domains: true,
       },
       order: {
         pages: {
@@ -274,22 +277,30 @@ export class SitesService implements AuthorService {
     const files = await generateSiteFiles(site, domain, { favicon });
     const release = await this.createRelease(site, files);
 
-    for (const file of files) {
-      await this.uploadBundle({
-        file,
-        siteId: site.id,
-        releaseVersion: release.version,
-      });
-    }
+    if (process.env.NODE_ENV === 'production') {
+      for (const file of files) {
+        await this.uploadBundle({
+          file,
+          siteId: site.id,
+          releaseVersion: release.version,
+        });
+      }
 
-    const hostnames = [
-      ...site.domains.map((domain) => domain.hostname),
-      `${site.slug}.clayout.app`,
-    ];
+      const hostnames = [
+        ...site.domains.map((domain) => domain.hostname),
+        `${site.slug}.clayout.app`,
+      ];
 
-    for (const hostname of hostnames) {
-      await this.updateKV({
-        hostname,
+      for (const hostname of hostnames) {
+        await this.updateKV({
+          hostname,
+          siteId: site.id,
+          releaseVersion: release.version,
+        });
+      }
+    } else {
+      await this.saveLocalBundle({
+        files,
         siteId: site.id,
         releaseVersion: release.version,
       });
@@ -418,6 +429,55 @@ export class SitesService implements AuthorService {
       });
     } catch (error) {
       console.error({ error, url, body, token });
+    }
+  }
+
+  async saveLocalBundle({
+    files,
+    siteId,
+    releaseVersion,
+  }: {
+    files: SiteFile[];
+    siteId: number;
+    releaseVersion: string;
+  }) {
+    const bundleDir = join(
+      process.cwd(),
+      'bundles',
+      'sites',
+      siteId.toString(),
+      releaseVersion,
+    );
+
+    try {
+      await mkdir(bundleDir, { recursive: true });
+
+      for (const file of files) {
+        const filePath = join(bundleDir, file.name);
+        const content =
+          typeof file.content === 'string'
+            ? Buffer.from(file.content)
+            : file.content;
+
+        await writeFile(filePath, content);
+      }
+
+      const port = this.configService.get('PORT') || 3000;
+      const accessLink = `http://localhost:${port}/bundles/sites/${siteId}/${releaseVersion}/index.html`;
+
+      console.log(
+        `✓ Local bundle saved to: ${bundleDir}\n` +
+          `  Access your site at: ${accessLink}`,
+      );
+    } catch (error) {
+      console.error('Failed to save local bundle:', {
+        siteId,
+        releaseVersion,
+        error: error.message,
+      });
+      throw new BadRequestException(
+        `Failed to save local bundle: ${error.message}`,
+      );
     }
   }
 

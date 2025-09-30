@@ -1,8 +1,10 @@
 import * as fs from 'fs';
+import { join } from 'path';
 import { ClassSerializerInterceptor, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { SentryGlobalFilter, SentryModule } from '@sentry/nestjs/setup';
 import { AppService } from './app.service';
 import { AppController } from './app.controller';
@@ -47,6 +49,17 @@ import { PexelsModule } from './pexels/pexels.module';
       },
       inject: [ConfigService],
     }),
+    ...(process.env.NODE_ENV !== 'production'
+      ? [
+          ServeStaticModule.forRoot({
+            rootPath: join(process.cwd(), 'bundles'),
+            serveRoot: '/bundles',
+            serveStaticOptions: {
+              index: false,
+            },
+          }),
+        ]
+      : []),
     AuthModule,
     UsersModule,
     EmailsModule,

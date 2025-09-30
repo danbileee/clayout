@@ -1,5 +1,6 @@
 import {
   SitePageCategories,
+  SitePageSchema,
   type SitePageCategory,
   type SitePageWithRelations,
 } from "@clayout/interface";
@@ -13,6 +14,7 @@ import { css, styled, useTheme } from "styled-components";
 import { HInlineFlexBox } from "@/components/ui/box";
 import { Icon } from "@/components/ui/icon";
 import * as Typo from "@/components/ui/typography";
+import * as Tooltip from "@/components/ui/tooltip";
 import {
   IconEye,
   IconEyeOff,
@@ -23,26 +25,27 @@ import {
   type Icon as TablerIcon,
 } from "@tabler/icons-react";
 import { rem } from "@/utils/rem";
-import { useSiteContext } from "../../contexts/site.context";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
-import { useDialog } from "@/components/ui/dialog";
 import { patchSitePagesHome } from "@/apis/sites/pages/home";
-import { SelectHomeDialog } from "../shared/dialogs/select-home";
+import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
+import { getError } from "@/lib/zod/getError";
 
 interface Props {
   page: SitePageWithRelations;
+  freshPageId: number | null;
+  setFreshPageId: (value: number | null) => void;
 }
 
-export function PageBarItem({ page }: Props) {
+export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
   const theme = useTheme();
   const { site, refetchSite, selectedPage, setPage } = useSiteContext();
-  const { openDialog, closeDialog } = useDialog();
   const [hovering, setHovering] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [inputError, setInputError] = useState<string | undefined>(undefined);
   const { mutateAsync: updatePage } = useClientMutation({
     mutationFn: patchSitePages,
   });
@@ -76,23 +79,43 @@ export function PageBarItem({ page }: Props) {
     }
   };
 
-  const updatePageName = async (newValue: string) => {
+  const handleChange = () => {
+    if (inputError) {
+      setInputError(undefined);
+    }
+  };
+
+  const updatePageSlug = async (newValue: string) => {
+    const validation = SitePageSchema.shape.slug.safeParse(newValue);
+    const error = getError(validation);
+
+    if (error) {
+      setInputError(error);
+      return;
+    }
+
     const fn = async () => {
       if (!site?.id) return;
+
       await updatePage({
         params: {
           siteId: site.id,
           pageId: page.id,
-          name: newValue,
+          slug: newValue,
         },
       });
       await refetchSite();
+
+      setEditing(false);
+      setInputError(undefined);
+
+      if (freshPageId === page.id) {
+        setFreshPageId(null);
+      }
     };
 
     try {
       await fn();
-
-      setEditing((prev) => !prev);
     } catch (e) {
       const { error } = await handleError(e, {
         onRetry: fn,
@@ -105,56 +128,62 @@ export function PageBarItem({ page }: Props) {
   };
 
   const handleBlur = async (e: FocusEvent<HTMLInputElement>) => {
-    const newValue = e.currentTarget.value;
+    if (inputError) {
+      setEditing(false);
+      setInputError(undefined);
+      return;
+    }
 
-    updatePageName(newValue);
+    const newValue = e.currentTarget.value.trim();
+
+    updatePageSlug(newValue);
   };
 
   const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" || e.key === "Escape") {
-      const newValue = e.currentTarget.value;
+      if (inputError) {
+        setEditing(false);
+        setInputError(undefined);
+        return;
+      }
 
-      updatePageName(newValue);
+      const newValue = e.currentTarget.value.trim();
+
+      updatePageSlug(newValue);
     }
   };
 
   const handleToggleHome = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
-    const submit = async (newId: number) => {
-      if (!site?.id) return;
+    const fn = async () => {
+      const prevHomePageId = site?.pages?.find((page) => page.isHome)?.id;
 
-      const fn = async () => {
-        await updateHomePage({
-          params: {
-            siteId: site.id,
-            pageId: page.id,
-            newPageId: newId,
-          },
-        });
-        await refetchSite();
-        closeDialog();
-      };
-
-      try {
-        await fn();
-      } catch (e) {
-        const { error } = await handleError(e, {
-          onRetry: fn,
-        });
-
-        if (error) {
-          throw error;
-        }
+      if (!site?.id || !prevHomePageId) {
+        throw new Error("siteId and prevHomePageId are required.");
       }
+
+      await updateHomePage({
+        params: {
+          siteId: site.id,
+          pageId: prevHomePageId,
+          newPageId: page.id,
+        },
+      });
+      await refetchSite();
     };
 
-    openDialog(
-      <SelectHomeDialog
-        pages={site?.pages?.filter((p) => p.id !== page.id) ?? []}
-        onSubmit={submit}
-      />
-    );
+    try {
+      await fn();
+    } catch (e) {
+      const { error } = await handleError(e, {
+        onRetry: fn,
+      });
+
+      if (error) {
+        throw error;
+      }
+    }
   };
 
   const handleChangeVisible = async (e: MouseEvent<HTMLButtonElement>) => {
@@ -186,14 +215,22 @@ export function PageBarItem({ page }: Props) {
     }
   };
 
-  return editing ? (
-    <Input
-      defaultValue={page.name}
-      placeholder="Enter page name..."
-      onBlur={handleBlur}
-      onKeyDown={handleKeyDown}
-      autoFocus
-    />
+  return freshPageId === page.id || editing ? (
+    <InputWrapper>
+      <Tooltip.Root open={Boolean(inputError)}>
+        <Tooltip.Trigger>
+          <TextInput
+            defaultValue={page.slug}
+            placeholder="Enter page slug..."
+            onBlur={handleBlur}
+            onKeyDown={handleKeyDown}
+            onChange={handleChange}
+            autoFocus
+          />
+        </Tooltip.Trigger>
+        <Tooltip.Content>{inputError}</Tooltip.Content>
+      </Tooltip.Root>
+    </InputWrapper>
   ) : (
     <PageItem
       selected={page.id === selectedPage?.id}
@@ -216,17 +253,19 @@ export function PageBarItem({ page }: Props) {
             page.isVisible ? theme.colors.slate[950] : theme.colors.slate[300]
           }
         >
-          {page.name}
+          {page.slug}
         </Typo.P>
       </HInlineFlexBox>
-      <HInlineFlexBox gap={2}>
-        {!page.isHome && (
+      {!page.isHome && (
+        <HInlineFlexBox
+          gap={2}
+          style={{ visibility: hovering ? "visible" : "hidden" }}
+        >
           <Button
             isSquare
             variant="ghost"
             size="sm"
             onClick={handleChangeVisible}
-            style={{ visibility: hovering ? "visible" : "hidden" }}
           >
             <Icon
               size={14}
@@ -235,18 +274,44 @@ export function PageBarItem({ page }: Props) {
               {page.isVisible ? IconEye : IconEyeOff}
             </Icon>
           </Button>
-        )}
-        {page.isHome && (
-          <Button isSquare variant="ghost" size="sm" onClick={handleToggleHome}>
-            <Icon size={14} color={theme.colors.blue[700]}>
+          <Button
+            isSquare
+            variant="ghost"
+            size="sm"
+            onClick={handleToggleHome}
+            disabled={!page.isVisible}
+          >
+            <Icon size={14} color={theme.colors.slate[300]}>
               {IconHome}
             </Icon>
           </Button>
-        )}
-      </HInlineFlexBox>
+        </HInlineFlexBox>
+      )}
+      {page.isHome && (
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            <Button
+              isSquare
+              variant="ghost"
+              size="sm"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Icon size={14} color={theme.colors.blue[700]}>
+                {IconHome}
+              </Icon>
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content>This page is home</Tooltip.Content>
+        </Tooltip.Root>
+      )}
     </PageItem>
   );
 }
+
+const InputWrapper = styled.div`
+  width: 100%;
+  padding: ${rem(3)} 0;
+`;
 
 interface PageButtonProps {
   selected: boolean;

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import * as Typo from "@/components/ui/typography";
 import * as Tooltip from "@/components/ui/tooltip";
 import { forwardRef, useEffect } from "react";
-import { css, styled, useTheme } from "styled-components";
+import { css, styled } from "styled-components";
 import { SIDEBAR_WIDTH } from "./constants";
 import { rem } from "@/utils/rem";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
@@ -12,26 +12,19 @@ import { Icon } from "@/components/ui/icon";
 import {
   IconArrowBackUp,
   IconArrowForwardUp,
-  IconChevronLeft,
   IconShare,
-  IconSlash,
 } from "@tabler/icons-react";
-import { useNavigate } from "react-router";
-import { joinPath, Paths } from "@/routes";
-import { useParamsId } from "@/hooks/useParamsId";
 import { HFlexBox } from "@/components/ui/box";
 import { toast } from "sonner";
-import { useEditorHistory } from "./block/editor/hooks/useEditorHistory";
+import { useEditorHistory } from "./hooks/useEditorHistory";
 import { useSiteContext } from "../contexts/site.context";
 
 export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   _props,
   ref
 ) {
-  const theme = useTheme();
-  const id = useParamsId();
-  const navigate = useNavigate();
-  const { site, selectedPage, selectedPageId } = useSiteContext();
+  const { site, primaryDomain, selectedPage, selectedPageId } =
+    useSiteContext();
   const { mutateAsync: publish, isPending: isPublishing } = useClientMutation({
     mutationFn: patchSitePublish,
   });
@@ -49,31 +42,6 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
 
     const result = redo(selectedPageId);
     await updateDB.current(result);
-  };
-
-  const handleBack = () => {
-    if (window.history.length <= 1) {
-      navigate(
-        joinPath([Paths.sites, ":id"], {
-          ids: [
-            {
-              key: ":id",
-              value: id,
-            },
-          ],
-        })
-      );
-      return;
-    }
-
-    const referrer = document.referrer;
-    const loginPath = `/${Paths.login}`;
-
-    if (referrer.includes(loginPath)) {
-      navigate(-2);
-    } else {
-      navigate(-1);
-    }
   };
 
   const handlePublish = async () => {
@@ -108,9 +76,11 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
    */
   useEffect(() => {
     const handleKeyDown = async (event: KeyboardEvent) => {
+      if (!selectedPageId) return;
+
       const isModifierPressed = event.metaKey || event.ctrlKey;
 
-      if (!isModifierPressed || !selectedPageId) return;
+      if (!isModifierPressed) return;
 
       if (event.key === "z" || event.key === "y") {
         event.preventDefault();
@@ -139,27 +109,21 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   return (
     <HeaderBase ref={ref}>
       <HFlexBox gap={12}>
-        <Button isSquare variant="ghost" onClick={handleBack}>
-          <Icon>{IconChevronLeft}</Icon>
-        </Button>
         <Typo.P
           weight="medium"
           style={{ display: "flex", alignItems: "center" }}
         >
-          <SiteName hasPage={Boolean(selectedPage)}>{site?.name}</SiteName>
+          {primaryDomain && (
+            <SiteName hasPage={Boolean(selectedPage)}>
+              {primaryDomain.hostname}
+            </SiteName>
+          )}
           {selectedPage && (
             <>
-              <Icon
-                color={theme.colors.slate[500]}
-                style={{
-                  display: "inline-block",
-                  marginLeft: rem(6),
-                  marginRight: rem(6),
-                }}
-              >
-                {IconSlash}
-              </Icon>
-              <span>{selectedPage.name}</span>
+              <span style={{ paddingLeft: rem(4), paddingRight: rem(6) }}>
+                /
+              </span>
+              <span>{selectedPage.slug}</span>
             </>
           )}
         </Typo.P>

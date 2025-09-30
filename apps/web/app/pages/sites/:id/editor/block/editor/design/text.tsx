@@ -1,7 +1,7 @@
 import type { z } from "zod";
 import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
+import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import type { BlockEditorProps } from "../types";
-import { useHandleChangeBlock } from "../hooks/useHandleChangeBlock";
 import * as BlockEditor from "../styled";
 import * as BoxModel from "../shared/box-model";
 import * as Background from "../shared/background";

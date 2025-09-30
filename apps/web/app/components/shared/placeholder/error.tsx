@@ -14,7 +14,7 @@ export function ErrorPlaceholder({ children, className, ...props }: Props) {
   const theme = useTheme();
 
   return (
-    <main
+    <div
       className={cn("flex items-center justify-center h-full", className)}
       {...props}
     >
@@ -32,6 +32,6 @@ export function ErrorPlaceholder({ children, className, ...props }: Props) {
           )}
         </VFlexBox>
       </div>
-    </main>
+    </div>
   );
 }

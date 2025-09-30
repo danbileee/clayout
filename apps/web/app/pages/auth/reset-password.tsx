@@ -2,7 +2,7 @@ import { postAuthResetPassword } from "@/apis/auth/reset-password";
 import { postEmailsTrackClick } from "@/apis/emails/track-click";
 import { Button } from "@/components/ui/button";
 import * as Card from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { getErrorMessage } from "@/lib/axios/getErrorMessage";
 import {
@@ -126,7 +126,7 @@ export default function ResetPassword() {
                   <input type="hidden" name="token" value={query?.token} />
                   <div className="grid gap-2">
                     <Label htmlFor={fields.password.id}>New password</Label>
-                    <Input
+                    <TextInput
                       id={fields.password.id}
                       name={fields.password.name}
                       type="password"

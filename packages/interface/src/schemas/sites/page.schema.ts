@@ -3,6 +3,7 @@ import { SiteBlockSchema } from "./block.schema";
 import { siteMetaShape } from "./site.schema";
 import { Constants, Tables } from "../../types";
 import { SitePageFits } from "../../constants";
+import { KebabCase } from "../patterns";
 
 export const SitePageMetaSchema = z.object({
   ...siteMetaShape,
@@ -11,7 +12,14 @@ export const SitePageMetaSchema = z.object({
 
 const sitePageShape = {
   id: z.number().optional(),
-  slug: z.string(),
+  slug: z
+    .string()
+    .min(1, "Slug must contain at least 1 character.")
+    .max(120, "Slug could contain maximum 120 characters.")
+    .regex(
+      KebabCase,
+      `Slug must be in kebab-case\n(lowercase letters, numbers, and hyphens only)`
+    ),
   name: z.string(),
   category: z.enum(Constants.site_pages_category_enum),
   meta: SitePageMetaSchema.optional(),

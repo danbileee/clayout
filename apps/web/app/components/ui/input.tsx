@@ -1,12 +1,18 @@
 import * as React from "react";
 
 import { cn } from "@/lib/utils";
+import { NumericFormat, type NumericFormatProps } from "react-number-format";
 
 interface InputProps extends Omit<React.ComponentProps<"input">, "size"> {
   size?: "md" | "sm";
 }
 
-export function Input({ className, type, size = "md", ...props }: InputProps) {
+export function TextInput({
+  className,
+  type = "text",
+  size = "md",
+  ...props
+}: InputProps) {
   return (
     <input
       type={type}
@@ -25,6 +31,24 @@ export function Input({ className, type, size = "md", ...props }: InputProps) {
         className
       )}
       {...props}
+    />
+  );
+}
+
+export function NumberInput(
+  props: Omit<NumericFormatProps, "size"> & InputProps
+) {
+  return (
+    <NumericFormat
+      placeholder="Enter a number value"
+      min={0}
+      max={100}
+      maxLength={3}
+      decimalScale={0}
+      thousandSeparator={false}
+      type="text"
+      {...props}
+      customInput={TextInput}
     />
   );
 }

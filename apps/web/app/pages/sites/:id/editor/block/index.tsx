@@ -29,8 +29,8 @@ import { deleteSiteBlocks } from "@/apis/sites/pages/blocks";
 import { handleError } from "@/lib/axios/handleError";
 import { useDialog } from "@/components/ui/dialog";
 import { ConfirmDeleteDialog } from "@/components/shared/dialogs/confirm/delete";
-import { useTimer } from "@/hooks/useTimer";
 import { toast } from "sonner";
+import { useAsyncOpenBlockEditor } from "../hooks/useAsyncOpenBlockEditor";
 
 interface Props {
   blockId: string;
@@ -39,7 +39,6 @@ interface Props {
 
 export function Block({ blockId, blockIndex }: Props) {
   const blockRef = useRef<HTMLDivElement>(null);
-  const timer = useTimer();
   const [duplicatedBlockId, setDuplicatedBlockId] = useState<number | null>(
     null
   );
@@ -54,8 +53,8 @@ export function Block({ blockId, blockIndex }: Props) {
   } = useSiteContext();
   const blockSchema = useBlockById(blockId);
   const reorderBlockLocally = useReorderBlock();
-  const removeBlockLocally = useRemoveBlock();
   const addBlockLocally = useAddBlock();
+  const removeBlockLocally = useRemoveBlock();
   const { mutateAsync: reorderBlock } = useClientMutation({
     mutationFn: postSiteBlockReorder,
   });
@@ -182,13 +181,13 @@ export function Block({ blockId, blockIndex }: Props) {
         },
       });
 
+      await invalidateSiteCache();
+
       const parsed = SiteBlockSchema.safeParse(response.data.block);
 
       if (parsed.success) {
         addBlockLocally(selectedPage.id, parsed.data);
       }
-
-      await invalidateSiteCache();
 
       setDuplicatedBlockId(response.data.block.id);
     };
@@ -270,26 +269,12 @@ export function Block({ blockId, blockIndex }: Props) {
   /**
    * @useEffect
    * Open duplicated block in the editor after some amount of delay
-   * because the site data isn't updated right after duplication success
+   * because the site data isn't updated right after the duplication succeed
    */
-  useEffect(() => {
-    if (duplicatedBlockId) {
-      if (timer.current) {
-        clearTimeout(timer.current);
-      }
-
-      timer.current = setTimeout(() => {
-        openBlockEditor(duplicatedBlockId);
-        setDuplicatedBlockId(null);
-      }, 100);
-    }
-
-    return () => {
-      if (timer.current) {
-        clearTimeout(timer.current);
-      }
-    };
-  }, [duplicatedBlockId, openBlockEditor, timer]);
+  useAsyncOpenBlockEditor({
+    blockId: duplicatedBlockId,
+    setBlockId: setDuplicatedBlockId,
+  });
 
   /**
    * @useEffect

@@ -2,7 +2,7 @@ import { useTheme } from "styled-components";
 import { IconPhotoPlus, IconSearch } from "@tabler/icons-react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import * as Tooltip from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { rem } from "@/utils/rem";
 import {
@@ -111,7 +111,7 @@ export function Search({ onChange }: Pick<Props, "onChange">) {
           <Tooltip.Content>{`Need ideas? Try keywords like\nwallpaper, background, or pattern to get started.`}</Tooltip.Content>
         </Tooltip.Root>
         <div style={{ width: rem(200) }}>
-          <Input
+          <TextInput
             id="search-image-keyword"
             placeholder="Enter a search keyword"
             onChange={handleChangeQuery}

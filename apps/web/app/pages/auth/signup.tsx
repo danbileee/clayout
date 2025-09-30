@@ -3,7 +3,7 @@ import { parseWithZod } from "@conform-to/zod";
 import { postAuthRegister } from "@/apis/auth/register";
 import { Button } from "@/components/ui/button";
 import * as Card from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { joinPath, Paths } from "@/routes";
 import { Link, useNavigate } from "react-router";
@@ -67,7 +67,7 @@ export default function SignUp() {
                 <div className="flex flex-col gap-6">
                   <div className="grid gap-2">
                     <Label htmlFor={fields.username.id}>Username</Label>
-                    <Input
+                    <TextInput
                       id={fields.username.id}
                       name={fields.username.name}
                       type="text"
@@ -82,7 +82,7 @@ export default function SignUp() {
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor={fields.email.id}>Email</Label>
-                    <Input
+                    <TextInput
                       id={fields.email.id}
                       name={fields.email.name}
                       type="email"
@@ -99,7 +99,7 @@ export default function SignUp() {
                     <div className="flex items-center">
                       <Label htmlFor={fields.password.id}>Password</Label>
                     </div>
-                    <Input
+                    <TextInput
                       id={fields.password.id}
                       name={fields.password.name}
                       type="password"
@@ -115,7 +115,7 @@ export default function SignUp() {
                     <div className="flex items-center">
                       <Label htmlFor={fields.confirm.id}>Repeat Password</Label>
                     </div>
-                    <Input
+                    <TextInput
                       id={fields.confirm.id}
                       name={fields.confirm.name}
                       type="password"
