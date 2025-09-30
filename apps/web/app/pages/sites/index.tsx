@@ -5,6 +5,7 @@ import { handleError } from "@/lib/axios/handleError";
 import { isAuthenticated } from "@/lib/axios/isAuthenticated";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { joinPath, Paths } from "@/routes";
+import { generateSlugTail } from "@/utils/generateSlugTail";
 import {
   PaginationOptions,
   SiteCategories,
@@ -94,17 +95,17 @@ export default function Sites() {
               blocks: [
                 {
                   ...BlockData.Image,
-                  slug: `image-block-${nanoid(4).toLowerCase()}`,
+                  slug: `image-block-${generateSlugTail()}`,
                   order: 0,
                 },
                 {
                   ...BlockData.Text,
-                  slug: `text-block-${nanoid(4).toLowerCase()}`,
+                  slug: `text-block-${generateSlugTail()}`,
                   order: 1,
                 },
                 {
                   ...BlockData.Button,
-                  slug: `button-block-${nanoid(4).toLowerCase()}`,
+                  slug: `button-block-${generateSlugTail()}`,
                   order: 2,
                 },
               ],

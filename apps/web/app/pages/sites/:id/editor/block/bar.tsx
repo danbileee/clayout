@@ -1,4 +1,3 @@
-import { nanoid } from "nanoid";
 import { useState } from "react";
 import { css, styled } from "styled-components";
 import * as Typo from "@/components/ui/typography";
@@ -15,6 +14,7 @@ import { postSiteBlocks } from "@/apis/sites/pages/blocks";
 import { handleError } from "@/lib/axios/handleError";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import { getSiteBlockSlugValidation } from "@/apis/sites/pages/blocks/slug-duplication";
+import { generateSlugTail } from "@/utils/generateSlugTail";
 import { BlockIcons, BlockNames } from "../constants";
 import { useAsyncOpenBlockEditor } from "../hooks/useAsyncOpenBlockEditor";
 
@@ -44,7 +44,7 @@ export function BlockBar() {
           block: isSlugDuplicated
             ? {
                 ...data,
-                slug: `${data.slug}-${nanoid(4).toLowerCase()}`,
+                slug: `${data.slug}-${generateSlugTail()}`,
               }
             : data,
         },

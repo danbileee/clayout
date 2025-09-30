@@ -1,4 +1,3 @@
-import { nanoid } from "nanoid";
 import { HFlexBox } from "@/components/ui/box";
 import * as Typo from "@/components/ui/typography";
 import * as Tooltip from "@/components/ui/tooltip";
@@ -7,14 +6,15 @@ import { Icon } from "@/components/ui/icon";
 import { IconPlus } from "@tabler/icons-react";
 import { css, styled } from "styled-components";
 import { rem } from "@/utils/rem";
-import { PageBarItem } from "./bar-item";
-import { useSiteContext } from "../../contexts/site.context";
-import { BarBase } from "../styled";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
 import { SitePageCategories } from "@clayout/interface";
 import { useState } from "react";
+import { generateSlugTail } from "@/utils/generateSlugTail";
+import { PageBarItem } from "./bar-item";
+import { BarBase } from "../styled";
+import { useSiteContext } from "../../contexts/site.context";
 
 const NewPageName = "New Page";
 
@@ -38,7 +38,7 @@ export function PageBar() {
       const response = await createPage({
         params: {
           siteId: site.id,
-          slug: `new-page-${nanoid(4).toLowerCase()}`,
+          slug: `new-page-${generateSlugTail()}`,
           name: `${NewPageName}${count}`,
           category: SitePageCategories.Static,
           meta: site.meta ?? undefined,

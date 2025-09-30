@@ -136,11 +136,6 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
 
     const newValue = e.currentTarget.value.trim();
 
-    if (newValue === page.slug) {
-      setEditing(false);
-      return;
-    }
-
     updatePageSlug(newValue);
   };
 
@@ -153,11 +148,6 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
       }
 
       const newValue = e.currentTarget.value.trim();
-
-      if (newValue === page.slug) {
-        setEditing(false);
-        return;
-      }
 
       updatePageSlug(newValue);
     }
