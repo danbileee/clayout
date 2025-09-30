@@ -41,7 +41,7 @@ export function BlockBar() {
           block: isSlugDuplicated
             ? {
                 ...data,
-                slug: `${data.slug}-${nanoid(4)}`,
+                slug: `${data.slug}-${nanoid(4).toLowerCase()}`,
               }
             : data,
         },

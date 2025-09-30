@@ -5,6 +5,7 @@ import { getMaxWidth } from "../utils/getMaxWidth";
 import { getComposedStyleString } from "../utils/getComposedStyleString";
 import { getAlignStyle } from "../utils/getAlignStyle";
 import { getComposedStyleObject } from "../utils/getComposedStyleObject";
+import { basicFontFamily } from "../constants";
 
 export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
   static readonly type = SiteBlockTypes.Button;
@@ -139,29 +140,30 @@ export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {
 
 export const ButtonBlockData: z.infer<typeof ButtonBlockSchema> = {
   type: SiteBlockTypes.Button,
-  name: "Button Block",
-  slug: "button-block",
+  name: "Sample Button Block",
+  slug: "sample-button",
   data: {
-    link: "https://www.youtube.com/@lifeisworship.studio",
-    text: "View Channel",
+    link: "https://clayout.app",
+    text: "Visit website",
   },
   style: {
     width: "auto",
-    backgroundColor: "white",
-    padding: "8px 10px 8px 10px",
-    color: "black",
-    fontFamily: `"Libertinus Sans", sans-serif`,
-    fontSize: "24px",
-    fontWeight: "bold",
-    borderWidth: "1px",
+    backgroundColor: "#2563eb",
+    padding: "8px 16px 8px 16px",
+    color: "#ffffff",
+    fontFamily: basicFontFamily,
+    fontSize: "16px",
+    fontWeight: "medium",
+    borderWidth: "0px",
     borderStyle: "solid",
-    borderColor: "red",
-    borderRadius: "8px",
-    textDecoration: "underline",
-    textAlign: "right",
+    borderColor: "transparent",
+    borderRadius: "6px",
+    textDecoration: "none",
+    textAlign: "center",
   },
   containerStyle: {
-    padding: "20px 20px 20px 20px",
-    backgroundColor: "black",
+    padding: "16px 16px 16px 16px",
+    backgroundColor: "transparent",
+    align: "center",
   },
 };

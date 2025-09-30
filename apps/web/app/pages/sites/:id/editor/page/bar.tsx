@@ -30,7 +30,7 @@ export function PageBar() {
       const response = await createPage({
         params: {
           siteId: site.id,
-          slug: `new-page-${nanoid(4)}`,
+          slug: `new-page-${nanoid(4).toLowerCase()}`,
           name: "New Page",
           category: SitePageCategories.Static,
           meta: site.meta ?? undefined,
