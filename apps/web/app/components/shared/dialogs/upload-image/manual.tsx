@@ -1,6 +1,6 @@
 import * as Typo from "@/components/ui/typography";
 import * as Tooltip from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { useUploadAssets } from "@/hooks/useUploadAssets";
 import {
   AssetTargetTypes,
@@ -163,7 +163,7 @@ export function Manual({ value, onChange, options }: Props) {
         />
         <Typo.Small>or</Typo.Small>
         <HFlexBox gap={6}>
-          <Input id="upload-image-url" placeholder="Enter the image URL" />
+          <TextInput id="upload-image-url" placeholder="Enter the image URL" />
           <Button>Submit</Button>
         </HFlexBox>
       </InputsWrapper>

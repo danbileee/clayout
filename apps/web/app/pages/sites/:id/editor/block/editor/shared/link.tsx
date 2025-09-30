@@ -3,7 +3,7 @@ import * as BlockEditor from "../styled";
 import { Icon } from "@/components/ui/icon";
 import { IconLink } from "@tabler/icons-react";
 import { VFlexBox } from "@/components/ui/box";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { useTheme } from "styled-components";
 
 type LinkProperties = { link?: string };
@@ -28,7 +28,7 @@ export function Link({ id, value, error, onChange }: Props) {
         </Typo.P>
       </BlockEditor.Header>
       <VFlexBox gap={6}>
-        <Input
+        <TextInput
           id={id}
           value={link}
           onChange={(e) =>

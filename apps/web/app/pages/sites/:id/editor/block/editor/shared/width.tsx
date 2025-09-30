@@ -4,7 +4,7 @@ import * as BlockEditor from "../styled";
 import { Icon } from "@/components/ui/icon";
 import { IconArrowAutofitWidth } from "@tabler/icons-react";
 import { HFlexBox } from "@/components/ui/box";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/input";
 import { type BlockContainerStyle } from "@clayout/interface";
 
 const Units = {
@@ -75,8 +75,7 @@ export function Width({ value, onChange }: Props) {
       </BlockEditor.Header>
       <HFlexBox gap={8}>
         {([Units.Static, Units.Relative] as string[]).includes(parsed.unit) && (
-          <Input
-            type="tel"
+          <NumberInput
             value={parsed.value}
             onChange={(e) =>
               onChange({ width: `${e.target.value}${parsed.unit}` })

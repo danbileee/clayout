@@ -26,7 +26,7 @@ import {
 } from "@tabler/icons-react";
 import { rem } from "@/utils/rem";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { TextInput } from "@/components/ui/input";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
@@ -219,7 +219,7 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
     <InputWrapper>
       <Tooltip.Root open={Boolean(inputError)}>
         <Tooltip.Trigger>
-          <Input
+          <TextInput
             defaultValue={page.slug}
             placeholder="Enter page slug..."
             onBlur={handleBlur}

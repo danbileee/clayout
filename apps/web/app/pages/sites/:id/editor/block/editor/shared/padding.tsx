@@ -6,7 +6,7 @@ import { HFlexBox, VFlexBox } from "@/components/ui/box";
 import * as Typo from "@/components/ui/typography";
 import * as Popover from "@/components/ui/popover";
 import * as Tooltip from "@/components/ui/tooltip";
-import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/input";
 import * as BlockEditor from "../styled";
 import { TriggerIndicator } from "@/icons/trigger-indicator";
 import { composeSpacingValue, parseSpacingValue } from "./utils/spacing";
@@ -43,9 +43,7 @@ export function Padding({ value: { padding = "" }, onChange }: PaddingProps) {
           <VFlexBox gap={8}>
             <Typo.Small color={theme.colors.slate[600]}>Top</Typo.Small>
             <HFlexBox gap={8}>
-              <Input
-                type="tel"
-                placeholder="Enter a number value"
+              <NumberInput
                 value={parsed.top}
                 onChange={(e) =>
                   onChange({
@@ -62,9 +60,7 @@ export function Padding({ value: { padding = "" }, onChange }: PaddingProps) {
           <VFlexBox gap={8}>
             <Typo.Small color={theme.colors.slate[600]}>Bottom</Typo.Small>
             <HFlexBox gap={8}>
-              <Input
-                type="tel"
-                placeholder="Enter a number value"
+              <NumberInput
                 value={parsed.bottom}
                 onChange={(e) =>
                   onChange({
@@ -81,9 +77,7 @@ export function Padding({ value: { padding = "" }, onChange }: PaddingProps) {
           <VFlexBox gap={8}>
             <Typo.Small color={theme.colors.slate[600]}>Left</Typo.Small>
             <HFlexBox gap={8}>
-              <Input
-                type="tel"
-                placeholder="Enter a number value"
+              <NumberInput
                 value={parsed.left}
                 onChange={(e) =>
                   onChange({
@@ -100,9 +94,7 @@ export function Padding({ value: { padding = "" }, onChange }: PaddingProps) {
           <VFlexBox gap={8}>
             <Typo.Small color={theme.colors.slate[600]}>Right</Typo.Small>
             <HFlexBox gap={8}>
-              <Input
-                type="tel"
-                placeholder="Enter a number value"
+              <NumberInput
                 value={parsed.right}
                 onChange={(e) =>
                   onChange({
