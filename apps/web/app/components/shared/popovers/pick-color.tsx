@@ -256,6 +256,6 @@ const CustomButton = styled.div`
   width: ${rem(15)};
   height: ${rem(15)};
   border: 1px solid ${({ theme }) => theme.colors.slate[200]};
-  border-radius: 2px;
+  border-radius: ${rem(2)};
   background: conic-gradient(red, yellow, lime, cyan, blue, magenta, red);
 `;

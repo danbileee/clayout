@@ -18,7 +18,7 @@ export const Header = styled.div`
   align-items: center;
   justify-content: space-between;
   gap: ${rem(12)};
-  margin-bottom: 8px;
+  margin-bottom: ${rem(8)};
 `;
 
 export const Button = styled.button.withConfig({

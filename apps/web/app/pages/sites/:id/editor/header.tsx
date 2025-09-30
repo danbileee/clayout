@@ -12,12 +12,8 @@ import { Icon } from "@/components/ui/icon";
 import {
   IconArrowBackUp,
   IconArrowForwardUp,
-  IconChevronLeft,
   IconShare,
 } from "@tabler/icons-react";
-import { useNavigate } from "react-router";
-import { joinPath, Paths } from "@/routes";
-import { useParamsId } from "@/hooks/useParamsId";
 import { HFlexBox } from "@/components/ui/box";
 import { toast } from "sonner";
 import { useEditorHistory } from "./hooks/useEditorHistory";
@@ -27,8 +23,6 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   _props,
   ref
 ) {
-  const id = useParamsId();
-  const navigate = useNavigate();
   const { site, primaryDomain, selectedPage, selectedPageId } =
     useSiteContext();
   const { mutateAsync: publish, isPending: isPublishing } = useClientMutation({
@@ -48,31 +42,6 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
 
     const result = redo(selectedPageId);
     await updateDB.current(result);
-  };
-
-  const handleBack = () => {
-    if (window.history.length <= 1) {
-      navigate(
-        joinPath([Paths.sites, ":id"], {
-          ids: [
-            {
-              key: ":id",
-              value: id,
-            },
-          ],
-        })
-      );
-      return;
-    }
-
-    const referrer = document.referrer;
-    const loginPath = `/${Paths.login}`;
-
-    if (referrer.includes(loginPath)) {
-      navigate(-2);
-    } else {
-      navigate(-1);
-    }
   };
 
   const handlePublish = async () => {
@@ -140,9 +109,6 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
   return (
     <HeaderBase ref={ref}>
       <HFlexBox gap={12}>
-        <Button isSquare variant="ghost" onClick={handleBack}>
-          <Icon>{IconChevronLeft}</Icon>
-        </Button>
         <Typo.P
           weight="medium"
           style={{ display: "flex", alignItems: "center" }}

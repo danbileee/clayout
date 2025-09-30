@@ -16,6 +16,8 @@ import { handleError } from "@/lib/axios/handleError";
 import { SitePageCategories } from "@clayout/interface";
 import { useState } from "react";
 
+const NewPageName = "New Page";
+
 export function PageBar() {
   const { site, refetchSite, setPage } = useSiteContext();
   const { mutateAsync: createPage } = useClientMutation({
@@ -27,11 +29,17 @@ export function PageBar() {
     const fn = async () => {
       if (!site?.id) return;
 
+      const count = site.pages.filter(
+        (page) => page.name.trim() === NewPageName
+      ).length
+        ? ` ${site.pages.length}`
+        : "";
+
       const response = await createPage({
         params: {
           siteId: site.id,
           slug: `new-page-${nanoid(4).toLowerCase()}`,
-          name: "New Page",
+          name: `${NewPageName}${count}`,
           category: SitePageCategories.Static,
           meta: site.meta ?? undefined,
           order: site.pages.length,

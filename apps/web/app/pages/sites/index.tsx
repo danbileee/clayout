@@ -82,8 +82,8 @@ export default function Sites() {
           status: SiteStatuses.Draft,
           pages: [
             {
-              slug: `new-page-${nanoid(4).toLowerCase()}`,
-              name: "New Page",
+              slug: "home",
+              name: "Home Page",
               category: SitePageCategories.Static,
               isHome: true,
               isVisible: true,
