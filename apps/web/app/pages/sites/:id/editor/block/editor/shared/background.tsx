@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useTheme } from "styled-components";
 import { Icon } from "@/components/ui/icon";
 import * as Typo from "@/components/ui/typography";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/styled/editor";
 import { HFlexBox, VFlexBox } from "@/components/ui/box";
 import { type BlockContainerStyle } from "@clayout/interface";
 import { IconBackground, IconRadiusBottomLeft } from "@tabler/icons-react";
@@ -17,16 +17,16 @@ interface RootProps {
 
 export function Root({ children }: RootProps) {
   return (
-    <BlockEditor.Item>
-      <BlockEditor.Header>
+    <Editor.Item>
+      <Editor.Header>
         <Typo.P size="sm" flex>
           <Icon>{IconBackground}</Icon>
           <span>Background</span>
         </Typo.P>
         <HelpButton>{`The image will appear on top of the\nbackground color when both are set`}</HelpButton>
-      </BlockEditor.Header>
+      </Editor.Header>
       <VFlexBox gap={12}>{children}</VFlexBox>
-    </BlockEditor.Item>
+    </Editor.Item>
   );
 }
 

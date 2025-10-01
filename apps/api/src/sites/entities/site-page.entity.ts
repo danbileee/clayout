@@ -5,6 +5,7 @@ import {
   KebabCase,
   SitePageCategories,
   SitePageCategory,
+  SitePageContainerStyle,
   SitePageMeta,
 } from '@clayout/interface';
 import { SiteEntity } from './site.entity';
@@ -39,6 +40,13 @@ export class SitePageEntity extends BaseEntity {
   })
   @IsObject()
   meta: SitePageMeta;
+
+  @Column({
+    nullable: true,
+    type: 'jsonb',
+  })
+  @IsObject()
+  containerStyle: SitePageContainerStyle;
 
   @Column({
     nullable: false,

@@ -8,13 +8,25 @@ import { handleError } from "@/lib/axios/handleError";
 
 interface Params {
   pageId: ReturnType<typeof useSiteContext>["selectedPageId"];
+  initialState?: {
+    editing?: boolean;
+    inputError?: string;
+  };
   onSuccess?: VoidFunction;
+  onError?: VoidFunction;
 }
 
-export function useHandleChangePageSlug({ pageId, onSuccess }: Params) {
+export function useHandleChangePageSlug({
+  pageId,
+  initialState,
+  onSuccess,
+  onError,
+}: Params) {
   const { site, refetchSite } = useSiteContext();
-  const [editing, setEditing] = useState(false);
-  const [inputError, setInputError] = useState<string | undefined>(undefined);
+  const [editing, setEditing] = useState(initialState?.editing ?? false);
+  const [inputError, setInputError] = useState<string | undefined>(
+    initialState?.inputError ?? undefined
+  );
   const { mutateAsync: updatePage } = useClientMutation({
     mutationFn: patchSitePages,
   });
@@ -61,6 +73,7 @@ export function useHandleChangePageSlug({ pageId, onSuccess }: Params) {
       });
 
       if (error) {
+        onError?.();
         throw error;
       }
     }

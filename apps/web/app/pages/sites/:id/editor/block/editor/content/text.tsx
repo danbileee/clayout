@@ -3,10 +3,10 @@ import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
 import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import * as Typo from "@/components/ui/typography";
 import { Icon } from "@/components/ui/icon";
-import { IconMessage } from "@tabler/icons-react";
+import { IconNote } from "@tabler/icons-react";
 import { Textarea } from "@/components/ui/textarea";
 import type { BlockEditorProps } from "../types";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/styled/editor";
 
 export function TextEditorContent({
   block,
@@ -21,14 +21,14 @@ export function TextEditorContent({
   if (!block.id) return null;
 
   return (
-    <BlockEditor.List>
-      <BlockEditor.Item>
-        <BlockEditor.Header>
+    <Editor.List>
+      <Editor.Item>
+        <Editor.Header>
           <Typo.P size="sm" flex>
-            <Icon>{IconMessage}</Icon>
+            <Icon>{IconNote}</Icon>
             <span>Content</span>
           </Typo.P>
-        </BlockEditor.Header>
+        </Editor.Header>
         <Textarea
           id={`${block.id.toString()}-content`}
           value={block.data?.value}
@@ -38,7 +38,7 @@ export function TextEditorContent({
             })
           }
         />
-      </BlockEditor.Item>
-    </BlockEditor.List>
+      </Editor.Item>
+    </Editor.List>
   );
 }

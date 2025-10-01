@@ -1,7 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 import { SiteBlockTypes } from "../../constants";
 import { Tables } from "../../types";
-import { slugSchema } from "./slug.schema";
+import { Aligns, containerStyleShapeBase, slugSchema } from "./shared.schema";
 
 type BlockSchemaObject = Record<
   keyof Pick<
@@ -24,29 +24,6 @@ const siteBlockShapeBase = {
   name: z.string().optional(),
   order: z.number().optional(),
 } satisfies Pick<BlockSchemaObject, "id" | "slug" | "name" | "order">;
-
-const BlockAligns = {
-  left: "left",
-  right: "right",
-  center: "center",
-  justify: "justify",
-} as const;
-
-const containerStyleShapeBase = {
-  width: z.string().optional(),
-  align: z.nativeEnum(BlockAligns).optional(),
-  backgroundColor: z.string().optional(),
-  backgroundSize: z.string().optional(),
-  backgroundPosition: z.string().optional(),
-  backgroundRepeat: z.string().optional(),
-  backgroundImage: z.string().optional(),
-  borderWidth: z.string().optional(),
-  borderStyle: z.string().optional(),
-  borderColor: z.string().optional(),
-  borderRadius: z.string().optional(),
-  padding: z.string().optional(),
-  margin: z.string().optional(),
-};
 
 export const TextBlockSchema = z.object({
   ...siteBlockShapeBase,
@@ -100,7 +77,7 @@ export const ButtonBlockSchema = z.object({
     borderColor: z.string().optional(),
     borderRadius: z.string().optional(),
     textDecoration: z.string().optional(),
-    textAlign: z.nativeEnum(BlockAligns).optional(),
+    textAlign: z.nativeEnum(Aligns).optional(),
   }),
   containerStyle: z.object(containerStyleShapeBase),
 });

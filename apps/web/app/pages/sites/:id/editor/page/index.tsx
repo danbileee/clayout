@@ -1,6 +1,6 @@
 import { styled, useTheme } from "styled-components";
-import { IconCubeSpark } from "@tabler/icons-react";
-import { SitePageFitWidth } from "@clayout/interface";
+import { IconCubeSpark, IconEdit } from "@tabler/icons-react";
+import { SitePageFitWidth, SitePageSchema } from "@clayout/interface";
 import {
   SiteMenus,
   useSiteContext,
@@ -8,25 +8,38 @@ import {
 import { useBlockIdsForPage } from "@/lib/zustand/editor";
 import { EmptyPlaceholder } from "@/components/shared/placeholder/empty";
 import * as Typo from "@/components/ui/typography";
+import * as Tooltip from "@/components/ui/tooltip";
 import { Block } from "../block";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/icon";
+import { rem } from "@/utils/rem";
+import type { MouseEvent } from "react";
 
 export function Page() {
   const theme = useTheme();
-  const { selectedPage, setMenu } = useSiteContext();
+  const { selectedPage, setMenu, openPageEditor } = useSiteContext();
   const blockIds = useBlockIdsForPage(selectedPage?.id);
 
-  const handleClickBlocksPanel = () => {
+  const handleClickBlocksPanel = (e: MouseEvent<HTMLButtonElement>) => {
+    e.stopPropagation();
     setMenu(SiteMenus.Blocks);
+  };
+
+  const handleClickEditPage = (e: MouseEvent<HTMLButtonElement>) => {
+    if (!selectedPage) return;
+    e.stopPropagation();
+    openPageEditor(selectedPage.id);
   };
 
   if (!selectedPage) {
     console.warn(
-      "No selected page in the site context. This is not expected situation."
+      "No selected page in the site context. This is not an expected situation."
     );
     return null;
   }
 
-  const { pageFit = "md" } = selectedPage.meta ?? {};
+  const parsed = SitePageSchema.parse(selectedPage);
+  const { pageFit = "sm" } = parsed.containerStyle ?? {};
 
   return blockIds.length ? (
     <Canvas>
@@ -35,6 +48,21 @@ export function Page() {
           <Block key={blockId} blockId={blockId} blockIndex={blockIndex} />
         ))}
       </div>
+      {selectedPage && (
+        <Tooltip.Root>
+          <Tooltip.Trigger>
+            <Button
+              isSquare
+              level="secondary"
+              style={{ position: "fixed", bottom: rem(20), right: rem(20) }}
+              onClick={handleClickEditPage}
+            >
+              <Icon>{IconEdit}</Icon>
+            </Button>
+          </Tooltip.Trigger>
+          <Tooltip.Content align="end">Edit page properties</Tooltip.Content>
+        </Tooltip.Root>
+      )}
     </Canvas>
   ) : (
     <EmptyPlaceholder icon={IconCubeSpark}>
@@ -53,6 +81,7 @@ export function Page() {
 }
 
 const Canvas = styled.div`
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;

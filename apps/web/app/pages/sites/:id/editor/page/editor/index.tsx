@@ -1,29 +1,28 @@
-import { HFlexBox } from "@/components/ui/box";
-import { EditorBase } from "../../styled";
-import { Button } from "@/components/ui/button";
-import { IconChevronLeft } from "@tabler/icons-react";
 import * as Typo from "@/components/ui/typography";
 import * as Tab from "@/components/ui/tabs";
+import { HFlexBox } from "@/components/ui/box";
+import { Button } from "@/components/ui/button";
+import { IconChevronLeft } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
 import {
   EditorTabs,
   useSiteContext,
 } from "@/pages/sites/:id/contexts/site.context";
-import { BlockEditorContent } from "./content";
-import { BlockEditorDesign } from "./design";
-import { BlockNames } from "../../constants";
+import { EditorBase } from "../../styled";
+import { PageEditorContent } from "./content";
+import { PageEditorDesign } from "./design";
 
-export function BlockEditor() {
-  const { selectedBlock: block, closeBlockEditor } = useSiteContext();
+export function PageEditor() {
+  const { selectedPage, closePageEditor } = useSiteContext();
 
   const handleBack = () => {
-    closeBlockEditor();
+    closePageEditor();
   };
 
-  if (!block) {
+  if (!selectedPage) {
     return (
       <div>
-        <div>No block</div>
+        <div>No page</div>
       </div>
     );
   }
@@ -34,9 +33,7 @@ export function BlockEditor() {
         <Button isSquare variant="ghost" onClick={handleBack}>
           <Icon>{IconChevronLeft}</Icon>
         </Button>
-        <Typo.P weight="medium">
-          {`${BlockNames[block.type]} properties`}
-        </Typo.P>
+        <Typo.P weight="medium">Page properties</Typo.P>
       </HFlexBox>
       <Tab.Root defaultValue={EditorTabs.Content}>
         <Tab.List>
@@ -48,10 +45,10 @@ export function BlockEditor() {
           </Tab.Trigger>
         </Tab.List>
         <Tab.Content value={EditorTabs.Content}>
-          <BlockEditorContent />
+          <PageEditorContent />
         </Tab.Content>
         <Tab.Content value={EditorTabs.Design}>
-          <BlockEditorDesign />
+          <PageEditorDesign />
         </Tab.Content>
       </Tab.Root>
     </EditorBase>

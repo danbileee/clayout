@@ -7,7 +7,12 @@ import {
 } from 'class-validator';
 import { BaseEntity } from 'src/shared/entities/base.entity';
 import { Column, Entity, Index, ManyToOne } from 'typeorm';
-import { KebabCase, SiteBlockTypes, SiteBlockType } from '@clayout/interface';
+import {
+  KebabCase,
+  SiteBlockTypes,
+  SiteBlockType,
+  SiteBlockContainerStyle,
+} from '@clayout/interface';
 import { SitePageEntity } from './site-page.entity';
 import { SiteEntity } from './site.entity';
 
@@ -57,7 +62,7 @@ export class SiteBlockEntity extends BaseEntity {
     type: 'jsonb',
   })
   @IsObject()
-  containerStyle: Record<string, string>;
+  containerStyle: SiteBlockContainerStyle;
 
   @ManyToOne(() => SitePageEntity, (page) => page.blocks, {
     nullable: false,

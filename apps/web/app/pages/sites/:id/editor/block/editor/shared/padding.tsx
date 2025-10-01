@@ -7,7 +7,7 @@ import * as Typo from "@/components/ui/typography";
 import * as Popover from "@/components/ui/popover";
 import * as Tooltip from "@/components/ui/tooltip";
 import { NumberInput } from "@/components/ui/input";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/styled/editor";
 import { TriggerIndicator } from "@/icons/trigger-indicator";
 import { composeSpacingValue, parseSpacingValue } from "./utils/spacing";
 
@@ -27,10 +27,10 @@ export function Padding({ value: { padding = "" }, onChange }: PaddingProps) {
       <Tooltip.Root>
         <Tooltip.Trigger>
           <Popover.Trigger>
-            <BlockEditor.Button>
+            <Editor.Button>
               <Icon size={20}>{IconBoxPadding}</Icon>
               <TriggerIndicator />
-            </BlockEditor.Button>
+            </Editor.Button>
           </Popover.Trigger>
         </Tooltip.Trigger>
         <Tooltip.Content side="bottom">Padding</Tooltip.Content>

@@ -1,6 +1,6 @@
 import { rem } from "@/utils/rem";
 import { css, styled } from "styled-components";
-import { BAR_WIDTH } from "./constants";
+import { BAR_WIDTH } from "../constants";
 
 export const BarBase = styled.div`
   ${({ theme }) => css`

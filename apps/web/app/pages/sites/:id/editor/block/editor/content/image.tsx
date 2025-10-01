@@ -6,7 +6,7 @@ import { IconAlt, IconPhoto } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
 import { TextInput } from "@/components/ui/input";
 import type { BlockEditorProps } from "../types";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/styled/editor";
 import { ImageManager } from "../shared/image-manager";
 import { HelpButton } from "@/components/shared/buttons/help";
 import { useTheme } from "styled-components";
@@ -40,14 +40,14 @@ export function ImageEditorContent({
   if (!block.id) return null;
 
   return (
-    <BlockEditor.List>
-      <BlockEditor.Item>
-        <BlockEditor.Header>
+    <Editor.List>
+      <Editor.Item>
+        <Editor.Header>
           <Typo.P size="sm" flex>
             <Icon>{IconPhoto}</Icon>
             <span>Source</span>
           </Typo.P>
-        </BlockEditor.Header>
+        </Editor.Header>
         <ImageManager
           value={block.data?.url ?? ""}
           onChange={(v) =>
@@ -56,21 +56,21 @@ export function ImageEditorContent({
             })
           }
         />
-      </BlockEditor.Item>
+      </Editor.Item>
       <Link
         id={`${block.id}-link`}
         value={{ link: block.data?.link }}
         error={block.data?.link ? linkError : undefined}
         onChange={handleChangeData}
       />
-      <BlockEditor.Item>
-        <BlockEditor.Header>
+      <Editor.Item>
+        <Editor.Header>
           <Typo.P size="sm" flex>
             <Icon>{IconAlt}</Icon>
             <span>Alt text</span>
           </Typo.P>
           <HelpButton>{`Displayed when the image is unavailable.`}</HelpButton>
-        </BlockEditor.Header>
+        </Editor.Header>
         <VFlexBox gap={6}>
           <TextInput
             id={`${block.id.toString()}-alt`}
@@ -92,7 +92,7 @@ export function ImageEditorContent({
             </Typo.P>
           )}
         </VFlexBox>
-      </BlockEditor.Item>
-    </BlockEditor.List>
+      </Editor.Item>
+    </Editor.List>
   );
 }

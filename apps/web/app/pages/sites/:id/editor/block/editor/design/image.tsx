@@ -1,12 +1,12 @@
 import { z } from "zod";
 import { SiteBlockTypes, type ImageBlockSchema } from "@clayout/interface";
 import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
-import type { BlockEditorProps } from "../types";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/styled/editor";
 import * as BoxModel from "../shared/box-model";
 import * as Background from "../shared/background";
 import { Width } from "../shared/width";
 import { Alignment } from "../shared/align";
+import type { BlockEditorProps } from "../types";
 
 export function ImageEditorDesign({
   block,
@@ -38,7 +38,7 @@ export function ImageEditorDesign({
   const { width } = block.style ?? {};
 
   return (
-    <BlockEditor.List>
+    <Editor.List>
       <Width value={{ width }} onChange={handleChangeStyle} />
       <Alignment value={{ align }} onChange={handleChangeContainerStyle} />
       <BoxModel.Root>
@@ -75,6 +75,6 @@ export function ImageEditorDesign({
           onChange={handleChangeContainerStyle}
         />
       </Background.Root>
-    </BlockEditor.List>
+    </Editor.List>
   );
 }

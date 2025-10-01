@@ -148,23 +148,27 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
     }
   };
 
-  return freshPageId === page.id || editing ? (
-    <InputWrapper>
-      <Tooltip.Root open={Boolean(inputError)}>
-        <Tooltip.Trigger>
-          <TextInput
-            defaultValue={page.slug}
-            placeholder="Enter page slug..."
-            onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
-            onChange={handleChange}
-            autoFocus
-          />
-        </Tooltip.Trigger>
-        <Tooltip.Content>{inputError}</Tooltip.Content>
-      </Tooltip.Root>
-    </InputWrapper>
-  ) : (
+  if (freshPageId === page.id || editing) {
+    return (
+      <InputWrapper>
+        <Tooltip.Root open={Boolean(inputError)}>
+          <Tooltip.Trigger>
+            <TextInput
+              defaultValue={page.slug}
+              placeholder="Enter page slug..."
+              onBlur={handleBlur}
+              onKeyDown={handleKeyDown}
+              onChange={handleChange}
+              autoFocus
+            />
+          </Tooltip.Trigger>
+          <Tooltip.Content>{inputError}</Tooltip.Content>
+        </Tooltip.Root>
+      </InputWrapper>
+    );
+  }
+
+  return (
     <PageItem
       selected={page.id === selectedPage?.id}
       onDoubleClick={handleDoubleClick}
@@ -190,54 +194,55 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
           {page.slug}
         </Typo.P>
       </HInlineFlexBox>
-      {!page.isHome && (
-        <HInlineFlexBox
-          gap={2}
-          style={{ visibility: hovering ? "visible" : "hidden" }}
-        >
-          <Button
-            isSquare
-            variant="ghost"
-            size="sm"
-            onClick={handleChangeVisible}
-          >
-            <Icon
-              size={14}
-              color={theme.colors.slate[page.isVisible ? 600 : 300]}
-            >
-              {page.isVisible ? IconEye : IconEyeOff}
-            </Icon>
-          </Button>
-          <Button
-            isSquare
-            variant="ghost"
-            size="sm"
-            onClick={handleToggleHome}
-            disabled={!page.isVisible}
-          >
-            <Icon size={14} color={theme.colors.slate[300]}>
-              {IconHome}
-            </Icon>
-          </Button>
-        </HInlineFlexBox>
-      )}
-      {page.isHome && (
-        <Tooltip.Root>
-          <Tooltip.Trigger>
+      <HInlineFlexBox gap={2}>
+        {!page.isHome && (
+          <>
             <Button
               isSquare
               variant="ghost"
               size="sm"
-              onClick={(e) => e.stopPropagation()}
+              onClick={handleChangeVisible}
+              style={{ visibility: hovering ? "visible" : "hidden" }}
             >
-              <Icon size={14} color={theme.colors.blue[700]}>
+              <Icon
+                size={14}
+                color={theme.colors.slate[page.isVisible ? 600 : 300]}
+              >
+                {page.isVisible ? IconEye : IconEyeOff}
+              </Icon>
+            </Button>
+            <Button
+              isSquare
+              variant="ghost"
+              size="sm"
+              onClick={handleToggleHome}
+              disabled={!page.isVisible}
+              style={{ visibility: hovering ? "visible" : "hidden" }}
+            >
+              <Icon size={14} color={theme.colors.slate[300]}>
                 {IconHome}
               </Icon>
             </Button>
-          </Tooltip.Trigger>
-          <Tooltip.Content>This page is home</Tooltip.Content>
-        </Tooltip.Root>
-      )}
+          </>
+        )}
+        {page.isHome && (
+          <Tooltip.Root>
+            <Tooltip.Trigger>
+              <Button
+                isSquare
+                variant="ghost"
+                size="sm"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <Icon size={14} color={theme.colors.blue[700]}>
+                  {IconHome}
+                </Icon>
+              </Button>
+            </Tooltip.Trigger>
+            <Tooltip.Content>This page is home</Tooltip.Content>
+          </Tooltip.Root>
+        )}
+      </HInlineFlexBox>
     </PageItem>
   );
 }

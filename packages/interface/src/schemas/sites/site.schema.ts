@@ -1,16 +1,10 @@
 import { z, ZodTypeAny } from "zod";
-import { Constants, Tables } from "../../types";
 import { SitePageSchema } from "./page.schema";
+import { metaShape, slugSchema } from "./shared.schema";
 import { PaginationSchema } from "../pagination.schema";
-import { slugSchema } from "./slug.schema";
+import { Constants, Tables } from "../../types";
 
-export const siteMetaShape = {
-  description: z.string().optional(),
-  ogImagePath: z.string().optional(),
-  faviconPath: z.string().optional(),
-};
-
-export const SiteMetaSchema = z.object(siteMetaShape);
+export const SiteMetaSchema = z.object(metaShape);
 
 const siteShape = {
   name: z.string(),

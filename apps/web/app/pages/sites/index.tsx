@@ -88,7 +88,8 @@ export default function Sites() {
               category: SitePageCategories.Static,
               isHome: true,
               isVisible: true,
-              meta: {
+              meta: {},
+              containerStyle: {
                 pageFit: "sm",
               },
               order: 0,

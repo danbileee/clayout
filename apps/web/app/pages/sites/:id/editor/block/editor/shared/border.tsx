@@ -2,7 +2,7 @@ import { useTheme } from "styled-components";
 import * as Popover from "@/components/ui/popover";
 import * as Tooltip from "@/components/ui/tooltip";
 import * as Typo from "@/components/ui/typography";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/styled/editor";
 import type { BlockContainerStyle } from "@clayout/interface";
 import { Icon } from "@/components/ui/icon";
 import { IconBorderSides } from "@tabler/icons-react";
@@ -38,10 +38,10 @@ export function Border({
       <Tooltip.Root>
         <Tooltip.Trigger>
           <Popover.Trigger>
-            <BlockEditor.Button>
+            <Editor.Button>
               <Icon size={20}>{IconBorderSides}</Icon>
               <TriggerIndicator />
-            </BlockEditor.Button>
+            </Editor.Button>
           </Popover.Trigger>
         </Tooltip.Trigger>
         <Tooltip.Content side="bottom">Border</Tooltip.Content>
@@ -125,7 +125,7 @@ function BorderStyleButton({
   return (
     <Tooltip.Root>
       <Tooltip.Trigger>
-        <BlockEditor.Button
+        <Editor.Button
           style={{ padding: rem(12) }}
           selected={selected}
           onClick={onClick}
@@ -137,7 +137,7 @@ function BorderStyleButton({
               border: `1px ${type} ${theme.colors.slate[700]}`,
             }}
           />
-        </BlockEditor.Button>
+        </Editor.Button>
       </Tooltip.Trigger>
       <Tooltip.Content side="bottom">{type}</Tooltip.Content>
     </Tooltip.Root>

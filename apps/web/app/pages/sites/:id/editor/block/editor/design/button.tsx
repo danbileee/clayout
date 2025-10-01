@@ -6,7 +6,7 @@ import * as Background from "../shared/background";
 import * as ButtonStyle from "../shared/button-style";
 import { Alignment } from "../shared/align";
 import type { BlockEditorProps } from "../types";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/styled/editor";
 import { Width } from "../shared/width";
 
 export function ButtonEditorDesign({
@@ -52,7 +52,7 @@ export function ButtonEditorDesign({
   } = block.style ?? {};
 
   return (
-    <BlockEditor.List>
+    <Editor.List>
       <Width value={{ width: buttonWidth }} onChange={handleChangeStyle} />
       <ButtonStyle.Root>
         <ButtonStyle.Color
@@ -117,6 +117,6 @@ export function ButtonEditorDesign({
           onChange={handleChangeContainerStyle}
         />
       </Background.Root>
-    </BlockEditor.List>
+    </Editor.List>
   );
 }

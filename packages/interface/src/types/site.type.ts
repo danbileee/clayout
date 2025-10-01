@@ -47,6 +47,12 @@ export type SiteMeta = z.infer<typeof SiteMetaSchema>;
 
 export type SitePageMeta = z.infer<typeof SitePageMetaSchema>;
 
+export type SitePageContainerStyle = z.infer<
+  (typeof SitePageSchema)["shape"]["containerStyle"]
+>;
+
+export type SiteBlockContainerStyle = BlockSchema["containerStyle"];
+
 export type CreateSitePageDto = z.infer<typeof SitePageSchema>;
 
 export type UpdateSitePageDto = Partial<CreateSitePageDto>;

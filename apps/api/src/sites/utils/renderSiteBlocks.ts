@@ -32,7 +32,7 @@ export function renderSiteBlocks({
     ogImagePath && assetsDomain ? `${assetsDomain}/${ogImagePath}` : '';
   const path = page.isHome ? '' : `/${page.slug}`;
   const url = `https://${domain.hostname}${path}`;
-  const maxWidth = SitePageFitWidth[page.meta?.pageFit ?? 'md'];
+  const maxWidth = SitePageFitWidth[page.containerStyle?.pageFit ?? 'sm'];
 
   return `<!DOCTYPE html>
 <html lang="en">
