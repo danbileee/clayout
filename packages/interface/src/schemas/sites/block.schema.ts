@@ -1,6 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 import { SiteBlockTypes } from "../../constants";
 import { Tables } from "../../types";
+import { slugSchema } from "./slug.schema";
 
 type BlockSchemaObject = Record<
   keyof Pick<
@@ -19,7 +20,7 @@ type BlockSchemaObject = Record<
 
 const siteBlockShapeBase = {
   id: z.number().optional(),
-  slug: z.string(),
+  slug: slugSchema,
   name: z.string().optional(),
   order: z.number().optional(),
 } satisfies Pick<BlockSchemaObject, "id" | "slug" | "name" | "order">;

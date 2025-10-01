@@ -1,15 +1,9 @@
 import {
   SitePageCategories,
-  SitePageSchema,
   type SitePageCategory,
   type SitePageWithRelations,
 } from "@clayout/interface";
-import {
-  useState,
-  type FocusEvent,
-  type KeyboardEvent,
-  type MouseEvent,
-} from "react";
+import { useState, type MouseEvent } from "react";
 import { css, styled, useTheme } from "styled-components";
 import { HInlineFlexBox } from "@/components/ui/box";
 import { Icon } from "@/components/ui/icon";
@@ -32,7 +26,7 @@ import { patchSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
 import { patchSitePagesHome } from "@/apis/sites/pages/home";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
-import { getError } from "@/lib/zod/getError";
+import { useHandleChangePageSlug } from "../hooks/useHandleChangePageSlug";
 
 interface Props {
   page: SitePageWithRelations;
@@ -44,13 +38,26 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
   const theme = useTheme();
   const { site, refetchSite, selectedPage, setPage } = useSiteContext();
   const [hovering, setHovering] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [inputError, setInputError] = useState<string | undefined>(undefined);
   const { mutateAsync: updatePage } = useClientMutation({
     mutationFn: patchSitePages,
   });
   const { mutateAsync: updateHomePage } = useClientMutation({
     mutationFn: patchSitePagesHome,
+  });
+  const {
+    editing,
+    inputError,
+    setEditing,
+    handleChange,
+    handleBlur,
+    handleKeyDown,
+  } = useHandleChangePageSlug({
+    pageId: page.id,
+    onSuccess: () => {
+      if (freshPageId === page.id) {
+        setFreshPageId(null);
+      }
+    },
   });
 
   const handleClick = (e: MouseEvent<HTMLLIElement>) => {
@@ -76,80 +83,6 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
   const handleMouseLeave = () => {
     if (hovering) {
       setHovering(false);
-    }
-  };
-
-  const handleChange = () => {
-    if (inputError) {
-      setInputError(undefined);
-    }
-  };
-
-  const updatePageSlug = async (newValue: string) => {
-    const validation = SitePageSchema.shape.slug.safeParse(newValue);
-    const error = getError(validation);
-
-    if (error) {
-      setInputError(error);
-      return;
-    }
-
-    const fn = async () => {
-      if (!site?.id) return;
-
-      await updatePage({
-        params: {
-          siteId: site.id,
-          pageId: page.id,
-          slug: newValue,
-        },
-      });
-      await refetchSite();
-
-      setEditing(false);
-      setInputError(undefined);
-
-      if (freshPageId === page.id) {
-        setFreshPageId(null);
-      }
-    };
-
-    try {
-      await fn();
-    } catch (e) {
-      const { error } = await handleError(e, {
-        onRetry: fn,
-      });
-
-      if (error) {
-        throw error;
-      }
-    }
-  };
-
-  const handleBlur = async (e: FocusEvent<HTMLInputElement>) => {
-    if (inputError) {
-      setEditing(false);
-      setInputError(undefined);
-      return;
-    }
-
-    const newValue = e.currentTarget.value.trim();
-
-    updatePageSlug(newValue);
-  };
-
-  const handleKeyDown = async (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" || e.key === "Escape") {
-      if (inputError) {
-        setEditing(false);
-        setInputError(undefined);
-        return;
-      }
-
-      const newValue = e.currentTarget.value.trim();
-
-      updatePageSlug(newValue);
     }
   };
 
@@ -252,6 +185,7 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
           color={
             page.isVisible ? theme.colors.slate[950] : theme.colors.slate[300]
           }
+          className="line-clamp-1"
         >
           {page.slug}
         </Typo.P>
@@ -330,6 +264,7 @@ const PageItem = styled.li.withConfig({
     display: inline-flex;
     align-items: center;
     justify-content: space-between;
+    gap: ${rem(4)};
     background-color: ${theme.colors.white};
     padding: ${rem(4)} ${rem(4)} ${rem(4)} ${rem(8)};
     border-radius: ${rem(6)};

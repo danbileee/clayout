@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import * as Typo from "@/components/ui/typography";
 import * as Tooltip from "@/components/ui/tooltip";
 import { forwardRef, useEffect } from "react";
 import { css, styled } from "styled-components";
@@ -16,6 +15,10 @@ import {
 } from "@tabler/icons-react";
 import { HFlexBox } from "@/components/ui/box";
 import { toast } from "sonner";
+import { AutosizeInput } from "@/components/ui/input";
+import { trigger } from "@/lib/tailwindcss/presets";
+import { cn } from "@/lib/tailwindcss/merge";
+import { useHandleChangePageSlug } from "./hooks/useHandleChangePageSlug";
 import { useEditorHistory } from "./hooks/useEditorHistory";
 import { useSiteContext } from "../contexts/site.context";
 
@@ -29,6 +32,16 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
     mutationFn: patchSitePublish,
   });
   const { undo, redo, canUndo, canRedo, updateDB } = useEditorHistory();
+  const {
+    editing,
+    inputError,
+    setEditing,
+    handleChange,
+    handleBlur,
+    handleKeyDown,
+  } = useHandleChangePageSlug({
+    pageId: selectedPageId,
+  });
 
   const handleUndo = async () => {
     if (!selectedPageId) return;
@@ -108,25 +121,44 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
 
   return (
     <HeaderBase ref={ref}>
-      <HFlexBox gap={12}>
-        <Typo.P
-          weight="medium"
-          style={{ display: "flex", alignItems: "center" }}
-        >
-          {primaryDomain && (
-            <SiteName hasPage={Boolean(selectedPage)}>
-              {primaryDomain.hostname}
-            </SiteName>
-          )}
-          {selectedPage && (
-            <>
-              <span style={{ paddingLeft: rem(4), paddingRight: rem(6) }}>
-                /
+      <HFlexBox gap={2}>
+        {primaryDomain && (
+          <SiteName
+            hasPage={Boolean(selectedPage)}
+            className="truncate max-w-sm"
+          >
+            {primaryDomain.hostname}
+          </SiteName>
+        )}
+        {selectedPage && (
+          <>
+            <span style={{ paddingLeft: rem(4), paddingRight: rem(4) }}>/</span>
+            {editing ? (
+              <Tooltip.Root open={Boolean(inputError)}>
+                <Tooltip.Trigger>
+                  <AutosizeInput
+                    size="sm"
+                    placeholder="Enter page slug..."
+                    className="max-w-3xs"
+                    value={selectedPage.slug}
+                    onChange={handleChange}
+                    onBlur={handleBlur}
+                    onKeyDown={handleKeyDown}
+                    autoFocus
+                  />
+                </Tooltip.Trigger>
+                <Tooltip.Content>{inputError}</Tooltip.Content>
+              </Tooltip.Root>
+            ) : (
+              <span
+                className={cn(trigger, "truncate max-w-sm")}
+                onClick={() => setEditing(true)}
+              >
+                {selectedPage.slug}
               </span>
-              <span>{selectedPage.slug}</span>
-            </>
-          )}
-        </Typo.P>
+            )}
+          </>
+        )}
       </HFlexBox>
       <HFlexBox gap={12}>
         <HFlexBox gap={4}>

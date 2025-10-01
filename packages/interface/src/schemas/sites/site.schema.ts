@@ -2,6 +2,7 @@ import { z, ZodTypeAny } from "zod";
 import { Constants, Tables } from "../../types";
 import { SitePageSchema } from "./page.schema";
 import { PaginationSchema } from "../pagination.schema";
+import { slugSchema } from "./slug.schema";
 
 export const siteMetaShape = {
   description: z.string().optional(),
@@ -13,7 +14,7 @@ export const SiteMetaSchema = z.object(siteMetaShape);
 
 const siteShape = {
   name: z.string(),
-  slug: z.string(),
+  slug: slugSchema,
   meta: SiteMetaSchema.optional(),
   category: z.enum(Constants.sites_category_enum).optional(),
   status: z.enum(Constants.sites_status_enum).optional(),

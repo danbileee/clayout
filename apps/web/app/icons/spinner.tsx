@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwindcss/merge";
 import type { SVGProps } from "react";
 
 interface Props extends SVGProps<SVGSVGElement> {}
