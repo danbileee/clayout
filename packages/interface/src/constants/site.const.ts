@@ -45,18 +45,25 @@ export const SiteDomainStatuses = {
 
 export type SitedomainStatus = keyof typeof SiteDomainStatuses;
 
-export const SitePageFits = {
+export const SiteContentFits = {
   sm: "sm",
   md: "md",
   lg: "lg",
   full: "full",
 } as const;
 
-export type SitePageFit = keyof typeof SitePageFits;
+export type SiteContentFit = keyof typeof SiteContentFits;
 
-export const SitePageFitWidth: Record<SitePageFit, string> = {
+export const SiteContentFitWidth: Record<SiteContentFit, string> = {
   sm: "375px",
   md: "768px",
   lg: "1440px",
   full: "100%",
+};
+
+export const SiteContentFitLabel: Record<SiteContentFit, string> = {
+  sm: "Small (375px)",
+  md: "Medium (768px)",
+  lg: "Large (1440px)",
+  full: "Full (100%)",
 };

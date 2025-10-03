@@ -3,7 +3,7 @@ import { Icon } from "@/components/ui/icon";
 import { IconBoxMultiple } from "@tabler/icons-react";
 import { HFlexBox } from "@/components/ui/box";
 import * as Typo from "@/components/ui/typography";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 
 interface RootProps {
   children: ReactNode;

@@ -8,7 +8,7 @@ import {
   EditorTabs,
   useSiteContext,
 } from "@/pages/sites/:id/contexts/site.context";
-import { EditorBase } from "../../styled";
+import { EditorBase } from "../../shared/styled";
 import { PageEditorContent } from "./content";
 import { PageEditorDesign } from "./design";
 

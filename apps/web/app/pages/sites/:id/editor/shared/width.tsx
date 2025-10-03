@@ -1,6 +1,6 @@
 import * as Typo from "@/components/ui/typography";
 import * as Select from "@/components/ui/select";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import { Icon } from "@/components/ui/icon";
 import { IconArrowAutofitWidth } from "@tabler/icons-react";
 import { HFlexBox } from "@/components/ui/box";

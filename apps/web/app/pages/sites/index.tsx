@@ -13,7 +13,7 @@ import {
   SiteStatuses,
   type Tables,
 } from "@clayout/interface";
-import { BlockData } from "@clayout/kit";
+import { BlockData, DefaultPageContainerStyle } from "@clayout/kit";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { nanoid } from "nanoid";
 import { useLoaderData, useNavigate } from "react-router";
@@ -89,9 +89,7 @@ export default function Sites() {
               isHome: true,
               isVisible: true,
               meta: {},
-              containerStyle: {
-                pageFit: "sm",
-              },
+              containerStyle: DefaultPageContainerStyle,
               order: 0,
               blocks: [
                 {

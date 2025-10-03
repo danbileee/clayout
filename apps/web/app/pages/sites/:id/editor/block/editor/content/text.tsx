@@ -6,7 +6,7 @@ import { Icon } from "@/components/ui/icon";
 import { IconNote } from "@tabler/icons-react";
 import { Textarea } from "@/components/ui/textarea";
 import type { BlockEditorProps } from "../types";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 
 export function TextEditorContent({
   block,

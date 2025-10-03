@@ -16,7 +16,7 @@ interface Params {
   onError?: VoidFunction;
 }
 
-export function useHandleChangePageSlug({
+export function useEditablePageSlug({
   pageId,
   initialState,
   onSuccess,

@@ -53,19 +53,21 @@ export type SitePageContainerStyle = z.infer<
 
 export type SiteBlockContainerStyle = BlockSchema["containerStyle"];
 
-export type CreateSitePageDto = z.infer<typeof SitePageSchema>;
+export type PageSchema = z.infer<typeof SitePageSchema>;
 
-export type UpdateSitePageDto = Partial<CreateSitePageDto>;
+export type CreateSitePageDto = PageSchema;
+
+export type UpdateSitePageDto = Partial<PageSchema>;
 
 export type ChangeSiteHomePageDto = {
   newPageId: number;
 };
 
-export type CreateSiteBlockDto = z.infer<typeof SiteBlockSchema>;
-
-export type UpdateSiteBlockDto = Partial<CreateSiteBlockDto>;
-
 export type BlockSchema = z.infer<typeof SiteBlockSchema>;
+
+export type CreateSiteBlockDto = BlockSchema;
+
+export type UpdateSiteBlockDto = Partial<BlockSchema>;
 
 export const BlockSchemaByType = {
   Text: TextBlockSchema,

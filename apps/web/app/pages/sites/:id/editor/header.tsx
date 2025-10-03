@@ -18,7 +18,7 @@ import { toast } from "sonner";
 import { AutosizeInput } from "@/components/ui/input";
 import { trigger } from "@/lib/tailwindcss/presets";
 import { cn } from "@/lib/tailwindcss/merge";
-import { useHandleChangePageSlug } from "./hooks/useHandleChangePageSlug";
+import { useEditablePageSlug } from "./hooks/useEditablePageSlug";
 import { useEditorHistory } from "./hooks/useEditorHistory";
 import { useSiteContext } from "../contexts/site.context";
 
@@ -39,7 +39,7 @@ export const Header = forwardRef<HTMLDivElement, {}>(function Header(
     handleChange,
     handleBlur,
     handleKeyDown,
-  } = useHandleChangePageSlug({
+  } = useEditablePageSlug({
     pageId: selectedPageId,
   });
 

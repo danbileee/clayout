@@ -1,10 +1,10 @@
 import type { z } from "zod";
 import { Block } from "../block";
 import { SiteBlockTypes, ButtonBlockSchema } from "@clayout/interface";
-import { getMaxWidth } from "../utils/getMaxWidth";
-import { getComposedStyleString } from "../utils/getComposedStyleString";
-import { getAlignStyle } from "../utils/getAlignStyle";
-import { getComposedStyleObject } from "../utils/getComposedStyleObject";
+import { getMaxWidth } from "../../utils/getMaxWidth";
+import { getComposedStyleString } from "../../utils/getComposedStyleString";
+import { getAlignStyle } from "../../utils/getAlignStyle";
+import { getComposedStyleObject } from "../../utils/getComposedStyleObject";
 import { basicFontFamily } from "../constants";
 
 export class ButtonBlock extends Block<z.infer<typeof ButtonBlockSchema>> {

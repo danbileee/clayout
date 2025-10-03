@@ -1,19 +1,20 @@
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import type { UpdateSitePageDto } from "@clayout/interface";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
-import { useCallback } from "react";
+import { useRef } from "react";
 import { toast } from "sonner";
+import debounce from "lodash/debounce";
 import { handleError } from "@/lib/axios/handleError";
 import { patchSitePages } from "@/apis/sites/pages";
 
 export function useHandleChangePage() {
-  const { site, selectedPageId } = useSiteContext();
+  const { site, selectedPageId, refetchSite } = useSiteContext();
   const { mutateAsync } = useClientMutation({
     mutationFn: patchSitePages,
   });
 
-  const updateDB = useCallback(
-    async (params: { siteId: number; page: UpdateSitePageDto }) => {
+  const updateDB = useRef(
+    debounce(async (params: { siteId: number; page: UpdateSitePageDto }) => {
       toast.promise(
         async () => {
           const { siteId, page } = params;
@@ -30,6 +31,7 @@ export function useHandleChangePage() {
                 ...page,
               },
             });
+            await refetchSite();
           };
 
           try {
@@ -49,8 +51,7 @@ export function useHandleChangePage() {
           error: "Failed to save",
         }
       );
-    },
-    [mutateAsync]
+    }, 1000)
   );
 
   const handleChangeData = async (
@@ -65,7 +66,7 @@ export function useHandleChangePage() {
       throw new Error(`siteId and selectedPageId are required.`);
     }
 
-    await updateDB({
+    await updateDB.current({
       siteId: site.id,
       page: {
         id: selectedPageId,
@@ -74,14 +75,14 @@ export function useHandleChangePage() {
     });
   };
 
-  const handleChangeContainerStyle = async ({
-    containerStyle,
-  }: NonNullable<Pick<UpdateSitePageDto, "containerStyle">>) => {
+  const handleChangeContainerStyle = async (
+    containerStyle: UpdateSitePageDto["containerStyle"]
+  ) => {
     if (!site?.id || !selectedPageId) {
       throw new Error(`siteId and selectedPageId are required.`);
     }
 
-    await updateDB({
+    await updateDB.current({
       siteId: site.id,
       page: {
         id: selectedPageId,

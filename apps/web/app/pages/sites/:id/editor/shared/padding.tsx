@@ -7,7 +7,7 @@ import * as Typo from "@/components/ui/typography";
 import * as Popover from "@/components/ui/popover";
 import * as Tooltip from "@/components/ui/tooltip";
 import { NumberInput } from "@/components/ui/input";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import { TriggerIndicator } from "@/icons/trigger-indicator";
 import { composeSpacingValue, parseSpacingValue } from "./utils/spacing";
 

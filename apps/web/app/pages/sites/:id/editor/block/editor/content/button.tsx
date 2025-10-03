@@ -8,9 +8,9 @@ import { IconTxt } from "@tabler/icons-react";
 import { VFlexBox } from "@/components/ui/box";
 import { TextInput } from "@/components/ui/input";
 import * as Typo from "@/components/ui/typography";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import type { BlockEditorProps } from "../types";
-import { Link } from "../shared/link";
+import { Link } from "@/pages/sites/:id/editor/shared/link";
 
 /**
  * This schema is locally defined

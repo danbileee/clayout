@@ -1,5 +1,5 @@
 import * as Typo from "@/components/ui/typography";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import { Icon } from "@/components/ui/icon";
 import { IconLink } from "@tabler/icons-react";
 import { VFlexBox } from "@/components/ui/box";

@@ -26,7 +26,7 @@ import { patchSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
 import { patchSitePagesHome } from "@/apis/sites/pages/home";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
-import { useHandleChangePageSlug } from "../hooks/useHandleChangePageSlug";
+import { useEditablePageSlug } from "../hooks/useEditablePageSlug";
 
 interface Props {
   page: SitePageWithRelations;
@@ -51,7 +51,7 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
     handleChange,
     handleBlur,
     handleKeyDown,
-  } = useHandleChangePageSlug({
+  } = useEditablePageSlug({
     pageId: page.id,
     onSuccess: () => {
       if (freshPageId === page.id) {

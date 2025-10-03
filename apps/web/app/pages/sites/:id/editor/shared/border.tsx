@@ -2,7 +2,7 @@ import { useTheme } from "styled-components";
 import * as Popover from "@/components/ui/popover";
 import * as Tooltip from "@/components/ui/tooltip";
 import * as Typo from "@/components/ui/typography";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import type { BlockContainerStyle } from "@clayout/interface";
 import { Icon } from "@/components/ui/icon";
 import { IconBorderSides } from "@tabler/icons-react";

@@ -5,8 +5,8 @@ import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
-import { useBlocksStore } from "@/lib/zustand/editor";
-import type { BlocksStore } from "@/lib/zustand/editor";
+import { useEditorStore } from "@/lib/zustand/editor";
+import type { EditorStore } from "@/lib/zustand/editor";
 import { joinPath, Paths } from "@/routes";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -105,7 +105,6 @@ const reducer: SiteContextReducer = (state, action) => {
     case CLOSE_PAGE_EDITOR:
       return {
         ...state,
-        selectedPageId: null,
         editorTab: EditorTabs.Content,
         menu: SiteMenus.Pages,
       };
@@ -143,7 +142,7 @@ export function SiteContextProvider({ children }: Props) {
   const id = useParamsId();
   const queryClient = useQueryClient();
   const queryKey = getSiteQueryKey({ id });
-  const hydrateBlocks = useBlocksStore((s: BlocksStore) => s.hydrate);
+  const hydrateEditor = useEditorStore((s: EditorStore) => s.hydrate);
   const { data, refetch: refetchSite } = useClientQuery({
     queryKey,
     queryFn: async () => {
@@ -183,8 +182,8 @@ export function SiteContextProvider({ children }: Props) {
    */
   const hydrateBlocksStore = useCallback(() => {
     if (data?.data?.site?.pages) {
-      const pages = data.data.site.pages.map((page) => {
-        const blocks = page.blocks
+      const pages = data.data.site.pages.map(({ blocks, ...page }) => {
+        const registeredBlocks = blocks
           .map((block) => {
             const parsedBlock = SiteBlockSchema.parse(block);
             const { block: registeredBlock } = new BlockRegistry().find(
@@ -195,14 +194,14 @@ export function SiteContextProvider({ children }: Props) {
           .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
         return {
-          id: page.id,
-          blocks,
+          ...page,
+          blocks: registeredBlocks,
         };
       });
 
-      hydrateBlocks({ pages });
+      hydrateEditor({ pages });
     }
-  }, [data?.data?.site?.pages, hydrateBlocks]);
+  }, [data?.data?.site?.pages, hydrateEditor]);
 
   /**
    * @useEffect

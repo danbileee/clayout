@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { useTheme } from "styled-components";
 import { Icon } from "@/components/ui/icon";
 import * as Typo from "@/components/ui/typography";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import { HFlexBox, VFlexBox } from "@/components/ui/box";
 import { type BlockContainerStyle } from "@clayout/interface";
 import { IconBackground, IconRadiusBottomLeft } from "@tabler/icons-react";

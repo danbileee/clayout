@@ -13,8 +13,9 @@ import { SitePageCategories } from "@clayout/interface";
 import { useState } from "react";
 import { generateSlugTail } from "@/utils/generateSlugTail";
 import { PageBarItem } from "./bar-item";
-import { BarBase } from "../styled";
+import { BarBase } from "../shared/styled";
 import { useSiteContext } from "../../contexts/site.context";
+import { DefaultPageContainerStyle } from "@clayout/kit";
 
 const NewPageName = "New Page";
 
@@ -45,6 +46,7 @@ export function PageBar() {
           order: site.pages.length,
           isHome: false,
           isVisible: true,
+          containerStyle: DefaultPageContainerStyle,
           blocks: [],
         },
       });

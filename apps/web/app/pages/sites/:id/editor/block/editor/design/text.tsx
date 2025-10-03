@@ -2,11 +2,11 @@ import type { z } from "zod";
 import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
 import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import type { BlockEditorProps } from "../types";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
-import * as BoxModel from "../shared/box-model";
-import * as Background from "../shared/background";
-import { Width } from "../shared/width";
-import { Alignment } from "../shared/align";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
+import * as BoxModel from "@/pages/sites/:id/editor/shared/box-model";
+import * as Background from "@/pages/sites/:id/editor/shared/background";
+import { Width } from "@/pages/sites/:id/editor/shared/width";
+import { Alignment } from "@/pages/sites/:id/editor/shared/align";
 
 export function TextEditorDesign({
   block,

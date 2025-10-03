@@ -1,5 +1,5 @@
 import { HFlexBox } from "@/components/ui/box";
-import { EditorBase } from "../../styled";
+import { EditorBase } from "../../shared/styled";
 import { Button } from "@/components/ui/button";
 import { IconChevronLeft } from "@tabler/icons-react";
 import * as Typo from "@/components/ui/typography";

@@ -12,7 +12,7 @@ import * as Popover from "@/components/ui/popover";
 import * as Select from "@/components/ui/select";
 import * as Tooltip from "@/components/ui/tooltip";
 import * as Typo from "@/components/ui/typography";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import type { BlockStyleOf, SiteBlockTypes } from "@clayout/interface";
 import { TriggerIndicator } from "@/icons/trigger-indicator";
 import { HFlexBox, VFlexBox } from "@/components/ui/box";

@@ -6,7 +6,7 @@ export function getComposedStyleString(style: CSSProperties) {
       const newKey = key.replace(/([a-z])([A-Z])/g, "$1-$2").toLowerCase();
 
       if (newKey === "background-image") {
-        return `${newKey}: url('${value.trim()}');`;
+        return value ? `${newKey}: url('${value.trim()}');` : "";
       }
 
       return `${newKey}: ${value};`;
@@ -14,7 +14,7 @@ export function getComposedStyleString(style: CSSProperties) {
     .filter((newStyle) => {
       const [newKey, value] = newStyle.split(":");
       return (
-        !newKey.startsWith("align:") && Boolean(value.trim().replace(";", ""))
+        !newKey.startsWith("align:") && Boolean(value?.trim()?.replace(";", ""))
       );
     })
     .join(" ");

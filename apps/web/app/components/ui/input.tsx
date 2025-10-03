@@ -13,10 +13,14 @@ import { mergeRefs } from "@/utils/mergeRefs";
 
 interface InputProps extends Omit<ComponentProps<"input">, "size"> {
   size?: "md" | "sm";
+  hasError?: boolean;
 }
 
 export const TextInput = forwardRef<HTMLInputElement, InputProps>(
-  function TextInput({ className, type = "text", size = "md", ...props }, ref) {
+  function TextInput(
+    { className, type = "text", size = "md", hasError = false, ...props },
+    ref
+  ) {
     return (
       <input
         ref={ref}
@@ -31,7 +35,10 @@ export const TextInput = forwardRef<HTMLInputElement, InputProps>(
             "h-6 px-2 py-1 file:h-5 file:text-xs text-sm rounded-sm":
               size === "sm",
           },
-          "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+          // Focus styles - red shadow when has error, normal ring otherwise
+          hasError
+            ? "focus-visible:border-destructive focus-visible:ring-destructive/50 focus-visible:ring-[3px] focus-visible:shadow-[0_0_0_3px_hsl(var(--destructive)/0.3)]"
+            : "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
           "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
           className
         )}

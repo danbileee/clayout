@@ -1,7 +1,7 @@
 import { z, ZodTypeAny } from "zod";
 import { SiteBlockSchema } from "./block.schema";
 import { Constants, Tables } from "../../types";
-import { SitePageFits } from "../../constants";
+import { SiteContentFits } from "../../constants";
 import {
   containerStyleShapeBase,
   metaShape,
@@ -18,7 +18,7 @@ const sitePageShape = {
   meta: SitePageMetaSchema.optional(),
   containerStyle: z.object({
     ...containerStyleShapeBase,
-    pageFit: z.nativeEnum(SitePageFits).optional(),
+    contentFit: z.nativeEnum(SiteContentFits).optional(),
   }),
   order: z.number(),
   isHome: z.boolean(),

@@ -6,13 +6,13 @@ import { IconAlt, IconPhoto } from "@tabler/icons-react";
 import { Icon } from "@/components/ui/icon";
 import { TextInput } from "@/components/ui/input";
 import type { BlockEditorProps } from "../types";
-import * as Editor from "@/pages/sites/:id/editor/styled/editor";
-import { ImageManager } from "../shared/image-manager";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
+import { ImageManager } from "@/pages/sites/:id/editor/shared/image-manager";
 import { HelpButton } from "@/components/shared/buttons/help";
 import { useTheme } from "styled-components";
 import { VFlexBox } from "@/components/ui/box";
 import { getErrors } from "@/lib/zod/getErrors";
-import { Link } from "../shared/link";
+import { Link } from "@/pages/sites/:id/editor/shared/link";
 
 /**
  * This schema is locally defined
