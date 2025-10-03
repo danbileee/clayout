@@ -330,6 +330,7 @@ export type Database = {
       site_pages: {
         Row: {
           category: Database["public"]["Enums"]["site_pages_category_enum"]
+          containerStyle: Json | null
           createdAt: Date
           id: number
           isHome: boolean
@@ -343,6 +344,7 @@ export type Database = {
         }
         Insert: {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
+          containerStyle?: Json | null
           createdAt: Date
           id: number
           isHome?: boolean
@@ -356,6 +358,7 @@ export type Database = {
         }
         Update: {
           category?: Database["public"]["Enums"]["site_pages_category_enum"]
+          containerStyle?: Json | null
           createdAt?: Date
           id: number
           isHome?: boolean

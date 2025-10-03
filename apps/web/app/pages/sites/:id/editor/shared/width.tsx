@@ -1,6 +1,6 @@
 import * as Typo from "@/components/ui/typography";
 import * as Select from "@/components/ui/select";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import { Icon } from "@/components/ui/icon";
 import { IconArrowAutofitWidth } from "@tabler/icons-react";
 import { HFlexBox } from "@/components/ui/box";
@@ -66,13 +66,13 @@ export function Width({ value, onChange }: Props) {
   };
 
   return (
-    <BlockEditor.Item>
-      <BlockEditor.Header>
+    <Editor.Item>
+      <Editor.Header>
         <Typo.P size="sm" flex>
           <Icon>{IconArrowAutofitWidth}</Icon>
           <span>Width</span>
         </Typo.P>
-      </BlockEditor.Header>
+      </Editor.Header>
       <HFlexBox gap={8}>
         {([Units.Static, Units.Relative] as string[]).includes(parsed.unit) && (
           <NumberInput
@@ -102,6 +102,6 @@ export function Width({ value, onChange }: Props) {
           </Select.Content>
         </Select.Root>
       </HFlexBox>
-    </BlockEditor.Item>
+    </Editor.Item>
   );
 }

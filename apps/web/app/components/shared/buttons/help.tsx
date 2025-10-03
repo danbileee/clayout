@@ -19,7 +19,7 @@ export function HelpButton({ children }: Props) {
           <Icon color={theme.colors.slate[500]}>{IconInfoCircle}</Icon>
         </Button>
       </Tooltip.Trigger>
-      <Tooltip.Content>{children}</Tooltip.Content>
+      <Tooltip.Content side="right">{children}</Tooltip.Content>
     </Tooltip.Root>
   );
 }

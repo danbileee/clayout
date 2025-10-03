@@ -12,7 +12,7 @@ import * as Popover from "@/components/ui/popover";
 import * as Select from "@/components/ui/select";
 import * as Tooltip from "@/components/ui/tooltip";
 import * as Typo from "@/components/ui/typography";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import type { BlockStyleOf, SiteBlockTypes } from "@clayout/interface";
 import { TriggerIndicator } from "@/icons/trigger-indicator";
 import { HFlexBox, VFlexBox } from "@/components/ui/box";
@@ -27,15 +27,15 @@ interface RootProps {
 
 export function Root({ children }: RootProps) {
   return (
-    <BlockEditor.Item>
-      <BlockEditor.Header>
+    <Editor.Item>
+      <Editor.Header>
         <Typo.P size="sm" flex>
           <Icon>{IconPencilStar}</Icon>
           <span>Button style</span>
         </Typo.P>
-      </BlockEditor.Header>
+      </Editor.Header>
       <HFlexBox gap={12}>{children}</HFlexBox>
-    </BlockEditor.Item>
+    </Editor.Item>
   );
 }
 
@@ -57,10 +57,10 @@ export function Color({ value, onChange }: ColorProps) {
       <Tooltip.Root>
         <Tooltip.Trigger>
           <Popover.Trigger>
-            <BlockEditor.Button>
+            <Editor.Button>
               <Icon size={20}>{IconDroplet}</Icon>
               <TriggerIndicator />
-            </BlockEditor.Button>
+            </Editor.Button>
           </Popover.Trigger>
         </Tooltip.Trigger>
         <Tooltip.Content side="bottom">Colors</Tooltip.Content>
@@ -117,10 +117,10 @@ export function Font({ value, onChange }: FontProps) {
       <Tooltip.Root>
         <Tooltip.Trigger>
           <Popover.Trigger>
-            <BlockEditor.Button>
+            <Editor.Button>
               <Icon size={20}>{IconTypography}</Icon>
               <TriggerIndicator />
-            </BlockEditor.Button>
+            </Editor.Button>
           </Popover.Trigger>
         </Tooltip.Trigger>
         <Tooltip.Content side="bottom">Font</Tooltip.Content>
@@ -205,7 +205,7 @@ export function Font({ value, onChange }: FontProps) {
             <HFlexBox gap={8}>
               <Tooltip.Root>
                 <Tooltip.Trigger>
-                  <BlockEditor.Button
+                  <Editor.Button
                     selected={textAlign === "left"}
                     onClick={() => {
                       if (textAlign === "left") return;
@@ -213,13 +213,13 @@ export function Font({ value, onChange }: FontProps) {
                     }}
                   >
                     <Icon size={14}>{IconAlignLeft}</Icon>
-                  </BlockEditor.Button>
+                  </Editor.Button>
                 </Tooltip.Trigger>
                 <Tooltip.Content side="bottom">left</Tooltip.Content>
               </Tooltip.Root>
               <Tooltip.Root>
                 <Tooltip.Trigger>
-                  <BlockEditor.Button
+                  <Editor.Button
                     selected={textAlign === "center"}
                     onClick={() => {
                       if (textAlign === "center") return;
@@ -227,13 +227,13 @@ export function Font({ value, onChange }: FontProps) {
                     }}
                   >
                     <Icon size={14}>{IconAlignCenter}</Icon>
-                  </BlockEditor.Button>
+                  </Editor.Button>
                 </Tooltip.Trigger>
                 <Tooltip.Content side="bottom">center</Tooltip.Content>
               </Tooltip.Root>
               <Tooltip.Root>
                 <Tooltip.Trigger>
-                  <BlockEditor.Button
+                  <Editor.Button
                     selected={textAlign === "right"}
                     onClick={() => {
                       if (textAlign === "right") return;
@@ -241,7 +241,7 @@ export function Font({ value, onChange }: FontProps) {
                     }}
                   >
                     <Icon size={14}>{IconAlignRight}</Icon>
-                  </BlockEditor.Button>
+                  </Editor.Button>
                 </Tooltip.Trigger>
                 <Tooltip.Content side="bottom">right</Tooltip.Content>
               </Tooltip.Root>

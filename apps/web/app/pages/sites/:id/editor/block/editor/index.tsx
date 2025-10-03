@@ -1,14 +1,17 @@
 import { HFlexBox } from "@/components/ui/box";
-import { EditorBase } from "../../styled";
+import { EditorBase } from "../../shared/styled";
 import { Button } from "@/components/ui/button";
 import { IconChevronLeft } from "@tabler/icons-react";
 import * as Typo from "@/components/ui/typography";
 import * as Tab from "@/components/ui/tabs";
 import { Icon } from "@/components/ui/icon";
-import { BlockNames } from "../../constants";
-import { BlockTabs, useSiteContext } from "../../../contexts/site.context";
+import {
+  EditorTabs,
+  useSiteContext,
+} from "@/pages/sites/:id/contexts/site.context";
 import { BlockEditorContent } from "./content";
 import { BlockEditorDesign } from "./design";
+import { BlockNames } from "../../constants";
 
 export function BlockEditor() {
   const { selectedBlock: block, closeBlockEditor } = useSiteContext();
@@ -35,17 +38,19 @@ export function BlockEditor() {
           {`${BlockNames[block.type]} properties`}
         </Typo.P>
       </HFlexBox>
-      <Tab.Root defaultValue={BlockTabs.Content}>
+      <Tab.Root defaultValue={EditorTabs.Content}>
         <Tab.List>
-          <Tab.Trigger value={BlockTabs.Content}>
-            {BlockTabs.Content}
+          <Tab.Trigger value={EditorTabs.Content}>
+            {EditorTabs.Content}
           </Tab.Trigger>
-          <Tab.Trigger value={BlockTabs.Design}>{BlockTabs.Design}</Tab.Trigger>
+          <Tab.Trigger value={EditorTabs.Design}>
+            {EditorTabs.Design}
+          </Tab.Trigger>
         </Tab.List>
-        <Tab.Content value={BlockTabs.Content}>
+        <Tab.Content value={EditorTabs.Content}>
           <BlockEditorContent />
         </Tab.Content>
-        <Tab.Content value={BlockTabs.Design}>
+        <Tab.Content value={EditorTabs.Design}>
           <BlockEditorDesign />
         </Tab.Content>
       </Tab.Root>

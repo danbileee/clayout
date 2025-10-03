@@ -8,7 +8,7 @@ import {
 import { HFlexBox } from "@/components/ui/box";
 import * as Typo from "@/components/ui/typography";
 import * as Tooltip from "@/components/ui/tooltip";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import type { BlockContainerStyle } from "@clayout/interface";
 
 type AlignProperties = Pick<BlockContainerStyle, "align">;
@@ -22,17 +22,17 @@ export function Alignment({ value, onChange }: Props) {
   const { align } = value ?? {};
 
   return (
-    <BlockEditor.Item>
-      <BlockEditor.Header>
+    <Editor.Item>
+      <Editor.Header>
         <Typo.P size="sm" flex>
           <Icon>{IconSpacingHorizontal}</Icon>
           <span>Alignment</span>
         </Typo.P>
-      </BlockEditor.Header>
+      </Editor.Header>
       <HFlexBox gap={12}>
         <Tooltip.Root>
           <Tooltip.Trigger>
-            <BlockEditor.Button
+            <Editor.Button
               selected={align === "left"}
               onClick={() => {
                 if (align === "left") return;
@@ -40,13 +40,13 @@ export function Alignment({ value, onChange }: Props) {
               }}
             >
               <Icon size={20}>{IconLayoutAlignLeft}</Icon>
-            </BlockEditor.Button>
+            </Editor.Button>
           </Tooltip.Trigger>
           <Tooltip.Content side="bottom">left</Tooltip.Content>
         </Tooltip.Root>
         <Tooltip.Root>
           <Tooltip.Trigger>
-            <BlockEditor.Button
+            <Editor.Button
               selected={align === "center"}
               onClick={() => {
                 if (align === "center") return;
@@ -54,13 +54,13 @@ export function Alignment({ value, onChange }: Props) {
               }}
             >
               <Icon size={20}>{IconLayoutAlignCenter}</Icon>
-            </BlockEditor.Button>
+            </Editor.Button>
           </Tooltip.Trigger>
           <Tooltip.Content side="bottom">center</Tooltip.Content>
         </Tooltip.Root>
         <Tooltip.Root>
           <Tooltip.Trigger>
-            <BlockEditor.Button
+            <Editor.Button
               selected={align === "right"}
               onClick={() => {
                 if (align === "right") return;
@@ -68,11 +68,11 @@ export function Alignment({ value, onChange }: Props) {
               }}
             >
               <Icon size={20}>{IconLayoutAlignRight}</Icon>
-            </BlockEditor.Button>
+            </Editor.Button>
           </Tooltip.Trigger>
           <Tooltip.Content side="bottom">right</Tooltip.Content>
         </Tooltip.Root>
       </HFlexBox>
-    </BlockEditor.Item>
+    </Editor.Item>
   );
 }

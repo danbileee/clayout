@@ -11,7 +11,7 @@ import {
 } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwindcss/merge";
 import { Icon } from "./icon";
 import { IconX } from "@tabler/icons-react";
 import { ThemeProvider } from "styled-components";

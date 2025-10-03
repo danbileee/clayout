@@ -2,7 +2,7 @@ import { useState } from "react";
 import { css, styled } from "styled-components";
 import * as Typo from "@/components/ui/typography";
 import { rem } from "@/utils/rem";
-import { BarBase } from "../styled";
+import { BarBase } from "../shared/styled";
 import { BlockData } from "@clayout/kit";
 import {
   SiteBlockSchema,

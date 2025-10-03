@@ -4,7 +4,7 @@ import { Icon } from "@/components/ui/icon";
 import { IconNoteOff, type TablerIcon } from "@tabler/icons-react";
 import { useTheme } from "styled-components";
 import * as Typo from "@/components/ui/typography";
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/tailwindcss/merge";
 
 interface Props extends HTMLAttributes<HTMLElement> {
   icon?: TablerIcon;

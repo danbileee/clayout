@@ -1,28 +1,25 @@
 import { z, ZodTypeAny } from "zod";
 import { SiteBlockSchema } from "./block.schema";
-import { siteMetaShape } from "./site.schema";
 import { Constants, Tables } from "../../types";
-import { SitePageFits } from "../../constants";
-import { KebabCase } from "../patterns";
+import { SiteContentFits } from "../../constants";
+import {
+  containerStyleShapeBase,
+  metaShape,
+  slugSchema,
+} from "./shared.schema";
 
-export const SitePageMetaSchema = z.object({
-  ...siteMetaShape,
-  pageFit: z.nativeEnum(SitePageFits).optional(),
-});
+export const SitePageMetaSchema = z.object(metaShape);
 
 const sitePageShape = {
   id: z.number().optional(),
-  slug: z
-    .string()
-    .min(1, "Slug must contain at least 1 character.")
-    .max(120, "Slug could contain maximum 120 characters.")
-    .regex(
-      KebabCase,
-      `Slug must be in kebab-case\n(lowercase letters, numbers, and hyphens only)`
-    ),
-  name: z.string(),
+  slug: slugSchema,
+  name: z.string().max(100),
   category: z.enum(Constants.site_pages_category_enum),
   meta: SitePageMetaSchema.optional(),
+  containerStyle: z.object({
+    ...containerStyleShapeBase,
+    contentFit: z.nativeEnum(SiteContentFits).optional(),
+  }),
   order: z.number(),
   isHome: z.boolean(),
   isVisible: z.boolean(),
@@ -35,6 +32,7 @@ const sitePageShape = {
     | "name"
     | "category"
     | "meta"
+    | "containerStyle"
     | "order"
     | "isHome"
     | "isVisible"

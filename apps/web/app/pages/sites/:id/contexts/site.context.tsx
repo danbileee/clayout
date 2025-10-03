@@ -5,12 +5,12 @@ import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
-import { useBlocksStore } from "@/lib/zustand/editor";
-import type { BlocksStore } from "@/lib/zustand/editor";
+import { useHydrateEditor } from "@/lib/zustand/editor";
 import { joinPath, Paths } from "@/routes";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   SiteBlockSchema,
+  SitePageSchema,
   type SiteBlock,
   type SitePageWithRelations,
   type SiteWithRelations,
@@ -39,32 +39,36 @@ export const SiteMenus = {
 
 export type SiteMenu = keyof typeof SiteMenus;
 
-export const BlockTabs = {
+export const EditorTabs = {
   Content: "Content",
   Design: "Design",
 } as const;
 
-export type BlockTab = keyof typeof BlockTabs;
+export type EditorTab = keyof typeof EditorTabs;
 
 interface SiteContextState {
   menu: SiteMenu;
   selectedPageId: number | null;
   selectedBlockId: number | null;
-  blockTab: BlockTab;
+  editorTab: EditorTab;
 }
 
+const OPEN_PAGE_EDITOR = "OPEN_PAGE_EDITOR";
+const CLOSE_PAGE_EDITOR = "CLOSE_PAGE_EDITOR";
 const OPEN_BLOCK_EDITOR = "OPEN_BLOCK_EDITOR";
 const CLOSE_BLOCK_EDITOR = "CLOSE_BLOCK_EDITOR";
 const SET_MENU = "SET_MENU";
 const SET_PAGE = "SET_PAGE";
-const SET_BLOCK_TAB = "SET_BLOCK_TAB";
+const SET_EDITOR_TAB = "SET_EDITOR_TAB";
 
 type SiteContextAction =
+  | { type: typeof OPEN_PAGE_EDITOR; pageId: number }
+  | { type: typeof CLOSE_PAGE_EDITOR }
   | { type: typeof OPEN_BLOCK_EDITOR; blockId: number }
   | { type: typeof CLOSE_BLOCK_EDITOR }
   | { type: typeof SET_MENU; menu: SiteMenu }
   | { type: typeof SET_PAGE; pageId: number | null }
-  | { type: typeof SET_BLOCK_TAB; tab: BlockTab };
+  | { type: typeof SET_EDITOR_TAB; tab: EditorTab };
 
 type SiteContextReducer = (
   state: SiteContextState,
@@ -80,35 +84,50 @@ interface SiteContextValue extends SiteContextState {
   invalidateSiteCache: () => Promise<void>;
   openBlockEditor: (blockId: number) => void;
   closeBlockEditor: VoidFunction;
+  openPageEditor: (pageId: number) => void;
+  closePageEditor: VoidFunction;
   setMenu: (menu: SiteMenu) => void;
   setPage: (pageId: number) => void;
-  setBlockTab: (tab: BlockTab) => void;
+  setBlockTab: (tab: EditorTab) => void;
 }
 
 export const SiteContext = createContext<SiteContextValue | null>(null);
 
 const reducer: SiteContextReducer = (state, action) => {
   switch (action.type) {
+    case OPEN_PAGE_EDITOR:
+      return {
+        ...state,
+        selectedPageId: action.pageId,
+        editorTab: EditorTabs.Content,
+        menu: SiteMenus.Page,
+      };
+    case CLOSE_PAGE_EDITOR:
+      return {
+        ...state,
+        editorTab: EditorTabs.Content,
+        menu: SiteMenus.Pages,
+      };
     case OPEN_BLOCK_EDITOR:
       return {
         ...state,
         selectedBlockId: action.blockId,
-        blockTab: BlockTabs.Content,
+        editorTab: EditorTabs.Content,
         menu: SiteMenus.Block,
       };
     case CLOSE_BLOCK_EDITOR:
       return {
         ...state,
         selectedBlockId: null,
-        blockTab: BlockTabs.Content,
+        editorTab: EditorTabs.Content,
         menu: SiteMenus.Blocks,
       };
     case SET_MENU:
       return { ...state, menu: action.menu, selectedBlockId: null };
     case SET_PAGE:
       return { ...state, selectedPageId: action.pageId, selectedBlockId: null };
-    case SET_BLOCK_TAB:
-      return { ...state, blockTab: action.tab };
+    case SET_EDITOR_TAB:
+      return { ...state, editorTab: action.tab };
     default:
       return state;
   }
@@ -123,7 +142,7 @@ export function SiteContextProvider({ children }: Props) {
   const id = useParamsId();
   const queryClient = useQueryClient();
   const queryKey = getSiteQueryKey({ id });
-  const hydrateBlocks = useBlocksStore((s: BlocksStore) => s.hydrate);
+  const hydrateEditor = useHydrateEditor();
   const { data, refetch: refetchSite } = useClientQuery({
     queryKey,
     queryFn: async () => {
@@ -155,34 +174,33 @@ export function SiteContextProvider({ children }: Props) {
     menu: SiteMenus.Pages,
     selectedPageId: firstPage?.id ?? null,
     selectedBlockId: null,
-    blockTab: BlockTabs.Content,
+    editorTab: EditorTabs.Content,
   });
 
   /**
    * Manual hydration function for when we need to force update the Zustand store
    */
-  const hydrateBlocksStore = useCallback(() => {
+  const hydrateEditorStore = useCallback(() => {
     if (data?.data?.site?.pages) {
       const pages = data.data.site.pages.map((page) => {
-        const blocks = page.blocks
-          .map((block) => {
-            const parsedBlock = SiteBlockSchema.parse(block);
-            const { block: registeredBlock } = new BlockRegistry().find(
-              parsedBlock
-            );
-            return registeredBlock;
-          })
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+        const parsedPage = SitePageSchema.parse(page);
+        const registeredBlocks = page.blocks.map((block) => {
+          const parsedBlock = SiteBlockSchema.parse(block);
+          const { block: registeredBlock } = new BlockRegistry().find(
+            parsedBlock
+          );
+          return registeredBlock;
+        });
 
         return {
-          id: page.id,
-          blocks,
+          ...parsedPage,
+          blocks: registeredBlocks,
         };
       });
 
-      hydrateBlocks({ pages });
+      hydrateEditor({ pages });
     }
-  }, [data?.data?.site?.pages, hydrateBlocks]);
+  }, [data?.data?.site?.pages, hydrateEditor]);
 
   /**
    * @useEffect
@@ -190,9 +208,9 @@ export function SiteContextProvider({ children }: Props) {
    */
   useEffect(() => {
     if (data?.data?.site?.pages) {
-      hydrateBlocksStore();
+      hydrateEditorStore();
     }
-  }, [data?.data?.site?.pages, hydrateBlocksStore]);
+  }, [data?.data?.site?.pages, hydrateEditorStore]);
 
   /**
    * @useEffect
@@ -226,6 +244,14 @@ export function SiteContextProvider({ children }: Props) {
         await queryClient.invalidateQueries({ queryKey });
       },
       ...state,
+      openPageEditor: async (pageId: number) => {
+        dispatch({ type: OPEN_PAGE_EDITOR, pageId });
+        await refetchSite();
+      },
+      closePageEditor: async () => {
+        dispatch({ type: CLOSE_PAGE_EDITOR });
+        await refetchSite();
+      },
       openBlockEditor: async (blockId: number) => {
         dispatch({ type: OPEN_BLOCK_EDITOR, blockId });
         await refetchSite();
@@ -242,8 +268,8 @@ export function SiteContextProvider({ children }: Props) {
         dispatch({ type: SET_PAGE, pageId });
         await refetchSite();
       },
-      setBlockTab: async (tab: BlockTab) => {
-        dispatch({ type: SET_BLOCK_TAB, tab });
+      setBlockTab: async (tab: EditorTab) => {
+        dispatch({ type: SET_EDITOR_TAB, tab });
         await refetchSite();
       },
     };

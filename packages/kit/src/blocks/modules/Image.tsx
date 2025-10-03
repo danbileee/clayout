@@ -1,10 +1,10 @@
 import type { z } from "zod";
 import { Block } from "../block";
 import { ImageBlockSchema, SiteBlockTypes } from "@clayout/interface";
-import { getMaxWidth } from "../utils/getMaxWidth";
-import { getComposedStyleString } from "../utils/getComposedStyleString";
-import { getAlignStyle } from "../utils/getAlignStyle";
-import { getComposedStyleObject } from "../utils/getComposedStyleObject";
+import { getMaxWidth } from "../../utils/getMaxWidth";
+import { getComposedStyleString } from "../../utils/getComposedStyleString";
+import { getAlignStyle } from "../../utils/getAlignStyle";
+import { getComposedStyleObject } from "../../utils/getComposedStyleObject";
 
 export class ImageBlock extends Block<z.infer<typeof ImageBlockSchema>> {
   static readonly type = SiteBlockTypes.Image;

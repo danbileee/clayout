@@ -1,5 +1,5 @@
 import { BlockSchemaByType } from "@clayout/interface";
-import type { BlockSchema } from "@clayout/interface";
+import type { BlockSchema, CreateSitePageDto } from "@clayout/interface";
 import { nanoid } from "nanoid";
 
 // ----------------------------------------------------------------------------
@@ -12,6 +12,9 @@ export const CommandTypes = {
   ADD_BLOCK: "ADD_BLOCK",
   REORDER_BLOCK: "REORDER_BLOCK",
   REORDER_BLOCKS: "REORDER_BLOCKS",
+  UPDATE_PAGE: "UPDATE_PAGE",
+  REORDER_PAGE: "REORDER_PAGE",
+  REORDER_PAGES: "REORDER_PAGES",
 } as const;
 
 export type CommandType = keyof typeof CommandTypes;
@@ -36,6 +39,18 @@ export type CommandResult =
   | {
       type: typeof CommandTypes.REORDER_BLOCKS;
       params: { pageId: number; blockIds: string[] };
+    }
+  | {
+      type: typeof CommandTypes.UPDATE_PAGE;
+      params: { pageId: number; page: CreateSitePageDto };
+    }
+  | {
+      type: typeof CommandTypes.REORDER_PAGE;
+      params: { sourcePageId: number; targetPageId: number };
+    }
+  | {
+      type: typeof CommandTypes.REORDER_PAGES;
+      params: { pageIds: number[] };
     };
 
 interface Command {
@@ -258,7 +273,7 @@ export function createHistoryManager() {
 export type HistoryManager = ReturnType<typeof createHistoryManager>;
 
 // ----------------------------------------------------------------------------
-// Concrete Command Implementations
+// Block Commands
 // ----------------------------------------------------------------------------
 
 export function createUpdateBlockCommand(
@@ -393,7 +408,7 @@ export function createReorderBlocksCommand(
     },
     getAffectedBlocks: () => {
       // Get all unique block IDs from both arrays
-      const allIds = [...new Set([...oldBlockIds, ...newBlockIds])];
+      const allIds = Array.from(new Set([...oldBlockIds, ...newBlockIds]));
       return allIds.map((id) => parseInt(id));
     },
     getAffectedPages: () => [pageId],
@@ -427,5 +442,99 @@ export function createAddBlockCommand(
     },
     getAffectedBlocks: () => (block.id ? [block.id] : []),
     getAffectedPages: () => [pageId],
+  };
+}
+
+// ----------------------------------------------------------------------------
+// Page Commands
+// ----------------------------------------------------------------------------
+
+export function createUpdatePageCommand(
+  pageId: number,
+  oldPage: CreateSitePageDto,
+  newPage: CreateSitePageDto,
+  updatePageFn: (pageId: number, page: CreateSitePageDto) => void
+): Command {
+  return {
+    ...createBaseCommand(CommandTypes.UPDATE_PAGE, `Update page ${pageId}`),
+    execute: () => {
+      updatePageFn(pageId, newPage);
+      return {
+        type: CommandTypes.UPDATE_PAGE,
+        params: { pageId, page: newPage },
+      };
+    },
+    undo: () => {
+      updatePageFn(pageId, oldPage);
+      return {
+        type: CommandTypes.UPDATE_PAGE,
+        params: { pageId, page: oldPage },
+      };
+    },
+    getAffectedBlocks: () => [],
+    getAffectedPages: () => [pageId],
+  };
+}
+
+export function createReorderPageCommand(
+  sourcePageId: number,
+  targetPageId: number,
+  reorderPageFn: (sourcePageId: number, targetPageId: number) => void
+): Command {
+  return {
+    ...createBaseCommand(
+      CommandTypes.REORDER_PAGE,
+      `Reorder page ${sourcePageId} to ${targetPageId}`
+    ),
+    execute: () => {
+      reorderPageFn(sourcePageId, targetPageId);
+      return {
+        type: CommandTypes.REORDER_PAGE,
+        params: { sourcePageId, targetPageId },
+      };
+    },
+    undo: () => {
+      reorderPageFn(sourcePageId, targetPageId);
+      return {
+        type: CommandTypes.REORDER_PAGE,
+        params: {
+          sourcePageId: targetPageId,
+          targetPageId: sourcePageId,
+        },
+      };
+    },
+    getAffectedBlocks: () => [],
+    getAffectedPages: () => [sourcePageId, targetPageId],
+  };
+}
+
+export function createReorderPagesCommand(
+  oldPageIds: number[],
+  newPageIds: number[],
+  reorderPagesFn: (pageIds: number[]) => void
+): Command {
+  return {
+    ...createBaseCommand(CommandTypes.REORDER_PAGES, `Reorder pages`),
+    execute: () => {
+      reorderPagesFn(newPageIds);
+      return {
+        type: CommandTypes.REORDER_PAGES,
+        params: { pageIds: newPageIds },
+      };
+    },
+    undo: () => {
+      // Restore the original order
+      reorderPagesFn(oldPageIds);
+      return {
+        type: CommandTypes.REORDER_PAGES,
+        params: { pageIds: oldPageIds },
+      };
+    },
+    getAffectedBlocks: () => [],
+    getAffectedPages: () => {
+      // Get all unique page IDs from both arrays
+      const allIds = Array.from(new Set([...oldPageIds, ...newPageIds]));
+      return allIds;
+    },
   };
 }

@@ -8,9 +8,9 @@ import { IconTxt } from "@tabler/icons-react";
 import { VFlexBox } from "@/components/ui/box";
 import { TextInput } from "@/components/ui/input";
 import * as Typo from "@/components/ui/typography";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import type { BlockEditorProps } from "../types";
-import { Link } from "../shared/link";
+import { Link } from "@/pages/sites/:id/editor/shared/link";
 
 /**
  * This schema is locally defined
@@ -36,15 +36,16 @@ export function ButtonEditorContent({
   const { link: linkError, text: textError } = getErrors(validation);
 
   if (!block.id) return null;
+
   return (
-    <BlockEditor.List>
-      <BlockEditor.Item>
-        <BlockEditor.Header>
+    <Editor.List>
+      <Editor.Item>
+        <Editor.Header>
           <Typo.P size="sm" flex>
             <Icon>{IconTxt}</Icon>
             <span>Button text</span>
           </Typo.P>
-        </BlockEditor.Header>
+        </Editor.Header>
         <VFlexBox gap={6}>
           <TextInput
             id={`${block.id.toString()}-text`}
@@ -66,13 +67,13 @@ export function ButtonEditorContent({
             </Typo.P>
           )}
         </VFlexBox>
-      </BlockEditor.Item>
+      </Editor.Item>
       <Link
         id={`${block.id}-link`}
         value={{ link: block.data?.link }}
         error={block.data?.link ? linkError : undefined}
         onChange={handleChangeData}
       />
-    </BlockEditor.List>
+    </Editor.List>
   );
 }

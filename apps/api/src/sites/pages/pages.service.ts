@@ -196,6 +196,12 @@ export class SitePagesService {
         meta: updateSitePageDto.meta
           ? { ...matchedSitePage.meta, ...updateSitePageDto.meta }
           : matchedSitePage.meta,
+        containerStyle: updateSitePageDto.containerStyle
+          ? {
+              ...matchedSitePage.containerStyle,
+              ...updateSitePageDto.containerStyle,
+            }
+          : matchedSitePage.containerStyle,
         id,
       });
       return { page: updatedSitePage };

@@ -1,13 +1,13 @@
 import type { z } from "zod";
 import { SiteBlockTypes, type ButtonBlockSchema } from "@clayout/interface";
 import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
-import * as BoxModel from "../shared/box-model";
-import * as Background from "../shared/background";
-import * as ButtonStyle from "../shared/button-style";
-import { Alignment } from "../shared/align";
+import * as BoxModel from "@/pages/sites/:id/editor/shared/box-model";
+import * as Background from "@/pages/sites/:id/editor/shared/background";
+import * as ButtonStyle from "@/pages/sites/:id/editor/shared/button-style";
+import { Alignment } from "@/pages/sites/:id/editor/shared/align";
 import type { BlockEditorProps } from "../types";
-import * as BlockEditor from "../styled";
-import { Width } from "../shared/width";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
+import { Width } from "@/pages/sites/:id/editor/shared/width";
 
 export function ButtonEditorDesign({
   block,
@@ -52,7 +52,7 @@ export function ButtonEditorDesign({
   } = block.style ?? {};
 
   return (
-    <BlockEditor.List>
+    <Editor.List>
       <Width value={{ width: buttonWidth }} onChange={handleChangeStyle} />
       <ButtonStyle.Root>
         <ButtonStyle.Color
@@ -117,6 +117,6 @@ export function ButtonEditorDesign({
           onChange={handleChangeContainerStyle}
         />
       </Background.Root>
-    </BlockEditor.List>
+    </Editor.List>
   );
 }

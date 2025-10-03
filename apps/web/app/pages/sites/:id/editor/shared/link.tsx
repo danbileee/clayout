@@ -1,5 +1,5 @@
 import * as Typo from "@/components/ui/typography";
-import * as BlockEditor from "../styled";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import { Icon } from "@/components/ui/icon";
 import { IconLink } from "@tabler/icons-react";
 import { VFlexBox } from "@/components/ui/box";
@@ -20,13 +20,13 @@ export function Link({ id, value, error, onChange }: Props) {
   const { link } = value;
 
   return (
-    <BlockEditor.Item>
-      <BlockEditor.Header>
+    <Editor.Item>
+      <Editor.Header>
         <Typo.P size="sm" flex>
           <Icon>{IconLink}</Icon>
           <span>Link</span>
         </Typo.P>
-      </BlockEditor.Header>
+      </Editor.Header>
       <VFlexBox gap={6}>
         <TextInput
           id={id}
@@ -44,6 +44,6 @@ export function Link({ id, value, error, onChange }: Props) {
           </Typo.P>
         )}
       </VFlexBox>
-    </BlockEditor.Item>
+    </Editor.Item>
   );
 }

@@ -2,11 +2,11 @@ import type { z } from "zod";
 import { SiteBlockTypes, TextBlockSchema } from "@clayout/interface";
 import { useHandleChangeBlock } from "@/pages/sites/:id/editor/hooks/useHandleChangeBlock";
 import type { BlockEditorProps } from "../types";
-import * as BlockEditor from "../styled";
-import * as BoxModel from "../shared/box-model";
-import * as Background from "../shared/background";
-import { Width } from "../shared/width";
-import { Alignment } from "../shared/align";
+import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
+import * as BoxModel from "@/pages/sites/:id/editor/shared/box-model";
+import * as Background from "@/pages/sites/:id/editor/shared/background";
+import { Width } from "@/pages/sites/:id/editor/shared/width";
+import { Alignment } from "@/pages/sites/:id/editor/shared/align";
 
 export function TextEditorDesign({
   block,
@@ -38,7 +38,7 @@ export function TextEditorDesign({
   const { width: textWidth } = block.style ?? {};
 
   return (
-    <BlockEditor.List>
+    <Editor.List>
       <Width value={{ width: textWidth }} onChange={handleChangeStyle} />
       <Alignment value={{ align }} onChange={handleChangeContainerStyle} />
       <BoxModel.Root>
@@ -75,6 +75,6 @@ export function TextEditorDesign({
           onChange={handleChangeContainerStyle}
         />
       </Background.Root>
-    </BlockEditor.List>
+    </Editor.List>
   );
 }

@@ -23,7 +23,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "UNLICENSED",
   "packageManager": "pnpm@10.13.1",
   "dependencies": {
     "@clayout/interface": "workspace:*",
