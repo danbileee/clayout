@@ -257,7 +257,7 @@ export function PageBarItem({ pageId, freshPageId, setFreshPageId }: Props) {
                 </Icon>
               </Button>
             </Tooltip.Trigger>
-            <Tooltip.Content>This page is home</Tooltip.Content>
+            <Tooltip.Content side="right">This page is home</Tooltip.Content>
           </Tooltip.Root>
         )}
       </HInlineFlexBox>
