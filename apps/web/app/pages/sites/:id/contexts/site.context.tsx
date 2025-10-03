@@ -5,12 +5,12 @@ import { useParamsId } from "@/hooks/useParamsId";
 import { handleError } from "@/lib/axios/handleError";
 import type { Refetcher } from "@/lib/react-query/types";
 import { useClientQuery } from "@/lib/react-query/useClientQuery";
-import { useEditorStore } from "@/lib/zustand/editor";
-import type { EditorStore } from "@/lib/zustand/editor";
+import { useHydrateEditor } from "@/lib/zustand/editor";
 import { joinPath, Paths } from "@/routes";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   SiteBlockSchema,
+  SitePageSchema,
   type SiteBlock,
   type SitePageWithRelations,
   type SiteWithRelations,
@@ -142,7 +142,7 @@ export function SiteContextProvider({ children }: Props) {
   const id = useParamsId();
   const queryClient = useQueryClient();
   const queryKey = getSiteQueryKey({ id });
-  const hydrateEditor = useEditorStore((s: EditorStore) => s.hydrate);
+  const hydrateEditor = useHydrateEditor();
   const { data, refetch: refetchSite } = useClientQuery({
     queryKey,
     queryFn: async () => {
@@ -180,21 +180,20 @@ export function SiteContextProvider({ children }: Props) {
   /**
    * Manual hydration function for when we need to force update the Zustand store
    */
-  const hydrateBlocksStore = useCallback(() => {
+  const hydrateEditorStore = useCallback(() => {
     if (data?.data?.site?.pages) {
-      const pages = data.data.site.pages.map(({ blocks, ...page }) => {
-        const registeredBlocks = blocks
-          .map((block) => {
-            const parsedBlock = SiteBlockSchema.parse(block);
-            const { block: registeredBlock } = new BlockRegistry().find(
-              parsedBlock
-            );
-            return registeredBlock;
-          })
-          .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+      const pages = data.data.site.pages.map((page) => {
+        const parsedPage = SitePageSchema.parse(page);
+        const registeredBlocks = page.blocks.map((block) => {
+          const parsedBlock = SiteBlockSchema.parse(block);
+          const { block: registeredBlock } = new BlockRegistry().find(
+            parsedBlock
+          );
+          return registeredBlock;
+        });
 
         return {
-          ...page,
+          ...parsedPage,
           blocks: registeredBlocks,
         };
       });
@@ -209,9 +208,9 @@ export function SiteContextProvider({ children }: Props) {
    */
   useEffect(() => {
     if (data?.data?.site?.pages) {
-      hydrateBlocksStore();
+      hydrateEditorStore();
     }
-  }, [data?.data?.site?.pages, hydrateBlocksStore]);
+  }, [data?.data?.site?.pages, hydrateEditorStore]);
 
   /**
    * @useEffect

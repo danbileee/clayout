@@ -2,9 +2,15 @@ import { patchSitePages } from "@/apis/sites/pages";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { getError } from "@/lib/zod/getError";
 import { SitePageSchema } from "@clayout/interface";
-import { useState, type FocusEvent, type KeyboardEvent } from "react";
+import {
+  useState,
+  type ChangeEvent,
+  type FocusEvent,
+  type KeyboardEvent,
+} from "react";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import { handleError } from "@/lib/axios/handleError";
+import { useUpdatePage } from "@/lib/zustand/editor";
 
 interface Params {
   pageId: ReturnType<typeof useSiteContext>["selectedPageId"];
@@ -30,11 +36,18 @@ export function useEditablePageSlug({
   const { mutateAsync: updatePage } = useClientMutation({
     mutationFn: patchSitePages,
   });
+  const updatePageLocally = useUpdatePage();
 
-  const handleChange = () => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (!pageId) {
+      throw new Error("pageId is required.");
+    }
+
     if (inputError) {
       setInputError(undefined);
     }
+
+    updatePageLocally(pageId, { slug: e.target.value });
   };
 
   const updatePageSlug = async (newValue: string) => {

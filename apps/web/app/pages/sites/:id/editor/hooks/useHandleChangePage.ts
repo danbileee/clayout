@@ -1,5 +1,5 @@
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
-import type { UpdateSitePageDto } from "@clayout/interface";
+import type { PageSchema } from "@clayout/interface";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { useRef } from "react";
 import { toast } from "sonner";
@@ -14,7 +14,7 @@ export function useHandleChangePage() {
   });
 
   const updateDB = useRef(
-    debounce(async (params: { siteId: number; page: UpdateSitePageDto }) => {
+    debounce(async (params: { siteId: number; page: PageSchema }) => {
       toast.promise(
         async () => {
           const { siteId, page } = params;
@@ -57,7 +57,7 @@ export function useHandleChangePage() {
   const handleChangeData = async (
     value: Partial<
       Pick<
-        UpdateSitePageDto,
+        PageSchema,
         "isHome" | "isVisible" | "meta" | "slug" | "name" | "order"
       >
     >
@@ -76,7 +76,7 @@ export function useHandleChangePage() {
   };
 
   const handleChangeContainerStyle = async (
-    containerStyle: UpdateSitePageDto["containerStyle"]
+    containerStyle: PageSchema["containerStyle"]
   ) => {
     if (!site?.id || !selectedPageId) {
       throw new Error(`siteId and selectedPageId are required.`);

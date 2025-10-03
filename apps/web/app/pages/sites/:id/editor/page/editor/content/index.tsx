@@ -4,23 +4,23 @@ import { Slug } from "./slug";
 import { Meta } from "./meta";
 import { Visibility } from "./visibility";
 import { DeletePage } from "./delete";
+import { usePageById } from "@/lib/zustand/editor";
 
 export function PageEditorContent() {
-  const { selectedPage } = useSiteContext();
+  const { selectedPageId } = useSiteContext();
+  const page = usePageById(selectedPageId ?? undefined);
 
-  if (!selectedPage) {
-    console.warn(
-      "No selected page in this context. This is not an expected situation."
-    );
+  if (!page) {
+    console.warn("Page not found in the zustand store.");
     return null;
   }
 
   return (
     <Editor.List>
-      <Slug />
-      <Meta />
-      <Visibility />
-      <DeletePage />
+      <Slug page={page} />
+      <Meta page={page} />
+      <Visibility page={page} />
+      <DeletePage page={page} />
     </Editor.List>
   );
 }

@@ -10,34 +10,42 @@ import { ConfirmDeleteDialog } from "@/components/shared/dialogs/confirm/delete"
 import { handleError } from "@/lib/axios/handleError";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { deleteSitePages } from "@/apis/sites/pages";
+import { useRemovePage } from "@/lib/zustand/editor";
+import type { PageSchema } from "@clayout/interface";
 
-export function DeletePage() {
-  const { site, selectedPage, closePageEditor, setPage } = useSiteContext();
+interface Props {
+  page: PageSchema;
+}
+
+export function DeletePage({ page }: Props) {
+  const { site, closePageEditor, setPage } = useSiteContext();
   const { openDialog, closeDialog } = useDialog();
   const { mutateAsync: deletePage } = useClientMutation({
     mutationFn: deleteSitePages,
   });
+  const removePageLocally = useRemovePage();
 
   const submit = async () => {
     const fn = async () => {
-      if (!site?.id || !selectedPage?.id) {
+      if (!site?.id || !page.id) {
         throw new Error("siteId and pageId are required");
+      }
+
+      closePageEditor();
+      removePageLocally(page.id);
+
+      const homePage = site?.pages?.find((p) => p.isHome);
+
+      if (homePage) {
+        setPage(homePage.id);
       }
 
       await deletePage({
         params: {
           siteId: site.id,
-          pageId: selectedPage.id,
+          pageId: page.id,
         },
       });
-
-      closePageEditor();
-
-      const homePage = site?.pages?.find((page) => page.isHome);
-
-      if (homePage) {
-        setPage(homePage.id);
-      }
 
       closeDialog();
     };
@@ -59,6 +67,7 @@ export function DeletePage() {
     openDialog(
       <ConfirmDeleteDialog
         title="Delete this page?"
+        description="All blocks and history belongs to this page are deleted as well. This action cannot be undone."
         confirmButtonProps={{
           onClick: submit,
         }}
@@ -73,7 +82,7 @@ export function DeletePage() {
           <Icon>{IconTrash}</Icon>
           <span>Delete this page</span>
         </Typo.P>
-        {selectedPage?.isHome ? (
+        {page.isHome ? (
           <Tooltip.Root>
             <Tooltip.Trigger>
               <Button size="sm" level="destructive" variant="outlined" disabled>

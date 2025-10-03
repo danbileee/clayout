@@ -6,41 +6,41 @@ import { HelpButton } from "@/components/shared/buttons/help";
 import { VFlexBox } from "@/components/ui/box";
 import { TextInput } from "@/components/ui/input";
 import { useState, type ChangeEvent } from "react";
-import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import { useHandleChangePage } from "@/pages/sites/:id/editor/hooks/useHandleChangePage";
 import { ImageManager } from "@/pages/sites/:id/editor/shared/image-manager";
-import { SitePageMetaSchema, SitePageSchema } from "@clayout/interface";
+import {
+  SitePageMetaSchema,
+  SitePageSchema,
+  type PageSchema,
+} from "@clayout/interface";
 import { getError } from "@/lib/zod/getError";
 import { useTheme } from "styled-components";
 import { rem } from "@/utils/rem";
-
-interface MetaData {
-  name: string;
-  description: string;
-}
+import { useUpdatePage } from "@/lib/zustand/editor";
 
 interface MetaError {
   name?: string;
   description?: string;
 }
 
-export function Meta() {
+interface Props {
+  page: PageSchema;
+}
+
+export function Meta({ page }: Props) {
   const theme = useTheme();
-  const { selectedPage } = useSiteContext();
   const { handleChangeData } = useHandleChangePage();
-  const [data, setData] = useState<MetaData>({
-    name: selectedPage?.name ?? "",
-    description: selectedPage?.meta?.description ?? "",
-  });
   const [errors, setErrors] = useState<MetaError>({});
+  const updatePageLocally = useUpdatePage();
 
   const handleChangeName = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!page.id) {
+      throw new Error("pageId is required");
+    }
+
     const newValue = e.target.value;
 
-    setData((prev) => ({
-      ...prev,
-      name: newValue,
-    }));
+    updatePageLocally(page.id, { name: newValue });
 
     const validation = SitePageSchema.shape.name.safeParse(newValue);
     const error = getError(validation);
@@ -61,12 +61,17 @@ export function Meta() {
   };
 
   const handleChangeDescription = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!page.id) {
+      throw new Error("pageId is required");
+    }
+
     const newValue = e.target.value;
 
-    setData((prev) => ({
-      ...prev,
-      description: newValue,
-    }));
+    updatePageLocally(page.id, {
+      meta: {
+        description: newValue,
+      },
+    });
 
     const validation = SitePageMetaSchema.shape.description.safeParse(newValue);
     const error = getError(validation);
@@ -111,7 +116,7 @@ export function Meta() {
           </Editor.Header>
           <VFlexBox gap={6}>
             <TextInput
-              defaultValue={data.name}
+              defaultValue={page.name}
               placeholder="Enter page name..."
               onChange={handleChangeName}
               hasError={Boolean(errors.name)}
@@ -141,7 +146,7 @@ export function Meta() {
           </Editor.Header>
           <VFlexBox gap={6}>
             <TextInput
-              defaultValue={data.description}
+              defaultValue={page.meta?.description}
               placeholder="Enter page description..."
               onChange={handleChangeDescription}
               hasError={Boolean(errors.description)}
@@ -170,7 +175,7 @@ export function Meta() {
             <HelpButton>{`Tips:\n· Recommended size: 1200x630px (landscape)\n· Supported formats: .jpg, .png, .webp\n· Keep file size under 1MB\n· Design something clean, readable, and brand-aligned`}</HelpButton>
           </Editor.Header>
           <ImageManager
-            value={selectedPage?.meta?.ogImagePath ?? ""}
+            value={page.meta?.ogImagePath ?? ""}
             onChange={(v) =>
               handleChangeData({
                 meta: {

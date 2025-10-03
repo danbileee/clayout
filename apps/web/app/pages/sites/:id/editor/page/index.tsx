@@ -13,7 +13,7 @@ import { Block } from "../block";
 import { Button } from "@/components/ui/button";
 import { Icon } from "@/components/ui/icon";
 import { rem } from "@/utils/rem";
-import type { MouseEvent } from "react";
+import { useState, type MouseEvent } from "react";
 import { PageRenderer } from "@clayout/kit";
 
 interface Props {
@@ -25,10 +25,23 @@ export function Page({ headerHeight }: Props) {
   const { selectedPage, menu, setMenu, closeBlockEditor, openPageEditor } =
     useSiteContext();
   const blockIds = useBlockIdsForPage(selectedPage?.id);
+  const [hovering, setHovering] = useState(false);
 
   const handleClickOutsidePage = () => {
     if (menu === SiteMenus.Block) {
       closeBlockEditor();
+    }
+  };
+
+  const handleMouseEnter = () => {
+    if (!hovering) {
+      setHovering(true);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (hovering) {
+      setHovering(false);
     }
   };
 
@@ -54,18 +67,18 @@ export function Page({ headerHeight }: Props) {
   const PageComponent = PageRenderer.renderToJsx(parsed);
 
   return (
-    <>
+    <PageWrapper
+      headerHeight={headerHeight}
+      onClick={handleClickOutsidePage}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+    >
       {blockIds.length ? (
-        <PageWrapper
-          headerHeight={headerHeight}
-          onClick={handleClickOutsidePage}
-        >
-          <PageComponent>
-            {blockIds.map((blockId, blockIndex) => (
-              <Block key={blockId} blockId={blockId} blockIndex={blockIndex} />
-            ))}
-          </PageComponent>
-        </PageWrapper>
+        <PageComponent>
+          {blockIds.map((blockId, blockIndex) => (
+            <Block key={blockId} blockId={blockId} blockIndex={blockIndex} />
+          ))}
+        </PageComponent>
       ) : (
         <EmptyPlaceholder icon={IconCubeSpark}>
           <Typo.P color={theme.colors.slate[400]}>
@@ -83,19 +96,19 @@ export function Page({ headerHeight }: Props) {
       {selectedPage && (
         <Tooltip.Root>
           <Tooltip.Trigger>
-            <Button
+            <StyledButton
+              hovering={hovering}
               isSquare
               level="secondary"
-              style={{ position: "fixed", bottom: rem(20), right: rem(20) }}
               onClick={handleClickEditPage}
             >
               <Icon>{IconEdit}</Icon>
-            </Button>
+            </StyledButton>
           </Tooltip.Trigger>
           <Tooltip.Content align="end">Edit page properties</Tooltip.Content>
         </Tooltip.Root>
       )}
-    </>
+    </PageWrapper>
   );
 }
 
@@ -116,5 +129,25 @@ const PageWrapper = styled.div.withConfig({
     min-height: calc(100svh - ${rem(headerHeight)});
     margin-top: ${rem(headerHeight)};
     overflow-y: auto;
+  `}
+`;
+
+interface StyledButtonProps {
+  hovering: boolean;
+}
+
+const StyledButton = styled(Button).withConfig({
+  shouldForwardProp: (prop) => {
+    const nonForwardedProps = ["hovering"];
+
+    return !nonForwardedProps.includes(prop);
+  },
+})<StyledButtonProps>`
+  ${({ hovering }) => css`
+    position: fixed;
+    bottom: ${rem(20)};
+    right: ${rem(20)};
+    opacity: ${hovering ? 0.99 : 0};
+    transition: opacity ease-in-out 150ms;
   `}
 `;

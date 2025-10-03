@@ -48,7 +48,7 @@ export function SelectHomeDialog({ pages, onSubmit }: Props) {
             <Select.Label>Pages</Select.Label>
             {pages.map((page) => (
               <Select.Item key={page.id} value={page.id.toString()}>
-                {page.name}
+                {page.slug}
               </Select.Item>
             ))}
           </Select.Group>

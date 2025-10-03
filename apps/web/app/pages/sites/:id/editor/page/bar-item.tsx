@@ -1,8 +1,4 @@
-import {
-  SitePageCategories,
-  type SitePageCategory,
-  type SitePageWithRelations,
-} from "@clayout/interface";
+import { SitePageCategories, type SitePageCategory } from "@clayout/interface";
 import { useState, type MouseEvent } from "react";
 import { css, styled, useTheme } from "styled-components";
 import { HInlineFlexBox } from "@/components/ui/box";
@@ -27,15 +23,18 @@ import { handleError } from "@/lib/axios/handleError";
 import { patchSitePagesHome } from "@/apis/sites/pages/home";
 import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import { useEditablePageSlug } from "../hooks/useEditablePageSlug";
+import { usePageById, useUpdatePage } from "@/lib/zustand/editor";
 
 interface Props {
-  page: SitePageWithRelations;
+  pageId: number;
   freshPageId: number | null;
   setFreshPageId: (value: number | null) => void;
 }
 
-export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
+export function PageBarItem({ pageId, freshPageId, setFreshPageId }: Props) {
   const theme = useTheme();
+  const page = usePageById(pageId);
+  const updatePageLocally = useUpdatePage();
   const { site, refetchSite, selectedPage, setPage } = useSiteContext();
   const [hovering, setHovering] = useState(false);
   const { mutateAsync: updatePage } = useClientMutation({
@@ -52,9 +51,9 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
     handleBlur,
     handleKeyDown,
   } = useEditablePageSlug({
-    pageId: page.id,
+    pageId,
     onSuccess: () => {
-      if (freshPageId === page.id) {
+      if (freshPageId === pageId) {
         setFreshPageId(null);
       }
     },
@@ -63,7 +62,7 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
   const handleClick = (e: MouseEvent<HTMLLIElement>) => {
     if (e.detail > 1) return;
 
-    setPage(page.id);
+    setPage(pageId);
   };
 
   const handleDoubleClick = (e: MouseEvent<HTMLLIElement>) => {
@@ -89,18 +88,25 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
   const handleToggleHome = async (e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
 
-    const fn = async () => {
-      const prevHomePageId = site?.pages?.find((page) => page.isHome)?.id;
+    const prevHomePageId = site?.pages?.find((page) => page.isHome)?.id;
 
-      if (!site?.id || !prevHomePageId) {
-        throw new Error("siteId and prevHomePageId are required.");
+    if (!prevHomePageId) {
+      throw new Error("prevHomePageId is required.");
+    }
+
+    const fn = async () => {
+      if (!site?.id || !pageId) {
+        throw new Error("siteId and pageId are required.");
       }
+
+      updatePageLocally(pageId, { isHome: true });
+      updatePageLocally(prevHomePageId, { isHome: false });
 
       await updateHomePage({
         params: {
           siteId: site.id,
           pageId: prevHomePageId,
-          newPageId: page.id,
+          newPageId: pageId,
         },
       });
       await refetchSite();
@@ -114,6 +120,8 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
       });
 
       if (error) {
+        updatePageLocally(pageId, { isHome: false });
+        updatePageLocally(prevHomePageId, { isHome: true });
         throw error;
       }
     }
@@ -123,12 +131,16 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
     e.stopPropagation();
 
     const fn = async () => {
-      if (!site?.id) return;
+      if (!site?.id || !page) {
+        throw Error(`siteId and page are required.`);
+      }
+
+      updatePageLocally(pageId, { isVisible: !page.isVisible });
 
       await updatePage({
         params: {
           siteId: site.id,
-          pageId: page.id,
+          pageId,
           isVisible: !page.isVisible,
         },
       });
@@ -143,12 +155,18 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
       });
 
       if (error) {
+        updatePageLocally(pageId, { isVisible: page?.isVisible });
         throw error;
       }
     }
   };
 
-  if (freshPageId === page.id || editing) {
+  if (!page) {
+    console.warn("Page not found in zustand store.");
+    return null;
+  }
+
+  if (freshPageId === pageId || editing) {
     return (
       <InputWrapper>
         <Tooltip.Root open={Boolean(inputError)}>
@@ -182,7 +200,7 @@ export function PageBarItem({ page, freshPageId, setFreshPageId }: Props) {
             page.isVisible ? theme.colors.slate[500] : theme.colors.slate[300]
           }
         >
-          {PageIcons[page.category]}
+          {PageIcons[page.category ?? SitePageCategories.Static]}
         </Icon>
         <Typo.P
           size="sm"

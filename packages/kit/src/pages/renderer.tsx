@@ -27,6 +27,7 @@ export function renderToJsx(page: z.infer<typeof SitePageSchema>) {
           height: "100%",
           ...alignStyle,
           alignItems: "flex-start",
+          ...getComposedStyleObject(restContainerStyle),
         }}
       >
         <div
@@ -37,7 +38,6 @@ export function renderToJsx(page: z.infer<typeof SitePageSchema>) {
             width: containerWidth,
             maxWidth: SiteContentFitWidth[contentFit],
             minHeight: "100%",
-            ...getComposedStyleObject(restContainerStyle),
           }}
         >
           {children}
@@ -64,6 +64,7 @@ export function renderToString(page: z.infer<typeof SitePageSchema>) {
     height: "100%",
     ...getAlignStyle({ align }),
     alignItems: "flex-start",
+    ...restContainerStyle,
   });
   const pageStyle = getComposedStyleString({
     position: "relative",
@@ -72,7 +73,6 @@ export function renderToString(page: z.infer<typeof SitePageSchema>) {
     width: pageWidth,
     maxWidth: SiteContentFitWidth[contentFit],
     minHeight: "inherit",
-    ...restContainerStyle,
   });
 
   return function renderer(innerContent: string) {

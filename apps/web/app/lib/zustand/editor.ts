@@ -52,14 +52,12 @@ type EditorActions = {
   removeBlock: (pageId: number, blockId: number) => void;
   reorderBlock: (pageId: number, blockId: number, targetId: number) => void;
   reorderBlocks: (pageId: number, blockIds: string[]) => void;
-  hydrate: (data: {
-    pages: Array<{ id: number; blocks: BlockSchema[] }>;
-  }) => void;
+  hydrate: (data: { pages: PageSchema[] }) => void;
 
   // Page management actions
   addPage: (page: PageSchema) => void;
   removePage: (pageId: number) => void;
-  updatePage: (pageId: number, page: PageSchema) => void;
+  updatePage: (pageId: number, page: Partial<PageSchema>) => void;
   reorderPage: (sourcePageId: number, targetPageId: number) => void;
   reorderPages: (pageIds: number[]) => void;
   upsertPages: (pages: PageSchema[]) => void;
@@ -104,6 +102,41 @@ const createEditorStore = () => {
     blockIdsByPageId: {},
     pageSchemaByPageId: {},
     pageIds: [],
+
+    hydrate: (data) => {
+      const newById: EditorState["blockById"] = {};
+      const newIdsByPageId: EditorState["blockIdsByPageId"] = {};
+      const newPageSchemaByPageId: EditorState["pageSchemaByPageId"] = {};
+      const newPageIds: EditorState["pageIds"] = [];
+
+      for (const page of data.pages) {
+        if (!page.id) continue;
+
+        const pageKey = toKey(page.id);
+        const blockIds: string[] = [];
+
+        for (const block of page.blocks || []) {
+          if (!block.id) continue;
+
+          const blockKey = toKey(block.id);
+          newById[blockKey] = block;
+          blockIds.push(blockKey);
+        }
+
+        newPageSchemaByPageId[pageKey] = page;
+        newIdsByPageId[pageKey] = blockIds;
+        newPageIds.push(page.id);
+      }
+
+      newPageIds.sort((a, b) => sortPagesByOrder(a, b, newPageSchemaByPageId));
+
+      set(() => ({
+        blockById: newById,
+        blockIdsByPageId: newIdsByPageId,
+        pageSchemaByPageId: newPageSchemaByPageId,
+        pageIds: newPageIds,
+      }));
+    },
 
     /**
      * =======================================================================
@@ -276,30 +309,6 @@ const createEditorStore = () => {
       historyManager.execute(command, pageId);
     },
 
-    hydrate: (data) =>
-      set((state) => {
-        const newById = { ...state.blockById };
-        const newIdsByPageId = { ...state.blockIdsByPageId };
-
-        for (const page of data.pages) {
-          const pageKey = toKey(page.id);
-          const blockIds: string[] = [];
-
-          for (const block of page.blocks) {
-            const blockKey = toKey(block.id!);
-            newById[blockKey] = block;
-            blockIds.push(blockKey);
-          }
-
-          newIdsByPageId[pageKey] = blockIds;
-        }
-
-        return {
-          blockById: newById,
-          blockIdsByPageId: newIdsByPageId,
-        };
-      }),
-
     /**
      * =======================================================================
      * Page Actions
@@ -422,6 +431,9 @@ export const useEditorStore = <T>(
   const memoizedSelector = useCallback(selector, deps);
   return useStore(editorStore, memoizedSelector);
 };
+
+export const useHydrateEditor = () =>
+  useEditorStore((s: EditorStore) => s.hydrate, []);
 
 /**
  * =======================================================================
@@ -635,7 +647,7 @@ const createAddPageFunction =
       if (!page.id) return state;
 
       const pageKey = toKey(page.id);
-      const newContainerStylesByPageId = {
+      const newPageSchema = {
         ...state.pageSchemaByPageId,
         [pageKey]: page,
       };
@@ -644,7 +656,7 @@ const createAddPageFunction =
 
       return {
         ...state,
-        pageSchemaByPageId: newContainerStylesByPageId,
+        pageSchemaByPageId: newPageSchema,
         pageIds: newPageIds,
       };
     });
@@ -655,13 +667,13 @@ const createRemovePageFunction =
   (pageId: number) => {
     set((state: EditorState) => {
       const pageKey = toKey(pageId);
-      const newContainerStylesByPageId = { ...state.pageSchemaByPageId };
-      delete newContainerStylesByPageId[pageKey];
+      const newPageSchema = { ...state.pageSchemaByPageId };
+      delete newPageSchema[pageKey];
       const newPageIds = state.pageIds.filter((id) => id !== pageId);
 
       return {
         ...state,
-        pageSchemaByPageId: newContainerStylesByPageId,
+        pageSchemaByPageId: newPageSchema,
         pageIds: newPageIds,
       };
     });
@@ -715,10 +727,10 @@ const createReorderPagesFunction =
 const sortPagesByOrder = (
   a: number,
   b: number,
-  containerStylesByPageId: Record<string, PageSchema>
+  pageSchemaByPageId: Record<string, PageSchema>
 ) => {
-  const pageA = containerStylesByPageId[toKey(a)];
-  const pageB = containerStylesByPageId[toKey(b)];
+  const pageA = pageSchemaByPageId[toKey(a)];
+  const pageB = pageSchemaByPageId[toKey(b)];
   return (pageA?.order || 0) - (pageB?.order || 0);
 };
 
@@ -726,22 +738,22 @@ const upsertPagesReducer = (
   state: EditorState,
   pages: PageSchema[]
 ): EditorState => {
-  const newContainerStylesByPageId = { ...state.pageSchemaByPageId };
+  const newPageSchema = { ...state.pageSchemaByPageId };
   const newPageIds: number[] = [];
 
   for (const page of pages) {
     if (page.id) {
       const pageKey = toKey(page.id);
-      newContainerStylesByPageId[pageKey] = page;
+      newPageSchema[pageKey] = page;
       newPageIds.push(page.id);
     }
   }
 
-  newPageIds.sort((a, b) => sortPagesByOrder(a, b, newContainerStylesByPageId));
+  newPageIds.sort((a, b) => sortPagesByOrder(a, b, newPageSchema));
 
   return {
     ...state,
-    pageSchemaByPageId: newContainerStylesByPageId,
+    pageSchemaByPageId: newPageSchema,
     pageIds: newPageIds,
   };
 };

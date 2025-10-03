@@ -9,13 +9,18 @@ import { rem } from "@/utils/rem";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { postSitePages } from "@/apis/sites/pages";
 import { handleError } from "@/lib/axios/handleError";
-import { SitePageCategories } from "@clayout/interface";
+import {
+  SitePageCategories,
+  SitePageSchema,
+  type PageSchema,
+} from "@clayout/interface";
 import { useState } from "react";
 import { generateSlugTail } from "@/utils/generateSlugTail";
 import { PageBarItem } from "./bar-item";
 import { BarBase } from "../shared/styled";
 import { useSiteContext } from "../../contexts/site.context";
 import { DefaultPageContainerStyle } from "@clayout/kit";
+import { useAddPage, usePageIds } from "@/lib/zustand/editor";
 
 const NewPageName = "New Page";
 
@@ -25,34 +30,42 @@ export function PageBar() {
     mutationFn: postSitePages,
   });
   const [freshPageId, setFreshPageId] = useState<number | null>(null);
+  const pageIds = usePageIds();
+  const addPageLocally = useAddPage();
 
   const handleAddPage = async () => {
     const fn = async () => {
       if (!site?.id) return;
 
-      const count = site.pages.filter(
+      const defaultNamedPages = site.pages.filter(
         (page) => page.name.trim() === NewPageName
-      ).length
-        ? ` ${site.pages.length}`
+      );
+      const count = defaultNamedPages.length
+        ? ` ${defaultNamedPages.length}`
         : "";
+      const page: PageSchema = {
+        slug: `new-page-${generateSlugTail()}`,
+        name: `${NewPageName}${count}`,
+        category: SitePageCategories.Static,
+        meta: site.meta ?? {},
+        order: site.pages.length,
+        isHome: false,
+        isVisible: true,
+        containerStyle: DefaultPageContainerStyle,
+        blocks: [],
+      };
 
       const response = await createPage({
         params: {
           siteId: site.id,
-          slug: `new-page-${generateSlugTail()}`,
-          name: `${NewPageName}${count}`,
-          category: SitePageCategories.Static,
-          meta: site.meta ?? undefined,
-          order: site.pages.length,
-          isHome: false,
-          isVisible: true,
-          containerStyle: DefaultPageContainerStyle,
-          blocks: [],
+          ...page,
         },
       });
-      await refetchSite();
+      const parsed = SitePageSchema.parse(response.data.page);
+      addPageLocally(parsed);
       setFreshPageId(response.data.page.id);
       setPage(response.data.page.id);
+      await refetchSite();
     };
 
     try {
@@ -85,10 +98,10 @@ export function PageBar() {
       </HFlexBox>
       <PageBarList>
         {site ? (
-          site.pages.map((page) => (
+          pageIds.map((pageId) => (
             <PageBarItem
-              key={page.id}
-              page={page}
+              key={pageId}
+              pageId={pageId}
               freshPageId={freshPageId}
               setFreshPageId={setFreshPageId}
             />

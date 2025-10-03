@@ -6,23 +6,30 @@ import { HelpButton } from "@/components/shared/buttons/help";
 import { VFlexBox } from "@/components/ui/box";
 import { TextInput } from "@/components/ui/input";
 import { useState, type ChangeEvent } from "react";
-import { useSiteContext } from "@/pages/sites/:id/contexts/site.context";
 import { useHandleChangePage } from "@/pages/sites/:id/editor/hooks/useHandleChangePage";
-import { SitePageSchema } from "@clayout/interface";
+import { SitePageSchema, type PageSchema } from "@clayout/interface";
 import { getError } from "@/lib/zod/getError";
 import { useTheme } from "styled-components";
+import { useUpdatePage } from "@/lib/zustand/editor";
 
-export function Slug() {
+interface Props {
+  page: PageSchema;
+}
+
+export function Slug({ page }: Props) {
   const theme = useTheme();
-  const { selectedPage } = useSiteContext();
   const { handleChangeData } = useHandleChangePage();
-  const [slug, setSlug] = useState(selectedPage?.slug ?? "");
   const [error, setError] = useState<string | undefined>(undefined);
+  const updatePageLocally = useUpdatePage();
 
   const handleChangeSlug = async (e: ChangeEvent<HTMLInputElement>) => {
+    if (!page.id) {
+      throw new Error("pageId is required");
+    }
+
     const newValue = e.target.value;
 
-    setSlug(newValue);
+    updatePageLocally(page.id, { slug: newValue });
 
     const validation = SitePageSchema.shape.slug.safeParse(newValue);
     const error = getError(validation);
@@ -50,7 +57,7 @@ export function Slug() {
       </Editor.Header>
       <VFlexBox gap={6}>
         <TextInput
-          defaultValue={slug}
+          defaultValue={page.slug}
           placeholder="Enter page slug..."
           onChange={handleChangeSlug}
           hasError={Boolean(error)}

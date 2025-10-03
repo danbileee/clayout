@@ -11,32 +11,42 @@ import { useDialog } from "@/components/ui/dialog";
 import { useClientMutation } from "@/lib/react-query/useClientMutation";
 import { patchSitePagesHome } from "@/apis/sites/pages/home";
 import { toast } from "sonner";
-import { useState } from "react";
 import { handleError } from "@/lib/axios/handleError";
+import type { PageSchema } from "@clayout/interface";
+import { useUpdatePage } from "@/lib/zustand/editor";
 
-export function Visibility() {
+interface Props {
+  page: PageSchema;
+}
+
+export function Visibility({ page }: Props) {
   const { openDialog, closeDialog } = useDialog();
-  const { site, selectedPage, refetchSite } = useSiteContext();
+  const { site, refetchSite } = useSiteContext();
   const { mutateAsync: updateHomePage } = useClientMutation({
     mutationFn: patchSitePagesHome,
   });
   const { handleChangeData } = useHandleChangePage();
-  const [isHome, setIsHome] = useState(Boolean(selectedPage?.isHome));
-  const [isVisible, setIsVisible] = useState(Boolean(selectedPage?.isVisible));
+  const updatePageLocally = useUpdatePage();
 
   const disableHome = async () => {
-    if (!site?.id || !selectedPage?.id) return;
-
     const submit = async (newId: number) => {
       const fn = async () => {
+        if (!site?.id || !page.id) {
+          throw new Error(`siteId and pageId are required.`);
+        }
+
+        updatePageLocally(page.id, { isHome: false });
+
         await updateHomePage({
           params: {
             siteId: site.id,
-            pageId: selectedPage.id,
+            pageId: page.id,
             newPageId: newId,
           },
         });
         await refetchSite();
+
+        updatePageLocally(newId, { isHome: true });
         closeDialog();
       };
 
@@ -46,13 +56,14 @@ export function Visibility() {
           success: "Saved",
           error: "Failed to save",
         });
-        setIsHome(false);
       } catch (e) {
         const { error } = await handleError(e, {
           onRetry: fn,
         });
 
         if (error) {
+          updatePageLocally(page.id!, { isHome: true });
+          updatePageLocally(newId, { isHome: false });
           throw error;
         }
       }
@@ -60,29 +71,36 @@ export function Visibility() {
 
     openDialog(
       <SelectHomeDialog
-        pages={site?.pages?.filter((p) => p.id !== selectedPage.id) ?? []}
+        pages={site?.pages?.filter((p) => p.id !== page.id) ?? []}
         onSubmit={submit}
       />
     );
   };
 
   const enableHome = async () => {
-    if (!site?.id || !selectedPage?.id) return;
-
-    setIsHome(true);
-
     const prevHomePage = site?.pages?.find((page) => page.isHome);
 
+    if (!prevHomePage) {
+      throw new Error("prevHomePage is required.");
+    }
+
     const fn = async () => {
-      if (!prevHomePage) return;
+      if (!site?.id || !page.id) {
+        throw new Error(`siteId and pageId are required.`);
+      }
+
+      updatePageLocally(page.id, { isHome: true });
 
       await updateHomePage({
         params: {
           siteId: site.id,
           pageId: prevHomePage.id,
-          newPageId: selectedPage.id,
+          newPageId: page.id,
         },
       });
+
+      updatePageLocally(prevHomePage.id, { isHome: false });
+
       await refetchSite();
     };
 
@@ -98,14 +116,15 @@ export function Visibility() {
       });
 
       if (error) {
-        setIsHome(false);
+        updatePageLocally(page.id!, { isHome: false });
+        updatePageLocally(prevHomePage.id, { isHome: true });
         throw error;
       }
     }
   };
 
   const handleChangeIsHome = async () => {
-    if (isHome) {
+    if (page.isHome) {
       disableHome();
     } else {
       enableHome();
@@ -113,7 +132,11 @@ export function Visibility() {
   };
 
   const handleChangeIsVisible = async (newValue: boolean) => {
-    setIsVisible(newValue);
+    if (!page.id) {
+      throw new Error(`pageId is required.`);
+    }
+
+    updatePageLocally(page.id, { isVisible: newValue });
 
     try {
       toast.promise(
@@ -131,7 +154,7 @@ export function Visibility() {
       const { error } = await handleError(e);
 
       if (error) {
-        setIsVisible(!newValue);
+        updatePageLocally(page.id, { isVisible: !newValue });
         throw error;
       }
     }
@@ -145,11 +168,11 @@ export function Visibility() {
             <Icon>{IconHome}</Icon>
             <span>Set as homepage</span>
           </Typo.P>
-          {isVisible ? (
+          {page.isVisible ? (
             <Tooltip.Root>
               <Tooltip.Trigger>
                 <span>
-                  <Switch checked={isHome} onClick={handleChangeIsHome} />
+                  <Switch checked={page.isHome} onClick={handleChangeIsHome} />
                 </span>
               </Tooltip.Trigger>
               <Tooltip.Content side="right">{`Home page will be shown\nwhen visitors go to your domain\n(e.g. yoursite.com)`}</Tooltip.Content>
@@ -159,7 +182,7 @@ export function Visibility() {
               <Tooltip.Trigger>
                 <span>
                   <Switch
-                    checked={isHome}
+                    checked={page.isHome}
                     disabled
                     style={{ cursor: "not-allowed" }}
                   />
@@ -176,12 +199,12 @@ export function Visibility() {
             <Icon>{IconEye}</Icon>
             <span>Visibility</span>
           </Typo.P>
-          {isHome ? (
+          {page.isHome ? (
             <Tooltip.Root>
               <Tooltip.Trigger>
                 <span>
                   <Switch
-                    checked={isVisible}
+                    checked={page.isVisible}
                     disabled
                     style={{ cursor: "not-allowed" }}
                   />
@@ -196,7 +219,7 @@ export function Visibility() {
               <Tooltip.Trigger>
                 <span>
                   <Switch
-                    checked={isVisible}
+                    checked={page.isVisible}
                     onCheckedChange={handleChangeIsVisible}
                   />
                 </span>

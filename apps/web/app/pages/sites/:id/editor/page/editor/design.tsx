@@ -3,20 +3,30 @@ import * as Editor from "@/pages/sites/:id/editor/shared/styled/editor";
 import * as BoxModel from "@/pages/sites/:id/editor/shared/box-model";
 import * as Background from "@/pages/sites/:id/editor/shared/background";
 import { useHandleChangePage } from "@/pages/sites/:id/editor/hooks/useHandleChangePage";
-import { SitePageSchema } from "@clayout/interface";
+import { SitePageSchema, type PageSchema } from "@clayout/interface";
 import { Alignment } from "@/pages/sites/:id/editor/shared/align";
 import { ContentFit } from "@/pages/sites/:id/editor/shared/content-fit";
+import { usePageById, useUpdatePage } from "@/lib/zustand/editor";
 
 export function PageEditorDesign() {
-  const { selectedPage } = useSiteContext();
+  const { selectedPageId } = useSiteContext();
   const { handleChangeContainerStyle } = useHandleChangePage();
+  const page = usePageById(selectedPageId ?? undefined);
+  const updatePageLocally = useUpdatePage();
 
-  if (!selectedPage) {
-    console.warn(
-      "No selected page in this context. This is not an expected situation."
-    );
+  if (!page) {
+    console.warn("Page not found in the zustand store.");
     return null;
   }
+
+  const handleChange = async (containerStyle: PageSchema["containerStyle"]) => {
+    if (!page.id) {
+      throw new Error("pageId is required");
+    }
+
+    updatePageLocally(page.id, { containerStyle });
+    await handleChangeContainerStyle(containerStyle);
+  };
 
   const {
     contentFit = "sm",
@@ -32,20 +42,14 @@ export function PageEditorDesign() {
     backgroundImage,
     backgroundRepeat,
     backgroundSize,
-  } = SitePageSchema.shape.containerStyle.parse(selectedPage.containerStyle);
+  } = SitePageSchema.shape.containerStyle.parse(page.containerStyle);
 
   return (
     <Editor.List>
-      <ContentFit
-        value={{ contentFit }}
-        onChange={handleChangeContainerStyle}
-      />
-      <Alignment value={{ align }} onChange={handleChangeContainerStyle} />
+      <ContentFit value={{ contentFit }} onChange={handleChange} />
+      <Alignment value={{ align }} onChange={handleChange} />
       <BoxModel.Root>
-        <BoxModel.Padding
-          value={{ padding }}
-          onChange={handleChangeContainerStyle}
-        />
+        <BoxModel.Padding value={{ padding }} onChange={handleChange} />
         <BoxModel.Border
           value={{
             borderWidth,
@@ -53,18 +57,12 @@ export function PageEditorDesign() {
             borderRadius,
             borderStyle,
           }}
-          onChange={handleChangeContainerStyle}
+          onChange={handleChange}
         />
-        <BoxModel.Margin
-          value={{ margin }}
-          onChange={handleChangeContainerStyle}
-        />
+        <BoxModel.Margin value={{ margin }} onChange={handleChange} />
       </BoxModel.Root>
       <Background.Root>
-        <Background.Color
-          value={{ backgroundColor }}
-          onChange={handleChangeContainerStyle}
-        />
+        <Background.Color value={{ backgroundColor }} onChange={handleChange} />
         <Background.Image
           value={{
             backgroundImage,
@@ -72,7 +70,7 @@ export function PageEditorDesign() {
             backgroundRepeat,
             backgroundSize,
           }}
-          onChange={handleChangeContainerStyle}
+          onChange={handleChange}
         />
       </Background.Root>
     </Editor.List>
