@@ -16,27 +16,25 @@ BEGIN;
         AND column_name = 'containerStyle'
     ) THEN
       ALTER TABLE public.site_pages
-        ADD COLUMN "containerStyle" jsonb DEFAULT '{}'::jsonb;
+        ADD COLUMN "containerStyle" jsonb;
 
-      RAISE NOTICE 'Added containerStyle column to public.site_pages with default empty object';
+      RAISE NOTICE 'Added containerStyle column to public.site_pages';
     ELSE
       RAISE NOTICE 'Column public.site_pages.containerStyle already exists, skipping';
     END IF;
   END$$;
 
-  -- Ensure default value is set (in case column existed without default)
+  -- Backfill existing NULL values with empty object for containerStyle
   DO $$
+  DECLARE
+    updated_count integer;
   BEGIN
-    -- Set default for future inserts
-    ALTER TABLE public.site_pages
-      ALTER COLUMN "containerStyle" SET DEFAULT '{}'::jsonb;
-
-    -- Backfill existing NULL values with empty object
     UPDATE public.site_pages
     SET "containerStyle" = '{}'::jsonb
     WHERE "containerStyle" IS NULL;
 
-    RAISE NOTICE 'Ensured containerStyle has default value and backfilled NULL values';
+    GET DIAGNOSTICS updated_count = ROW_COUNT;
+    RAISE NOTICE 'Backfilled % NULL containerStyle values with empty object', updated_count;
   END$$;
 
   -- Reset all existing meta properties to empty object
@@ -49,11 +47,6 @@ BEGIN;
     SET "meta" = '{}'::jsonb;
 
     GET DIAGNOSTICS updated_count = ROW_COUNT;
-
-    -- Ensure default value is set for future inserts
-    ALTER TABLE public.site_pages
-      ALTER COLUMN "meta" SET DEFAULT '{}'::jsonb;
-
     RAISE NOTICE 'Reset % site_pages meta properties to empty object', updated_count;
   END$$;
 
